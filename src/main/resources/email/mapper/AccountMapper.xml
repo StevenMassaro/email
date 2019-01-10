@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="email.mapper.AccountMapper">
+    <select id="list" resultMap="accountResultMap">
+        SELECT * FROM email.account a
+        INNER JOIN email.domain d
+        ON a.domainid = d.id
+    </select>
+
+    <resultMap id="accountResultMap" type="email.model.Account">
+        <id property="id" column="id"/>
+        <result property="inboxName" column="inboxname"/>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <result property="dateCreated" column="dateCreated"/>
+        <association property="domain" resultMap="domainResult"/>
+    </resultMap>
+
+    <resultMap id="domainResult" type="email.model.Domain">
+        <id property="id" column="id"/>
+        <result property="hostname" column="hostname"/>
+        <result property="port" column="port"/>
+        <result property="dateCreated" column="dateCreated"/>
+        <result property="authentication" column="authentication"/>
+    </resultMap>
+
+    <insert id="insert">
+        INSERT INTO email.account(domainid, inboxname, username, "password")
+        VALUES(#{domainId}, #{inboxName}, #{username}, #{password})
+    </insert>
+    <!--<select id="selectCityById" resultType="City">-->
+    <!--select * from city where id = #{id}-->
+    <!--</select>-->
+</mapper>
