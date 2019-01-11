@@ -1,9 +1,28 @@
 package email.model;
 
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import java.io.IOException;
+
 public class Body {
 
     private long id;
     private String body;
+
+    public Body(javax.mail.Message message) throws IOException, MessagingException {
+        String bodyString = null;
+        try {
+            Multipart mp = (Multipart) message.getContent();
+            // todo this index might be specific to a single email or to AOL, not sure yet
+            Object bodyPart = mp.getBodyPart(1).getContent();
+            bodyString = bodyPart.toString();
+//            System.out.println("GOOD: " + message.getContentType());
+        } catch (ClassCastException e) {
+//            System.out.println("BAD: " + message.getContentType());
+            bodyString = (String) message.getContent();
+        }
+        this.body = bodyString;
+    }
 
     public long getId() {
         return id;

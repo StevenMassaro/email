@@ -27,11 +27,12 @@ create table email.message (
 	id serial not null,
 	accountid int not null,
 	subject varchar(5000) null,
-	datereceived timestamp not null,
+	dateReceived timestamp not null,
 	recipientid int null,
 	fromid int null,
 	bodyid int null,
-	datecreated timestamp not null
+	datecreated timestamp not null,
+	primary key (accountid, subject, dateReceived)
 );
 
 drop table if exists email.body;
