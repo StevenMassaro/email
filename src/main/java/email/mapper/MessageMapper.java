@@ -1,8 +1,10 @@
 package email.mapper;
 
+import email.model.Message;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 import java.util.Date;
 import java.util.List;
@@ -34,4 +36,6 @@ public interface MessageMapper extends BaseMapper {
                        @Param("bodyId") long bodyId,
                        @Param("dateCreated") Date dateCreated);
 
+    @Select("SELECT count(*) FROM email.message WHERE accountId = #{accountId} AND subject = #{subject} AND dateReceived = #{dateReceived}")
+    long count(@Param("accountId") long accountId, @Param("subject") String subject, @Param("dateReceived") Date dateReceived);
 }

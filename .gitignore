@@ -1,0 +1,9 @@
+.idea/*
+*.cmd
+uploads/*
+uploads/*
+*.config
+footer.forStevenSite
+_creds.php
+cacert.pem
+.user.ini
