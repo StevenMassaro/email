@@ -1,10 +1,7 @@
 package email.mapper;
 
 import email.model.Message;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
 
 import java.util.Date;
 import java.util.List;
@@ -26,11 +23,12 @@ public interface MessageMapper extends BaseMapper {
 //            "#{accountId}, #{subject}, #{dateReceived}, #{child}, #{fromId}, #{bodyId}, #{dateCreated}"+
 //            "</foreach>)"
 //    )
-    @Insert("INSERT INTO " + schema + "(accountid, subject, datereceived, recipientid, fromid, bodyid, datecreated) VALUES(" +
-            "#{accountId}, #{subject}, #{dateReceived}, #{recipientId}, #{fromId}, #{bodyId}, #{dateCreated})")
+    @Insert("INSERT INTO " + schema + "(accountid, subject, datereceived, readind, recipientid, fromid, bodyid, datecreated) VALUES(" +
+            "#{accountId}, #{subject}, #{dateReceived}, #{readInd}, #{recipientId}, #{fromId}, #{bodyId}, #{dateCreated})")
     void insertMessage(@Param("accountId") long accountId,
                        @Param("subject") String subject,
                        @Param("dateReceived") Date dateReceived,
+                       @Param("readInd") boolean readInd,
                        @Param("recipientId") long recipientId,
                        @Param("fromId") long fromId,
                        @Param("bodyId") long bodyId,
@@ -38,4 +36,9 @@ public interface MessageMapper extends BaseMapper {
 
     @Select("SELECT count(*) FROM email.message WHERE accountId = #{accountId} AND subject = #{subject} AND dateReceived = #{dateReceived}")
     long count(@Param("accountId") long accountId, @Param("subject") String subject, @Param("dateReceived") Date dateReceived);
+
+    List<Message> list(@Param("accountId") long accountId);
+
+    @Update("UPDATE " + schema + " SET readInd = #{readInd} WHERE id = #{messageId}")
+    void setReadIndicator(long messageId, boolean readInd);
 }

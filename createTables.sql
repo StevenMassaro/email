@@ -28,10 +28,11 @@ create table email.message (
 	accountid int not null,
 	subject varchar(5000) null,
 	dateReceived timestamp not null,
+	readInd boolean not null,
 	recipientid int null,
 	fromid int null,
 	bodyid int null,
-	datecreated timestamp not null,
+	dateCreated timestamp not null,
 	primary key (accountid, subject, dateReceived)
 );
 

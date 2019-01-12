@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="email.mapper.MessageMapper">
+    <select id="list" resultMap="messageResultMap">
+        SELECT * FROM email.message m INNER JOIN email.account a ON m.accountid = a.id WHERE m.accountid = #{accountId}
+    </select>
+
+    <!--<resultMap id="accountResultMap" type="email.model.Account">-->
+    <!--<id property="id" column="id"/>-->
+    <!--<result property="inboxName" column="inboxname"/>-->
+    <!--<result property="username" column="username"/>-->
+    <!--<result property="password" column="password"/>-->
+    <!--<result property="dateCreated" column="dateCreated"/>-->
+    <!--<association property="domain" resultMap="email.mapper.AccountMapper.domainResult"/>-->
+    <!--</resultMap>-->
+
+    <resultMap id="bodyResultMap" type="email.model.Body">
+        <id property="id" column="id"/>
+        <result property="body" column="body"/>
+    </resultMap>
+
+    <resultMap id="messageResultMap" type="email.model.Message">
+        <id property="id" column="id"/>
+        <result property="subject" column="subject"/>
+        <result property="dateReceived" column="datereceived"/>
+        <result property="dateCreated" column="dateCreated"/>
+        <result property="readInd" column="readInd"/>
+        <association property="body" resultMap="bodyResultMap"/>
+        <association property="account" resultMap="email.mapper.AccountMapper.accountResultMap"/>
+    </resultMap>
+
+    <!--<resultMap id="domainResult" type="email.model.Domain">-->
+    <!--<id property="id" column="id"/>-->
+    <!--<result property="hostname" column="hostname"/>-->
+    <!--<result property="port" column="port"/>-->
+    <!--<result property="dateCreated" column="dateCreated"/>-->
+    <!--<result property="authentication" column="authentication"/>-->
+    <!--</resultMap>-->
+
+    <!--<select id="selectCityById" resultType="City">-->
+    <!--select * from city where id = #{id}-->
+    <!--</select>-->
+</mapper>
