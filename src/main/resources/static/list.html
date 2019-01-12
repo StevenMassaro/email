@@ -1,0 +1,51 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steven Massaro</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.2.13/semantic.min.css">
+
+    <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"/>
+
+    <script src="https://cdn.datatables.net/responsive/2.2.3/js/dataTables.responsive.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdn.datatables.net/responsive/2.2.3/css/responsive.dataTables.min.css">
+    <script src="http://internal.stevenmassaro.com/library/common.js"></script>
+    <script src="http://internal.stevenmassaro.com/library/promise.js"></script>
+    <script src="common.js"></script>
+</head>
+<body>
+<div class="ui container">
+    <p>
+    <h3 class="ui header">Coupons</h3></p>
+    <div>
+        <table id="coupons" border='1' class="display cell-border" cellspacing="0" width="100%">
+            <thead>
+            <tr>
+                <th>Date received</th>
+                <th>Subject</th>
+                <!--<th>Comment</th>-->
+                <!--<th>Expiration date</th>-->
+                <!--<th>Delete</th>-->
+            </tr>
+            </thead>
+        </table>
+    </div>
+    <div>
+        <p><a href="index.html">Home</a></p>
+    </div>
+</div>
+</body>
+
+<script>
+let couponsPromise = buildLoadPromise("GET", "/message/listMessages");
+runCouponsPromise(couponsPromise);
+
+</script>
+</html>
