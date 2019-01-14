@@ -13,6 +13,7 @@ import javax.mail.Flags;
 import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 @Component
@@ -66,6 +67,13 @@ public class EmailSyncProcessor implements IProcessor {
                             System.out.println("Changed read indicator for email: " + match.getId());
                         }
                     }
+                    messages.remove(match);
+                }
+                // the remaining messages in the messages list should be deleted, they no longer exist on the imap server
+                if (!messages.isEmpty()) {
+                    messageService.delete(messages);
+                    bodyService.delete(messages);
+                    System.out.println("Deleted " + messages.size() + " messages from local database.");
                 }
             } catch (MessagingException | IOException e) {
                 e.printStackTrace();

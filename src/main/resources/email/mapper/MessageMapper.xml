@@ -7,14 +7,12 @@
         SELECT * FROM email.message m INNER JOIN email.account a ON m.accountid = a.id WHERE m.accountid = #{accountId}
     </select>
 
-    <!--<resultMap id="accountResultMap" type="email.model.Account">-->
-    <!--<id property="id" column="id"/>-->
-    <!--<result property="inboxName" column="inboxname"/>-->
-    <!--<result property="username" column="username"/>-->
-    <!--<result property="password" column="password"/>-->
-    <!--<result property="dateCreated" column="dateCreated"/>-->
-    <!--<association property="domain" resultMap="email.mapper.AccountMapper.domainResult"/>-->
-    <!--</resultMap>-->
+    <delete id="delete">
+        DELETE FROM email.message WHERE id IN
+        <foreach collection="messages" item="message" separator="," open="(" close=")">
+            #{message.id}
+        </foreach>
+    </delete>
 
     <resultMap id="bodyResultMap" type="email.model.Body">
         <id property="id" column="id"/>
@@ -31,15 +29,4 @@
         <association property="account" resultMap="email.mapper.AccountMapper.accountResultMap"/>
     </resultMap>
 
-    <!--<resultMap id="domainResult" type="email.model.Domain">-->
-    <!--<id property="id" column="id"/>-->
-    <!--<result property="hostname" column="hostname"/>-->
-    <!--<result property="port" column="port"/>-->
-    <!--<result property="dateCreated" column="dateCreated"/>-->
-    <!--<result property="authentication" column="authentication"/>-->
-    <!--</resultMap>-->
-
-    <!--<select id="selectCityById" resultType="City">-->
-    <!--select * from city where id = #{id}-->
-    <!--</select>-->
 </mapper>

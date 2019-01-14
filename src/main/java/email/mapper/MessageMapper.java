@@ -39,6 +39,8 @@ public interface MessageMapper extends BaseMapper {
 
     List<Message> list(@Param("accountId") long accountId);
 
+    long delete(@Param("messages") List<Message> messages);
+
     @Update("UPDATE " + schema + " SET readInd = #{readInd} WHERE id = #{messageId}")
     void setReadIndicator(long messageId, boolean readInd);
 }
