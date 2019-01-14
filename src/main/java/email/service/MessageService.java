@@ -1,5 +1,6 @@
 package email.service;
 
+import email.mapper.BodyMapper;
 import email.mapper.MessageMapper;
 import email.model.Message;
 import org.postgresql.util.PSQLException;
@@ -28,6 +29,10 @@ public class MessageService {
 
     public List<Message> list(long accountId) {
         return messageMapper.list(accountId);
+    }
+
+    public long delete(List<Message> messages) {
+        return messageMapper.delete(messages);
     }
 
     public void setReadIndicator(long messageId, boolean readInd) {

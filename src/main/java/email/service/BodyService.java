@@ -1,6 +1,7 @@
 package email.service;
 
 import email.mapper.BodyMapper;
+import email.model.Body;
 import email.model.Message;
 import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.util.StringUtils;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import java.io.IOException;
+import java.util.List;
 
 @Service
 @Transactional
@@ -27,6 +29,10 @@ public class BodyService {
         } else {
             return 0;
         }
+    }
+
+    public long delete(List<Message> messages) {
+        return bodyMapper.delete(messages);
     }
 
     public String get(long bodyId) {
