@@ -15,12 +15,13 @@ import java.util.Properties;
 @Service
 public class ImapService {
 
-    public List<Message> getInboxMessages(String hostname, String username, String decryptedPassword) throws MessagingException, IOException {
+    public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword) throws MessagingException, IOException {
+        int p = Integer.valueOf(Long.toString(port));
         Properties props = System.getProperties();
         props.setProperty("mail.store.protocol", "imaps");
         Session session = Session.getDefaultInstance(props, null);
         Store store = session.getStore("imaps");
-        store.connect(hostname, username, decryptedPassword);
+        store.connect(hostname, p, username, decryptedPassword);
 
         Folder inbox = store.getFolder("Inbox");
         inbox.open(Folder.READ_ONLY);

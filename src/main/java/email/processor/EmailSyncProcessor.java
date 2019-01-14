@@ -44,7 +44,7 @@ public class EmailSyncProcessor implements IProcessor {
         for (Account account : accounts) {
             try {
                 String decryptedPassword = encryptionService.decrypt(account.getPassword());
-                List<Message> imapMessages = imapService.getInboxMessages(account.getDomain().getHostname(), account.getUsername(), decryptedPassword);
+                List<Message> imapMessages = imapService.getInboxMessages(account.getDomain().getHostname(), account.getDomain().getPort(), account.getUsername(), decryptedPassword);
                 List<Message> messages = messageService.list(account.getId());
                 for (Message imapMessage : imapMessages) {
                     Message match = MessageService.findMatch(messages, imapMessage);
