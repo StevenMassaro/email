@@ -19,6 +19,6 @@ public class MessageEndpoint {
 
     @GetMapping("/listMessages")
     public List<Message> listMessages() {
-        return messageService.list(1);
+        return messageService.list();
     }
 }

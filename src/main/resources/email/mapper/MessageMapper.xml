@@ -24,6 +24,10 @@
         WHERE id = #{messageId}
     </update>
 
+    <select id="listAll" resultMap="messageResultMap">
+        SELECT * FROM email.message m INNER JOIN email.account a ON m.accountid = a.id
+    </select>
+
     <select id="list" resultMap="messageResultMap">
         SELECT * FROM email.message m INNER JOIN email.account a ON m.accountid = a.id WHERE m.accountid = #{accountId}
     </select>
