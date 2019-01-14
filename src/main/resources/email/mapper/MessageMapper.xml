@@ -3,6 +3,27 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="email.mapper.MessageMapper">
+    <insert id="insertMessage">
+        INSERT INTO email.message (accountid, subject, datereceived, readind, recipientid, fromid, bodyid, datecreated)
+        VALUES(#{accountId}, #{subject}, #{dateReceived}, #{readInd}, #{recipientId}, #{fromId}, #{bodyId},
+        #{dateCreated})
+    </insert>
+
+    <select id="count" resultType="long">
+        SELECT count(*)
+        FROM email.message
+        WHERE
+        accountId = #{accountId}
+        AND subject = #{subject}
+        AND dateReceived = #{dateReceived}
+    </select>
+
+    <update id="setReadIndicator">
+        UPDATE email.message
+        SET readInd = #{readInd}
+        WHERE id = #{messageId}
+    </update>
+
     <select id="list" resultMap="messageResultMap">
         SELECT * FROM email.message m INNER JOIN email.account a ON m.accountid = a.id WHERE m.accountid = #{accountId}
     </select>
