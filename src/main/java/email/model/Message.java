@@ -1,5 +1,7 @@
 package email.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 import java.io.IOException;
@@ -11,6 +13,7 @@ public class Message {
     private long id;
     private Account account;
     private String subject;
+    @JsonFormat(pattern = "yyyy-MM-dd h:mm:ss a", timezone = "America/New_York")
     private Date dateReceived;
     private Date dateCreated;
     private List<Address> recipient;
