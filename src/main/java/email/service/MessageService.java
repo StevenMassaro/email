@@ -27,6 +27,10 @@ public class MessageService {
         return messageMapper.count(accountId, subject, dateReceived);
     }
 
+    public List<Message> list() {
+        return messageMapper.listAll();
+    }
+
     public List<Message> list(long accountId) {
         return messageMapper.list(accountId);
     }

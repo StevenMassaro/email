@@ -34,6 +34,8 @@ public interface MessageMapper extends BaseMapper {
 
     long count(@Param("accountId") long accountId, @Param("subject") String subject, @Param("dateReceived") Date dateReceived);
 
+    List<Message> listAll();
+
     List<Message> list(@Param("accountId") long accountId);
 
     long delete(@Param("messages") List<Message> messages);
