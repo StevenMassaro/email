@@ -23,8 +23,6 @@ public interface MessageMapper extends BaseMapper {
 //            "#{accountId}, #{subject}, #{dateReceived}, #{child}, #{fromId}, #{bodyId}, #{dateCreated}"+
 //            "</foreach>)"
 //    )
-    @Insert("INSERT INTO " + schema + "(accountid, subject, datereceived, readind, recipientid, fromid, bodyid, datecreated) VALUES(" +
-            "#{accountId}, #{subject}, #{dateReceived}, #{readInd}, #{recipientId}, #{fromId}, #{bodyId}, #{dateCreated})")
     void insertMessage(@Param("accountId") long accountId,
                        @Param("subject") String subject,
                        @Param("dateReceived") Date dateReceived,
@@ -34,13 +32,11 @@ public interface MessageMapper extends BaseMapper {
                        @Param("bodyId") long bodyId,
                        @Param("dateCreated") Date dateCreated);
 
-    @Select("SELECT count(*) FROM email.message WHERE accountId = #{accountId} AND subject = #{subject} AND dateReceived = #{dateReceived}")
     long count(@Param("accountId") long accountId, @Param("subject") String subject, @Param("dateReceived") Date dateReceived);
 
     List<Message> list(@Param("accountId") long accountId);
 
     long delete(@Param("messages") List<Message> messages);
 
-    @Update("UPDATE " + schema + " SET readInd = #{readInd} WHERE id = #{messageId}")
-    void setReadIndicator(long messageId, boolean readInd);
+    void setReadIndicator(@Param("messageId") long messageId, @Param("readInd") boolean readInd);
 }
