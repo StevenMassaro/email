@@ -3,23 +3,23 @@ function runCouponsPromise(couponsPromise){
         $('#coupons').DataTable({
             data: JSON.parse(successMessage),
             "columns": [
-                {"data": "dateReceived"},
+                {
+                    "data": "dateReceived",
+                    "width": "50px"
+                },
+                {
+                    "data": "account",
+                    "render": function(data, type, row) {
+                        return row.account.username;
+                    },
+                    "width": "100px"
+                },
                 {
                     "data": "subject",
                     "render": function ( data, type, row, meta ) {
-                        return '<a href=' + getApiBaseUrl("/body") + '?bodyId=' + row.id + '>' + row.subject + '</a>';
+                        return '<a href=' + getApiBaseUrl("/body") + '?bodyId=' + row.body.id + '>' + row.subject + '</a>';
                     }
-                }//,
-
-//                {"data": "comment"},
-//                {"data": "expirationDate"},
-//                {
-//                    "data": null,
-//                    "defaultContent": "",
-//                    "render": function(data,type,row,meta) {
-//                        return (row.dateDeleted ? row.dateDeleted : '<a href=' + getApiBaseUrl("setDateDeleted") + '?id=' + row.id +'>Delete');
-//                    }
-//                }
+                }
             ],
             responsive: true,
             "pageLength": 50
