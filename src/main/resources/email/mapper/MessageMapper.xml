@@ -36,7 +36,7 @@
     </delete>
 
     <resultMap id="bodyResultMap" type="email.model.Body">
-        <id property="id" column="id"/>
+        <id property="id" column="bodyid"/>
         <result property="body" column="body"/>
     </resultMap>
 
