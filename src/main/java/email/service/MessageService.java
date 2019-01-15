@@ -17,6 +17,9 @@ import java.util.List;
 public class MessageService {
 
     @Autowired
+    private ImapService imapService;
+
+    @Autowired
     private MessageMapper messageMapper;
 
     public void insertMessage(long accountId, String subject, Date dateReceived, long recipientId, long fromId, long bodyId, boolean readInd) {
@@ -25,6 +28,10 @@ public class MessageService {
 
     public long count(long accountId, String subject, Date dateReceived){
         return messageMapper.count(accountId, subject, dateReceived);
+    }
+
+    public Message getByBodyId(long bodyId) {
+        return messageMapper.getByBodyId(bodyId);
     }
 
     public List<Message> list() {
@@ -40,6 +47,7 @@ public class MessageService {
     }
 
     public void setReadIndicator(long messageId, boolean readInd) {
+        imapService.setReadIndicator();
         messageMapper.setReadIndicator(messageId, readInd);
     }
 
