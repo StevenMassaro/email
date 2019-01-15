@@ -35,7 +35,7 @@ public class EmailSyncProcessor implements IProcessor {
     private EncryptionService encryptionService;
 
     @Override
-    @Scheduled(fixedDelay = 500 * 1000) //this is every 10 seconds
+//    @Scheduled(fixedDelay = 500 * 1000) //this is every 10 seconds
     public void run() {
         long syncStart = System.nanoTime();
         System.out.println("Starting sync rule.");

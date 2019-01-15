@@ -24,12 +24,22 @@
         WHERE id = #{messageId}
     </update>
 
-    <select id="listAll" resultMap="messageResultMap">
+    <select id="getByBodyId" resultMap="messageResultMap">
+        <include refid="selectMessageAccount"/>
+        JOIN email.body b ON m.bodyid = b.id WHERE b.id = #{bodyId}
+    </select>
+
+    <sql id="selectMessageAccount">
         SELECT * FROM email.message m INNER JOIN email.account a ON m.accountid = a.id
+    </sql>
+
+    <select id="listAll" resultMap="messageResultMap">
+        <include refid="selectMessageAccount"/>
     </select>
 
     <select id="list" resultMap="messageResultMap">
-        SELECT * FROM email.message m INNER JOIN email.account a ON m.accountid = a.id WHERE m.accountid = #{accountId}
+        <include refid="selectMessageAccount"/>
+        WHERE m.accountid = #{accountId}
     </select>
 
     <delete id="delete">
