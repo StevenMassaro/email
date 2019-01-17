@@ -52,3 +52,12 @@ create table email.address (
 	encodedPersonal varchar(1000) null
 );
 
+drop table if exists email.eventlog;
+create table email.eventlog (
+    id serial not null,
+    accountid int,
+    statusenum int not null,
+    messageuid int,
+    message text
+);
+
