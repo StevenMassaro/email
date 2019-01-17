@@ -9,8 +9,7 @@ import java.util.List;
 @Mapper
 public interface MessageMapper extends BaseMapper {
 
-    String table = "message";
-    String schema = DATABASE + "." + table;
+    Message get(@Param("uid") long uid);
 
     // I think this is right but it probably should be in an xml file
 //    @Insert("INSERT INTO " + schema + "(accountid, subject, datereceived, recipientid, fromid, bodyid, datecreated) VALUES(" +
@@ -30,7 +29,7 @@ public interface MessageMapper extends BaseMapper {
                        @Param("readInd") boolean readInd,
                        @Param("recipientId") long recipientId,
                        @Param("fromId") long fromId,
-                       @Param("bodyId") long bodyId);
+                       @Param("body") String body);
 
     long count(@Param("accountId") long accountId, @Param("subject") String subject, @Param("dateReceived") Date dateReceived);
 

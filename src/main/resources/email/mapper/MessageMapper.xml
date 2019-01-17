@@ -3,9 +3,13 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="email.mapper.MessageMapper">
+    <select id="get" resultMap="messageResultMap">
+        SELECT * FROM email.message WHERE uid = #{uid}
+    </select>
+
     <insert id="insertMessage">
-        INSERT INTO email.message (uid, accountid, subject, datereceived, readind, recipientid, fromid, bodyid)
-        VALUES(#{uid}, #{accountId}, #{subject}, #{dateReceived}, #{readInd}, #{recipientId}, #{fromId}, #{bodyId})
+        INSERT INTO email.message (uid, accountid, subject, datereceived, readind, recipientid, fromid, body)
+        VALUES(#{uid}, #{accountId}, #{subject}, #{dateReceived}, #{readInd}, #{recipientId}, #{fromId}, #{body})
     </insert>
 
     <select id="count" resultType="long">
@@ -38,18 +42,13 @@
         </foreach>
     </delete>
 
-    <resultMap id="bodyResultMap" type="email.model.Body">
-        <id property="id" column="bodyid"/>
-        <result property="body" column="body"/>
-    </resultMap>
-
     <resultMap id="messageResultMap" type="email.model.Message">
         <id property="uid" column="uid"/>
         <result property="subject" column="subject"/>
         <result property="dateReceived" column="datereceived"/>
         <result property="dateCreated" column="dateCreated"/>
         <result property="readInd" column="readInd"/>
-        <association property="body" resultMap="bodyResultMap"/>
+        <result property="body" column="body"/>
         <association property="account" resultMap="email.mapper.AccountMapper.accountResultMap"/>
     </resultMap>
 

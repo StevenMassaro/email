@@ -1,15 +1,12 @@
 package email.service;
 
-import email.mapper.BodyMapper;
 import email.mapper.MessageMapper;
 import email.model.Message;
-import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 
 @Component
@@ -19,9 +16,13 @@ public class MessageService {
     @Autowired
     private MessageMapper messageMapper;
 
+    public Message get(long uid) {
+        return messageMapper.get(uid);
+    }
+
     public void insertMessage(Message message) {
         messageMapper.insertMessage(message.getUid(), message.getAccount().getId(), message.getSubject(), message.getDateReceived(),
-                message.isReadInd(), 1L, 1L, message.getBody().getId());
+                message.isReadInd(), 1L, 1L, message.getBody());
     }
 
     public long count(long accountId, String subject, Date dateReceived){
