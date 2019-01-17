@@ -17,12 +17,7 @@ import java.util.Properties;
 public class ImapService {
 
     public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword) throws MessagingException, IOException {
-        int p = Integer.valueOf(Long.toString(port));
-        Properties props = System.getProperties();
-        props.setProperty("mail.store.protocol", "imaps");
-        Session session = Session.getDefaultInstance(props, null);
-        Store store = session.getStore("imaps");
-        store.connect(hostname, p, username, decryptedPassword);
+        Store store = getStore(hostname, port, username, decryptedPassword);
 
         IMAPFolder inbox = (IMAPFolder) store.getFolder("Inbox");
         inbox.open(Folder.READ_ONLY);
@@ -35,5 +30,25 @@ public class ImapService {
 //        FlagTerm ft = new FlagTerm(new Flags(Flags.Flag.), false);
         store.close();
         return returnMessages;
+    }
+
+    public void setReadIndicator(String hostname, long port, String username, String decryptedPassword) throws NoSuchProviderException {
+        Store store = getStore(hostname, port, username, decryptedPassword);
+
+        Folder inbox = store.getFolder("Inbox");
+        IMAPFolder imapFolder = new IMAPFolder();
+        imapFolder.getUID()
+        inbox.open(Folder.READ_WRITE);
+        inbox.setFlags();
+    }
+
+    private Store getStore(String hostname, long port, String username, String decryptedPassword) throws NoSuchProviderException {
+        int p = Integer.valueOf(Long.toString(port));
+
+        Properties props = System.getProperties();
+        props.setProperty("mail.store.protocol", "imaps");
+        Session session = Session.getDefaultInstance(props, null);
+        Store store = session.getStore("imaps");
+        store.connect(hostname, p, username, decryptedPassword);
     }
 }

@@ -5,7 +5,7 @@ function runCouponsPromise(couponsPromise){
             "columns": [
                 {
                     "data": "dateReceived",
-                    "width": "50px"
+                    "width": "100px"
                 },
                 {
                     "data": "account",

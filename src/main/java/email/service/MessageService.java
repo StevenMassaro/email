@@ -14,6 +14,9 @@ import java.util.List;
 public class MessageService {
 
     @Autowired
+    private ImapService imapService;
+
+    @Autowired
     private MessageMapper messageMapper;
 
     public Message get(long uid) {
@@ -29,6 +32,10 @@ public class MessageService {
         return messageMapper.count(accountId, subject, dateReceived);
     }
 
+    public Message getByBodyId(long bodyId) {
+        return messageMapper.getByBodyId(bodyId);
+    }
+
     public List<Message> list() {
         return messageMapper.listAll();
     }
@@ -42,6 +49,7 @@ public class MessageService {
     }
 
     public void setReadIndicator(long messageId, boolean readInd) {
+        imapService.setReadIndicator();
         messageMapper.setReadIndicator(messageId, readInd);
     }
 
