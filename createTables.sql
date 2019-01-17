@@ -31,16 +31,9 @@ create table email.message (
 	readInd boolean not null,
 	recipientid int null,
 	fromid int null,
-	bodyid int null,
+	body text null,
 	dateCreated timestamp default now(),
 	primary key (accountid, subject, dateReceived)
-);
-
-drop table if exists email.body;
-create table email.body (
-	id serial not null,
-	body text not null,
-	datecreated timestamp default now()
 );
 
 drop table if exists email.executionlog;

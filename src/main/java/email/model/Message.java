@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.mail.Flags;
 import javax.mail.MessagingException;
+import javax.mail.Multipart;
 import java.io.IOException;
 import java.util.Date;
 import java.util.List;
@@ -18,7 +19,7 @@ public class Message {
     private Date dateCreated;
     private List<Address> recipient;
     private List<Address> from;
-    private Body body;
+    private String body;
     private boolean readInd;
 
     public Message() {
@@ -28,7 +29,7 @@ public class Message {
     public Message(javax.mail.Message message, long uid) throws MessagingException, IOException {
         this.subject = message.getSubject();
         this.dateReceived = message.getReceivedDate();
-        this.body = new Body(message);
+        setBody(message);
         this.readInd = determineReadInd(message);
         this.uid = uid;
     }
@@ -118,12 +119,38 @@ public class Message {
         this.from = from;
     }
 
-    public Body getBody() {
+    public String getBody() {
         return body;
     }
 
-    public void setBody(Body body) {
+    public void setBody(String body) {
         this.body = body;
+    }
+
+    public void setBody(javax.mail.Message message) throws IOException, MessagingException {
+        String bodyString = null;
+        try {
+            Multipart mp = (Multipart) message.getContent();
+            // todo this index might be specific to a single email or to AOL, not sure yet
+            Object bodyPart = null;
+            try {
+                bodyPart = mp.getBodyPart(1).getContent();
+            } catch (ArrayIndexOutOfBoundsException e) {
+                try {
+                    bodyPart = mp.getBodyPart(0).getContent();
+                } catch (ArrayIndexOutOfBoundsException e1) {
+                    bodyPart = null;
+                }
+            }
+            if (bodyPart != null) {
+                bodyString = bodyPart.toString();
+            }
+//            System.out.println("GOOD: " + message.getContentType());
+        } catch (ClassCastException e) {
+//            System.out.println("BAD: " + message.getContentType());
+            bodyString = (String) message.getContent();
+        }
+        this.body = bodyString;
     }
 
     public boolean isReadInd() {

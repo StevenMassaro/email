@@ -26,9 +26,6 @@ public class EmailSyncProcessor implements IProcessor {
     private MessageService messageService;
 
     @Autowired
-    private BodyService bodyService;
-
-    @Autowired
     private AccountService accountService;
 
     @Autowired
@@ -58,7 +55,6 @@ public class EmailSyncProcessor implements IProcessor {
                     Message match = MessageService.findMatch(imapMessages, dbMessage);
                     if (match == null) {
                         messageService.delete(Collections.singletonList(dbMessage));
-                        bodyService.delete(Collections.singletonList(dbMessage));
                         deletedCount++;
                     }
                 }
@@ -74,7 +70,7 @@ public class EmailSyncProcessor implements IProcessor {
                     if (match == null) {
                         try {
                             imapMessage.setAccount(account);
-                            insertNewMessage(imapMessage);
+                            messageService.insertMessage(imapMessage);
                             insertedCount++;
                         } catch (Exception e) {
                             messageFailure = true;
@@ -108,13 +104,5 @@ public class EmailSyncProcessor implements IProcessor {
         }
         executionLogService.insert(result);
         logger.info(result.getMessage());
-    }
-
-    //todo this transaction does not rollback from the body table correctly
-    @Transactional
-    public void insertNewMessage(Message message) throws MessagingException, IOException {
-        long bodyId = bodyService.insert(message);
-        message.setBody(new Body(bodyId));
-        messageService.insertMessage(message);
     }
 }

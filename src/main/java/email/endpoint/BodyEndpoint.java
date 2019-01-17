@@ -1,6 +1,6 @@
 package email.endpoint;
 
-import email.service.BodyService;
+import email.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,10 +12,10 @@ import org.springframework.web.bind.annotation.RestController;
 public class BodyEndpoint {
 
     @Autowired
-    private BodyService bodyService;
+    private MessageService messageService;
 
     @GetMapping()
-    public String getBody(@RequestParam("bodyId") long bodyId) {
-        return bodyService.get(bodyId);
+    public String getBody(@RequestParam("uid") long uid) {
+        return messageService.get(uid).getBody();
     }
 }
