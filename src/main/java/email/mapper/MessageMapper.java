@@ -37,9 +37,7 @@ public interface MessageMapper {
 
     List<Message> list(@Param("accountId") long accountId);
 
-    Message getByBodyId(@Param("bodyId") long bodyId);
-
     long delete(@Param("messages") List<Message> messages);
 
-    void setReadIndicator(@Param("messageId") long messageId, @Param("readInd") boolean readInd);
+    void setReadIndicator(@Param("uid") long uid, @Param("readInd") boolean readInd);
 }
