@@ -3,11 +3,20 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="email.mapper.AccountMapper">
+    <select id="get" resultMap="accountResultMap">
+        <include refid="selectAccounts"/>
+        WHERE a.id = #{accountid}
+    </select>
+
     <select id="list" resultMap="accountResultMap">
+        <include refid="selectAccounts"/>
+    </select>
+
+    <sql id="selectAccounts">
         SELECT * FROM email.account a
         INNER JOIN email.domain d
         ON a.domainid = d.id
-    </select>
+    </sql>
 
     <resultMap id="accountResultMap" type="email.model.Account">
         <id property="id" column="id"/>

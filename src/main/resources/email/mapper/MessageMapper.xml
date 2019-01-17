@@ -4,7 +4,9 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="email.mapper.MessageMapper">
     <select id="get" resultMap="messageResultMap">
-        SELECT * FROM email.message WHERE uid = #{uid}
+        SELECT *
+        <include refid="fromMessageJoin"/>
+        WHERE uid = #{uid}
     </select>
 
     <insert id="insertMessage">
@@ -24,19 +26,24 @@
     <update id="setReadIndicator">
         UPDATE email.message
         SET readInd = #{readInd}
-        WHERE id = #{messageId}
+        WHERE uid = #{uid}
     </update>
 
     <select id="listAll" resultMap="messageResultMap">
         SELECT m.uid, m.accountid, m.subject, m.datereceived, m.readind, m.recipientid, m.fromid, m.datecreated, a.id,
         a.domainid, a.inboxname, a.username, a.datecreated
-        FROM email.message m
-        INNER JOIN email.account a ON m.accountid = a.id
+        <include refid="fromMessageJoin"/>
     </select>
 
     <select id="list" resultMap="messageResultMap">
-        SELECT * FROM email.message m INNER JOIN email.account a ON m.accountid = a.id WHERE m.accountid = #{accountId}
+        SELECT *
+        <include refid="fromMessageJoin"/>
+        WHERE m.accountid = #{accountId}
     </select>
+
+    <sql id="fromMessageJoin">
+        FROM email.message m INNER JOIN email.account a ON m.accountid = a.id
+    </sql>
 
     <delete id="delete">
         DELETE FROM email.message WHERE uid IN

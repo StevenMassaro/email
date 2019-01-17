@@ -27,6 +27,12 @@ public class AccountService {
         return accountMapper.list();
     }
 
+    public Account getDecrypted(long accountid) {
+        Account account = accountMapper.get(accountid);
+        account.setPassword(encryptionService.decrypt(account.getPassword()));
+        return account;
+    }
+
     public void insert(Account account) {
         long domainId = domainService.insert(account.getDomain());
         String encryptedPassword = encryptionService.encrypt(account.getPassword());

@@ -10,6 +10,8 @@ import java.util.List;
 
 @Mapper
 public interface AccountMapper {
+    Account get(@Param("accountid") long accountid);
+
     List<Account> list();
 
     void insert(@Param("domainId") long domainId, @Param("inboxName") String inboxName,
