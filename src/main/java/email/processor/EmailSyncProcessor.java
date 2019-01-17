@@ -1,11 +1,10 @@
 package email.processor;
 
-import email.model.Account;
-import email.model.Body;
-import email.model.Message;
+import email.model.*;
 import email.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +16,8 @@ import java.util.List;
 
 @Component
 public class EmailSyncProcessor implements IProcessor {
+
+    private Logger logger = LoggerFactory.getLogger(EmailSyncProcessor.class);
 
     @Autowired
     private ImapService imapService;
@@ -33,11 +34,16 @@ public class EmailSyncProcessor implements IProcessor {
     @Autowired
     private EncryptionService encryptionService;
 
+    @Autowired
+    private ExecutionLogService executionLogService;
+
     @Override
-    @Scheduled(fixedDelay = 500 * 1000) //this is every 10 seconds
+    @Scheduled(fixedDelay = 500 * 1000)
     public void run() {
-        long syncStart = System.nanoTime();
-        System.out.println("Starting sync rule.");
+        logger.info(ExecStatusEnum.RULE_START.getMessage());
+        executionLogService.insert(ExecStatusEnum.RULE_START);
+        boolean messageFailure = false;
+        boolean accountFailure = false;
         List<Account> accounts = accountService.list();
 
         for (Account account : accounts) {
@@ -56,10 +62,12 @@ public class EmailSyncProcessor implements IProcessor {
                         deletedCount++;
                     }
                 }
-
-                System.out.println("Deleted " + deletedCount + " messages from local database.");
+                logger.debug(String.format("Deleted %s messages from local database while processing account %s.",
+                        deletedCount, account.getUsername()));
 
                 // then add all messages that do exist on the imap server
+                long insertedCount = 0;
+                long changedReadIndCount = 0;
                 for (Message imapMessage : imapMessages) {
                     Message match = MessageService.findMatch(dbMessages, imapMessage);
 
@@ -67,30 +75,39 @@ public class EmailSyncProcessor implements IProcessor {
                         try {
                             imapMessage.setAccount(account);
                             insertNewMessage(imapMessage);
-                            System.out.println("Inserted new message.");
-                        } catch (DuplicateKeyException exception) {
-                            System.out.println("Message violates primary key constraint.");
+                            insertedCount++;
                         } catch (Exception e) {
-                            System.out.println("Failed to insert new message. " + e.getMessage());
+                            messageFailure = true;
+                            logger.error(String.format("Failed to insert new message %s while processing account %s.", imapMessage.getUid(), account.getUsername()), e);
                         }
                     } else {
-                        System.out.println("Message already in database.");
-
                         // if the message has a different read indicator in the database than IMAP
                         if (imapMessage.isReadInd() != match.isReadInd()) {
                             messageService.setReadIndicator(match.getUid(), imapMessage.isReadInd());
-                            System.out.println("Changed read indicator for email: " + match.getUid());
+                            logger.debug(String.format("Changed read indicator for email %s to %s.",
+                                    match.getUid(), imapMessage.isReadInd() ? "read" : "unread"));
+                            changedReadIndCount++;
                         }
                     }
                 }
+                logger.debug(String.format("Inserted %s messages into local database while processing account %s.", insertedCount, account.getUsername()));
+                logger.debug(String.format("Changed read indicator for %s messages while processing account %s.", changedReadIndCount, account.getUsername()));
             } catch (MessagingException | IOException e) {
-                e.printStackTrace();
+                accountFailure = true;
+                logger.error(String.format("Exception while processing account %s.", account.getUsername()), e);
             }
         }
-        long syncEnd = System.nanoTime();
-        long syncTime = syncEnd - syncStart;
-        double seconds = (double)syncTime / 1_000_000_000.0;
-        System.out.println("Time to run sync rule (seconds): " + seconds);
+
+        ExecStatusEnum result;
+        if (!accountFailure && !messageFailure) {
+            result = ExecStatusEnum.RULE_END_SUCCESS;
+        } else if (messageFailure && !accountFailure) {
+            result = ExecStatusEnum.RULE_END_MESSAGE_FAILURE;
+        } else {
+            result = ExecStatusEnum.RULE_END_ACCOUNT_FAILURE;
+        }
+        executionLogService.insert(result);
+        logger.info(result.getMessage());
     }
 
     //todo this transaction does not rollback from the body table correctly
