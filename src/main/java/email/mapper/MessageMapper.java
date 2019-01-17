@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 @Mapper
-public interface MessageMapper extends BaseMapper {
+public interface MessageMapper {
 
     Message get(@Param("uid") long uid);
 

@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 @Mapper
-public interface AccountMapper extends BaseMapper {
+public interface AccountMapper {
     List<Account> list();
 
     void insert(@Param("domainId") long domainId, @Param("inboxName") String inboxName,
