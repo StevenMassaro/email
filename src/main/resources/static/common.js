@@ -22,6 +22,7 @@ function runCouponsPromise(couponsPromise){
                     }
                 }
             ],
+            "order": [[ 0, "desc" ]],
             responsive: true,
             "pageLength": 50
         });
