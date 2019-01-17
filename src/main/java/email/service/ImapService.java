@@ -1,5 +1,6 @@
 package email.service;
 
+import com.sun.mail.imap.IMAPFolder;
 import email.model.Message;
 import org.springframework.stereotype.Service;
 
@@ -23,12 +24,13 @@ public class ImapService {
         Store store = session.getStore("imaps");
         store.connect(hostname, p, username, decryptedPassword);
 
-        Folder inbox = store.getFolder("Inbox");
+        IMAPFolder inbox = (IMAPFolder) store.getFolder("Inbox");
         inbox.open(Folder.READ_ONLY);
         javax.mail.Message messages[] = inbox.getMessages();
         List<Message> returnMessages = new ArrayList<>();
         for(javax.mail.Message message : messages){
-            returnMessages.add(new Message(message));
+            long uid = inbox.getUID(message);
+            returnMessages.add(new Message(message, uid));
         }
 //        FlagTerm ft = new FlagTerm(new Flags(Flags.Flag.), false);
         store.close();

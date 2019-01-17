@@ -24,7 +24,7 @@ create table email.domain (
 
 drop table if exists email.message;
 create table email.message (
-	id serial not null,
+	uid int not null,
 	accountid int not null,
 	subject varchar(5000) null,
 	dateReceived timestamp not null,

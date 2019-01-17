@@ -4,9 +4,8 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="email.mapper.MessageMapper">
     <insert id="insertMessage">
-        INSERT INTO email.message (accountid, subject, datereceived, readind, recipientid, fromid, bodyid, datecreated)
-        VALUES(#{accountId}, #{subject}, #{dateReceived}, #{readInd}, #{recipientId}, #{fromId}, #{bodyId},
-        #{dateCreated})
+        INSERT INTO email.message (uid, accountid, subject, datereceived, readind, recipientid, fromid, bodyid)
+        VALUES(#{uid}, #{accountId}, #{subject}, #{dateReceived}, #{readInd}, #{recipientId}, #{fromId}, #{bodyId})
     </insert>
 
     <select id="count" resultType="long">
@@ -33,9 +32,9 @@
     </select>
 
     <delete id="delete">
-        DELETE FROM email.message WHERE id IN
+        DELETE FROM email.message WHERE uid IN
         <foreach collection="messages" item="message" separator="," open="(" close=")">
-            #{message.id}
+            #{message.uid}
         </foreach>
     </delete>
 
@@ -45,7 +44,7 @@
     </resultMap>
 
     <resultMap id="messageResultMap" type="email.model.Message">
-        <id property="id" column="id"/>
+        <id property="uid" column="uid"/>
         <result property="subject" column="subject"/>
         <result property="dateReceived" column="datereceived"/>
         <result property="dateCreated" column="dateCreated"/>

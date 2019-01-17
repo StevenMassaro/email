@@ -13,6 +13,10 @@ public class Body {
 
     }
 
+    public Body(long id) {
+        this.id = id;
+    }
+
     public Body(javax.mail.Message message) throws IOException, MessagingException {
         String bodyString = null;
         try {
