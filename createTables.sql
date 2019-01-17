@@ -32,14 +32,22 @@ create table email.message (
 	recipientid int null,
 	fromid int null,
 	bodyid int null,
-	dateCreated timestamp not null,
+	dateCreated timestamp default now(),
 	primary key (accountid, subject, dateReceived)
 );
 
 drop table if exists email.body;
 create table email.body (
 	id serial not null,
-	body text not null
+	body text not null,
+	datecreated timestamp default now()
+);
+
+drop table if exists email.executionlog;
+create table email.executionlog (
+	id serial not null,
+	datecreated timestamp default now(),
+	execstatusenum int not null
 );
 
 drop table if exists email.address;
@@ -51,4 +59,3 @@ create table email.address (
 	address varchar(1000) null,
 	encodedPersonal varchar(1000) null
 );
-
