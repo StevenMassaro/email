@@ -19,8 +19,9 @@ public class MessageService {
     @Autowired
     private MessageMapper messageMapper;
 
-    public void insertMessage(long accountId, String subject, Date dateReceived, long recipientId, long fromId, long bodyId, boolean readInd) {
-        messageMapper.insertMessage(accountId, subject, dateReceived, readInd, recipientId, fromId, bodyId, new Date());
+    public void insertMessage(Message message) {
+        messageMapper.insertMessage(message.getUid(), message.getAccount().getId(), message.getSubject(), message.getDateReceived(),
+                message.isReadInd(), 1L, 1L, message.getBody().getId());
     }
 
     public long count(long accountId, String subject, Date dateReceived){

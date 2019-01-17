@@ -23,14 +23,14 @@ public interface MessageMapper extends BaseMapper {
 //            "#{accountId}, #{subject}, #{dateReceived}, #{child}, #{fromId}, #{bodyId}, #{dateCreated}"+
 //            "</foreach>)"
 //    )
-    void insertMessage(@Param("accountId") long accountId,
+    void insertMessage(@Param("uid") long uid,
+                       @Param("accountId") long accountId,
                        @Param("subject") String subject,
                        @Param("dateReceived") Date dateReceived,
                        @Param("readInd") boolean readInd,
                        @Param("recipientId") long recipientId,
                        @Param("fromId") long fromId,
-                       @Param("bodyId") long bodyId,
-                       @Param("dateCreated") Date dateCreated);
+                       @Param("bodyId") long bodyId);
 
     long count(@Param("accountId") long accountId, @Param("subject") String subject, @Param("dateReceived") Date dateReceived);
 

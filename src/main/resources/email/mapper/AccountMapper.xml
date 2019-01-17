@@ -30,7 +30,4 @@
         INSERT INTO email.account(domainid, inboxname, username, "password")
         VALUES(#{domainId}, #{inboxName}, #{username}, #{password})
     </insert>
-    <!--<select id="selectCityById" resultType="City">-->
-    <!--select * from city where id = #{id}-->
-    <!--</select>-->
 </mapper>

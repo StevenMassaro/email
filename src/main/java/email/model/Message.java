@@ -10,7 +10,7 @@ import java.util.List;
 
 public class Message {
 
-    private long id;
+    private long uid;
     private Account account;
     private String subject;
     @JsonFormat(pattern = "yyyy-MM-dd h:mm:ss a", timezone = "America/New_York")
@@ -25,11 +25,12 @@ public class Message {
 
     }
 
-    public Message(javax.mail.Message message) throws MessagingException, IOException {
+    public Message(javax.mail.Message message, long uid) throws MessagingException, IOException {
         this.subject = message.getSubject();
         this.dateReceived = message.getReceivedDate();
         this.body = new Body(message);
         this.readInd = determineReadInd(message);
+        this.uid = uid;
     }
 
     private boolean determineReadInd(javax.mail.Message message) throws MessagingException {
@@ -61,12 +62,12 @@ public class Message {
                 this.dateReceived.equals(message1.getDateReceived());
     }
 
-    public long getId() {
-        return id;
+    public long getUid() {
+        return uid;
     }
 
-    public void setId(long id) {
-        this.id = id;
+    public void setUid(long uid) {
+        this.uid = uid;
     }
 
     public Account getAccount() {

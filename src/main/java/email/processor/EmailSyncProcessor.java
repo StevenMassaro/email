@@ -1,6 +1,7 @@
 package email.processor;
 
 import email.model.Account;
+import email.model.Body;
 import email.model.Message;
 import email.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,11 +10,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.mail.Flags;
 import javax.mail.MessagingException;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -45,13 +44,29 @@ public class EmailSyncProcessor implements IProcessor {
             try {
                 String decryptedPassword = encryptionService.decrypt(account.getPassword());
                 List<Message> imapMessages = imapService.getInboxMessages(account.getDomain().getHostname(), account.getDomain().getPort(), account.getUsername(), decryptedPassword);
-                List<Message> messages = messageService.list(account.getId());
+                List<Message> dbMessages = messageService.list(account.getId());
+
+                // first delete all messages from the local db that no longer exist on the imap server
+                long deletedCount = 0;
+                for (Message dbMessage : dbMessages) {
+                    Message match = MessageService.findMatch(imapMessages, dbMessage);
+                    if (match == null) {
+                        messageService.delete(Collections.singletonList(dbMessage));
+                        bodyService.delete(Collections.singletonList(dbMessage));
+                        deletedCount++;
+                    }
+                }
+
+                System.out.println("Deleted " + deletedCount + " messages from local database.");
+
+                // then add all messages that do exist on the imap server
                 for (Message imapMessage : imapMessages) {
-                    Message match = MessageService.findMatch(messages, imapMessage);
+                    Message match = MessageService.findMatch(dbMessages, imapMessage);
 
                     if (match == null) {
                         try {
-                            insertNewMessage(imapMessage, account);
+                            imapMessage.setAccount(account);
+                            insertNewMessage(imapMessage);
                             System.out.println("Inserted new message.");
                         } catch (DuplicateKeyException exception) {
                             System.out.println("Message violates primary key constraint.");
@@ -63,17 +78,10 @@ public class EmailSyncProcessor implements IProcessor {
 
                         // if the message has a different read indicator in the database than IMAP
                         if (imapMessage.isReadInd() != match.isReadInd()) {
-                            messageService.setReadIndicator(match.getId(), imapMessage.isReadInd());
-                            System.out.println("Changed read indicator for email: " + match.getId());
+                            messageService.setReadIndicator(match.getUid(), imapMessage.isReadInd());
+                            System.out.println("Changed read indicator for email: " + match.getUid());
                         }
                     }
-                    messages.remove(match);
-                }
-                // the remaining messages in the messages list should be deleted, they no longer exist on the imap server
-                if (!messages.isEmpty()) {
-                    messageService.delete(messages);
-                    bodyService.delete(messages);
-                    System.out.println("Deleted " + messages.size() + " messages from local database.");
                 }
             } catch (MessagingException | IOException e) {
                 e.printStackTrace();
@@ -85,9 +93,11 @@ public class EmailSyncProcessor implements IProcessor {
         System.out.println("Time to run sync rule (seconds): " + seconds);
     }
 
+    //todo this transaction does not rollback from the body table correctly
     @Transactional
-    public void insertNewMessage(Message message, Account account) throws MessagingException, IOException {
+    public void insertNewMessage(Message message) throws MessagingException, IOException {
         long bodyId = bodyService.insert(message);
-        messageService.insertMessage(account.getId(), message.getSubject(), message.getDateReceived(), 1L, 1L, bodyId, message.isReadInd());
+        message.setBody(new Body(bodyId));
+        messageService.insertMessage(message);
     }
 }
