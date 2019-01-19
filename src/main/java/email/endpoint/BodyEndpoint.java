@@ -1,5 +1,6 @@
 package email.endpoint;
 
+import email.processor.ImapReadIndicatorProcessor;
 import email.service.ImapService;
 import email.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.mail.MessagingException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @RestController
 @RequestMapping(value = "/body")
@@ -21,10 +24,13 @@ public class BodyEndpoint {
     private ImapService imapService;
 
     @GetMapping()
-    public String getBody(@RequestParam("uid") long uid) throws MessagingException {
+    public String getBody(@RequestParam("uid") long uid) {
+        ExecutorService executor = Executors.newFixedThreadPool(1);
+        Runnable worker = new ImapReadIndicatorProcessor(imapService, uid, true);
+        executor.execute(worker);
+        executor.shutdown();
+
         messageService.setReadIndicator(uid, true);
-        // todo, this needs to occur in a separate thread, it's too slow to be done live
-        imapService.setReadIndicator(uid, true);
         return messageService.get(uid).getBody();
     }
 }
