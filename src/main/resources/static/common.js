@@ -18,7 +18,7 @@ function runCouponsPromise(couponsPromise){
                     "data": "subject",
                     "render": function ( data, type, row, meta ) {
                         return '<a ' + (row.readInd ? '' : 'style="font-weight:bold" ')
-                        + 'href=' + getApiBaseUrl("/body") + '?uid=' + row.uid + '>' + row.subject + '</a>';
+                        + 'href=# onclick="openModal(this)" id='+ row.uid + '>' + row.subject + '</a>';
                     }
                 }
             ],
