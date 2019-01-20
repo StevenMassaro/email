@@ -52,6 +52,10 @@
         </foreach>
     </delete>
 
+    <delete id="deleteById">
+        DELETE FROM email.message WHERE uid = #{uid}
+    </delete>
+
     <resultMap id="messageResultMap" type="email.model.Message">
         <id property="uid" column="uid"/>
         <result property="subject" column="subject"/>
