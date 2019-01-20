@@ -24,6 +24,10 @@
             padding: 0px 10px;
         }
 
+        .ui.container{
+            width: 95%;
+        }
+
         .modal {
             display: none;
             height: 100%;
@@ -40,7 +44,8 @@
             height: 50px;
         }
         .modal__footer {
-            height: 100px;
+            height: 50px;
+            left: 10px;
         }
         .modal__content,
         .modal__footer {
@@ -48,7 +53,7 @@
             width: 100%;
         }
         .modal__content {
-            bottom: 100px;
+            bottom: 50px;
             top: 50px;
             overflow-y: auto;
         }
@@ -58,6 +63,13 @@
 
         .subject{
             font-size: 24px;
+            position: relative;
+            top: 50%;
+            left: 10px;
+            transform: translateY(-50%);
+        }
+
+        .actionButtons{
             position: relative;
             top: 50%;
             transform: translateY(-50%);
@@ -85,20 +97,23 @@
     <div>
         <p><a href="index.html">Home</a></p>
     </div>
+    <div class="modal">
+        <div class="modal__header">
+            <div class="subject"></div>
+        </div>
+        <div class="modal__content">
+            <iframe id="email-body" style="width:100%;height:100%"></iframe>
+        </div>
+        <div class="modal__footer">
+            <div class="actionButtons">
+                <button class="ui negative button" onclick="deleteMessage(this)">Delete</button>
+                <button class="ui button" id="deleteMessage" onclick="closeModal()">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
 
-<div class="modal">
-    <div class="modal__header">
-        <div class="subject"></div>
-    </div>
-    <div class="modal__content">
-        <iframe id="email-body" style="width:100%;height:100%"></iframe>
-    </div>
-    <div class="modal__footer">
-        <button class="negative ui button">Delete</button>
-        <button class="ui button" onclick="closeModal()">Close</button>
-    </div>
-</div>
+
 </body>
 
 <script>
@@ -109,12 +124,20 @@ function openModal(content) {
     $('.modal').addClass('open');
     $('div.subject').text(content.innerHTML);
     $('iframe#email-body').attr('src', getApiBaseUrl("/body") + '?uid=' + content.id);
+    $('#deleteMessage').data('uid', content.id);
 }
 
 function closeModal() {
     $('.modal').removeClass('open');
     $('div.subject').text("");
     $('iframe#email-body').attr('src', "#");
+}
+
+function deleteMessage(content){
+    let uid = $('#deleteMessage').data('uid');
+    let deletePromise = buildLoadPromise("DELETE", "/message?uid=" + uid);
+    runDeletePromise(deletePromise);
+    closeModal();
 }
 </script>
 </html>

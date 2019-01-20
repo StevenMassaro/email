@@ -44,6 +44,10 @@ public class MessageService {
         return messageMapper.delete(messages);
     }
 
+    public long delete(long uid) {
+        return messageMapper.deleteById(uid);
+    }
+
     public void setReadIndicator(long messageId, boolean readInd) {
         messageMapper.setReadIndicator(messageId, readInd);
     }

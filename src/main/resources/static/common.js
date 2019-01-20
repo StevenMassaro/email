@@ -1,7 +1,10 @@
+let emails;
+
 function runCouponsPromise(couponsPromise){
     couponsPromise.then((successMessage) => {
+        emails = JSON.parse(successMessage);
         $('#coupons').DataTable({
-            data: JSON.parse(successMessage),
+            data: emails,
             "columns": [
                 {
                     "data": "dateReceived",
@@ -27,4 +30,10 @@ function runCouponsPromise(couponsPromise){
             "pageLength": 50
         });
     });
+}
+
+function runDeletePromise(deletePromise) {
+    deletePromise.then((successMessage) => {
+        console.log(successMessage);
+    })
 }

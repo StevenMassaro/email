@@ -7,9 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
-import javax.mail.search.ComparisonTerm;
-import javax.mail.search.ReceivedDateTerm;
-import javax.mail.search.SearchTerm;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,7 +24,7 @@ public class ImapService {
     public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword) throws MessagingException, IOException {
         Store store = getStore(hostname, port, username, decryptedPassword);
 
-        IMAPFolder inbox = openFolder(store, Folder.READ_ONLY);
+        IMAPFolder inbox = openInbox(store, Folder.READ_ONLY);
 
         javax.mail.Message messages[] = inbox.getMessages();
         List<Message> returnMessages = new ArrayList<>();
@@ -40,16 +37,32 @@ public class ImapService {
     }
 
     public void setReadIndicator(long messageUid, boolean readInd) throws MessagingException {
-        Message message = messageService.get(messageUid);
-        Account account = accountService.getDecrypted(message.getAccount().getId());
-        Store store = getStore(account.getDomain().getHostname(), account.getDomain().getPort(), account.getUsername(), account.getPassword());
+        Store store = getStore(messageUid);
 
-        IMAPFolder imapFolder = openFolder(store, Folder.READ_WRITE);
+        IMAPFolder imapFolder = openInbox(store, Folder.READ_WRITE);
 
         javax.mail.Message readMessage = imapFolder.getMessageByUID(messageUid);
         imapFolder.setFlags(new javax.mail.Message[]{readMessage}, new Flags(Flags.Flag.SEEN), readInd);
 
         store.close();
+    }
+
+    public void deleteMessage(long messageUid) throws MessagingException {
+        Store store = getStore(messageUid);
+
+        IMAPFolder inbox = openInbox(store, Folder.READ_WRITE);
+        IMAPFolder trash = openFolder(store, Folder.READ_WRITE, "Trash");
+
+        javax.mail.Message readMessage = inbox.getMessageByUID(messageUid);
+        inbox.moveMessages(new javax.mail.Message[]{readMessage}, trash);
+
+        store.close();
+    }
+
+    private Store getStore(long messageUid) throws MessagingException {
+        Message message = messageService.get(messageUid);
+        Account account = accountService.getDecrypted(message.getAccount().getId());
+        return getStore(account.getDomain().getHostname(), account.getDomain().getPort(), account.getUsername(), account.getPassword());
     }
 
     private Store getStore(String hostname, long port, String username, String decryptedPassword) throws MessagingException {
@@ -63,9 +76,13 @@ public class ImapService {
         return store;
     }
 
-    private IMAPFolder openFolder(Store store, int mode) throws MessagingException {
-        IMAPFolder imapFolder = (IMAPFolder) store.getFolder("Inbox");
+    private IMAPFolder openFolder(Store store, int mode, String folder) throws MessagingException {
+        IMAPFolder imapFolder = (IMAPFolder) store.getFolder(folder);
         imapFolder.open(mode);
         return imapFolder;
+    }
+
+    private IMAPFolder openInbox(Store store, int mode) throws MessagingException {
+        return openFolder(store, mode, "Inbox");
     }
 }
