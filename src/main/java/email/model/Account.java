@@ -4,7 +4,9 @@ import java.util.Date;
 
 public class Account {
     private long id;
-    private Domain domain;
+    private String hostname;
+    private long port;
+    private String authentication;
     private String inboxName;
     private String username;
     private String password;
@@ -18,12 +20,28 @@ public class Account {
         this.id = id;
     }
 
-    public Domain getDomain() {
-        return domain;
+    public String getHostname() {
+        return hostname;
     }
 
-    public void setDomain(Domain domain) {
-        this.domain = domain;
+    public void setHostname(String hostname) {
+        this.hostname = hostname;
+    }
+
+    public long getPort() {
+        return port;
+    }
+
+    public void setPort(long port) {
+        this.port = port;
+    }
+
+    public String getAuthentication() {
+        return authentication;
+    }
+
+    public void setAuthentication(String authentication) {
+        this.authentication = authentication;
     }
 
     public String getInboxName() {
@@ -52,5 +70,9 @@ public class Account {
 
     public Date getDateCreated() {
         return dateCreated;
+    }
+
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
     }
 }

@@ -35,7 +35,7 @@ public class EmailSyncProcessor implements IProcessor {
     private ExecutionLogService executionLogService;
 
     @Override
-    @Scheduled(fixedDelay = 500 * 1000)
+    @Scheduled(fixedDelay = 15 * 60 * 1000)
     public void run() {
         logger.info(ExecStatusEnum.RULE_START.getMessage());
         executionLogService.insert(ExecStatusEnum.RULE_START);
@@ -46,7 +46,7 @@ public class EmailSyncProcessor implements IProcessor {
         for (Account account : accounts) {
             try {
                 String decryptedPassword = encryptionService.decrypt(account.getPassword());
-                List<Message> imapMessages = imapService.getInboxMessages(account.getDomain().getHostname(), account.getDomain().getPort(), account.getUsername(), decryptedPassword);
+                List<Message> imapMessages = imapService.getInboxMessages(account.getHostname(), account.getPort(), account.getUsername(), decryptedPassword);
                 List<Message> dbMessages = messageService.list(account.getId());
 
                 // first delete all messages from the local db that no longer exist on the imap server
