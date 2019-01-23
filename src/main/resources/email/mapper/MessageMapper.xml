@@ -31,7 +31,7 @@
 
     <select id="listAll" resultMap="messageResultMap">
         SELECT m.uid, m.accountid, m.subject, m.datereceived, m.readind, m.recipientid, m.fromid, m.datecreated, a.id,
-        a.domainid, a.inboxname, a.username, a.datecreated
+        a.hostname, a.authentication, a.port, a.inboxname, a.username, a.datecreated
         <include refid="fromMessageJoin"/>
     </select>
 

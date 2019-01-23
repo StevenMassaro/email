@@ -47,11 +47,23 @@ public class ImapService {
         store.close();
     }
 
-    public void deleteMessage(long messageUid) throws MessagingException {
+    public void deleteMessage(long messageUid) throws Exception {
         Store store = getStore(messageUid);
 
+        Message message = messageService.get(messageUid);
+        String hostname = message.getAccount().getHostname();
+
+        String trashFolderName;
+        if (hostname.contains("gmail")) {
+            trashFolderName = "[Gmail]/Trash";
+        } else if (hostname.contains("aol")) {
+            trashFolderName = "Trash";
+        } else {
+            throw new Exception("Unknown domain.");
+        }
+
         IMAPFolder inbox = openInbox(store, Folder.READ_WRITE);
-        IMAPFolder trash = openFolder(store, Folder.READ_WRITE, "Trash");
+        IMAPFolder trash = openFolder(store, Folder.READ_WRITE, trashFolderName);
 
         javax.mail.Message readMessage = inbox.getMessageByUID(messageUid);
         inbox.moveMessages(new javax.mail.Message[]{readMessage}, trash);
@@ -62,7 +74,7 @@ public class ImapService {
     private Store getStore(long messageUid) throws MessagingException {
         Message message = messageService.get(messageUid);
         Account account = accountService.getDecrypted(message.getAccount().getId());
-        return getStore(account.getDomain().getHostname(), account.getDomain().getPort(), account.getUsername(), account.getPassword());
+        return getStore(account.getHostname(), account.getPort(), account.getUsername(), account.getPassword());
     }
 
     private Store getStore(String hostname, long port, String username, String decryptedPassword) throws MessagingException {

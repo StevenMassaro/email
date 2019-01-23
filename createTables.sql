@@ -6,19 +6,12 @@ create schema email;
 drop table if exists email.account;
 create table email.account (
 	id serial not null,
-	domainid int not null,
+    hostname varchar(1000) not null,
+	port int not null,
+	authentication varchar(1000) not null,
 	inboxName varchar(100) not null,
 	username varchar(1000) not null,
 	password varchar(1000) not null,
-	dateCreated timestamp DEFAULT now()
-);
-
-drop table if exists email.domain;
-create table email.domain (
-	id serial not null,
-	hostname varchar(1000) not null,
-	port int not null,
-	authentication varchar(1000) not null,
 	dateCreated timestamp DEFAULT now()
 );
 

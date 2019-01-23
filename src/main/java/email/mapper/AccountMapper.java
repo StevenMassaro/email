@@ -14,6 +14,6 @@ public interface AccountMapper {
 
     List<Account> list();
 
-    void insert(@Param("domainId") long domainId, @Param("inboxName") String inboxName,
-                @Param("username") String username, @Param("password") String password);
+    void insert(@Param("hostname") String hostname, @Param("port") long port, @Param("authentication") String authentication,
+                @Param("inboxName") String inboxName, @Param("username") String username, @Param("password") String password);
 }
