@@ -1,15 +1,14 @@
 .idea/*
 *.cmd
 uploads/*
-uploads/*
 *.config
 footer.forStevenSite
 _creds.php
 cacert.pem
 .user.ini
-react/node_modules/*
-react/node/*
-react/build/*
+src/frontend/node_modules/*
+src/frontend/node/*
+src/frontend/build/*
 src/main/resources/static/*
 *.iml
 
