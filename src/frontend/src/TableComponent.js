@@ -3,7 +3,7 @@ import ReactTable from "react-table";
 import ReactModal from "react-modal";
 import "react-table/react-table.css";
 import 'semantic-ui-css/semantic.min.css';
-import {Button} from "semantic-ui-react";
+import {Button, Grid} from "semantic-ui-react";
 import {toast, ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.min.css';
 
@@ -127,6 +127,14 @@ class TableComponent extends Component {
                         "flex-direction": "column",
                         "overflow": "hidden"
                     }}>
+                        <Grid>
+                            <Grid.Column width={13}>
+                                <b>{currentEmail.subject}</b>
+                            </Grid.Column>
+                            <Grid.Column width={3} style={{"text-align": "right"}}>
+                                {currentEmail.dateReceived}
+                            </Grid.Column>
+                        </Grid>
                         <iframe src={this.getBodyUrl(currentEmail.uid)}
                                 style={{"flex-grow": "1", "border": "none"}}
                         />
@@ -134,7 +142,7 @@ class TableComponent extends Component {
                             <div style={{"float": "left", "width": "50%"}}>
                                 <Button onClick={this.closeModal}>Close</Button>
                             </div>
-                            <div style={{"float": "right", "width": "50%"}}>
+                            <div style={{"float": "right", "width": "50%", "text-align": "right"}}>
                                 <Button negative onClick={() => this.deleteMessage(currentEmail)}>Delete</Button>
                             </div>
                         </div>
