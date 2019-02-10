@@ -141,9 +141,16 @@
                                 </goals>
                                 <configuration>
                                     <tasks>
-                                        <delete>
-                                            <fileset dir="${basedir}/src/main/resources/static" includes="**/*.*"/>
-                                        </delete>
+                                        <target name="check">
+                                            <condition property="deldir">
+                                                <available file="${basedir}/src/main/resources/static" type="dir"/>
+                                            </condition>
+                                        </target>
+                                        <target name="deldir" depends="check" if="deldir">
+                                            <delete>
+                                                <fileset dir="${basedir}/src/main/resources/static" includes="**/*.*"/>
+                                            </delete>
+                                        </target>
                                     </tasks>
                                 </configuration>
                             </execution>
