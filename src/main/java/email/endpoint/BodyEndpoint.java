@@ -1,5 +1,7 @@
 package email.endpoint;
 
+import email.model.BodyPart;
+import email.model.Message;
 import email.processor.ImapReadIndicatorProcessor;
 import email.service.ImapService;
 import email.service.MessageService;
@@ -9,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.mail.MessagingException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -31,6 +32,7 @@ public class BodyEndpoint {
         executor.shutdown();
 
         messageService.setReadIndicator(uid, true);
-        return messageService.get(uid).getBody();
+        // todo, specify the type of body that is desired here, rather than just assuming a particular type is requested
+        return messageService.get(uid).getBodyParts().get(0).getContentAsString();
     }
 }

@@ -17,6 +17,9 @@ public class MessageService {
     private ImapService imapService;
 
     @Autowired
+    private BodyPartService bodyPartService;
+
+    @Autowired
     private MessageMapper messageMapper;
 
     public Message get(long uid) {
@@ -24,8 +27,9 @@ public class MessageService {
     }
 
     public void insertMessage(Message message) {
-        messageMapper.insertMessage(message.getUid(), message.getAccount().getId(), message.getSubject(), message.getDateReceived(),
-                message.isReadInd(), 1L, 1L, message.getBody());
+        long messageId = messageMapper.insertMessage(message.getUid(), message.getAccount().getId(), message.getSubject(), message.getDateReceived(),
+                message.isReadInd(), 1L, 1L);
+        bodyPartService.insert(messageId, message.getBodyParts());
     }
 
     public long count(long accountId, String subject, Date dateReceived){

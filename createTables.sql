@@ -17,6 +17,7 @@ create table email.account (
 
 drop table if exists email.message;
 create table email.message (
+	id serial,
 	uid int not null,
 	accountid int not null,
 	subject varchar(5000) null,
@@ -24,9 +25,16 @@ create table email.message (
 	readInd boolean not null,
 	recipientid int null,
 	fromid int null,
-	body text null,
 	dateCreated timestamp default now(),
 	primary key (accountid, subject, dateReceived)
+);
+
+drop table if exists email.bodyPart;
+create table email.bodyPart (
+	messageid int not null,
+	seqnum int not null,
+	contenttype varchar(1000) not null,
+	content bytea
 );
 
 drop table if exists email.executionlog;

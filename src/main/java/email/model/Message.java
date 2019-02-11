@@ -6,11 +6,13 @@ import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class Message {
 
+    private long id;
     private long uid;
     private Account account;
     private String subject;
@@ -19,7 +21,7 @@ public class Message {
     private Date dateCreated;
     private List<Address> recipient;
     private List<Address> from;
-    private String body;
+    private List<BodyPart> bodyParts = new ArrayList<>();
     private boolean readInd;
 
     public Message() {
@@ -29,7 +31,7 @@ public class Message {
     public Message(javax.mail.Message message, long uid) throws MessagingException, IOException {
         this.subject = message.getSubject();
         this.dateReceived = message.getReceivedDate();
-        setBody(message);
+        setBodyParts(message);
         this.readInd = determineReadInd(message);
         this.uid = uid;
     }
@@ -61,6 +63,14 @@ public class Message {
         Message message1 = (Message) message;
         return this.subject.equals(message1.getSubject()) &&
                 this.dateReceived.equals(message1.getDateReceived());
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 
     public long getUid() {
@@ -119,38 +129,35 @@ public class Message {
         this.from = from;
     }
 
-    public String getBody() {
-        return body;
+    public List<BodyPart> getBodyParts() {
+        return bodyParts;
     }
 
-    public void setBody(String body) {
-        this.body = body;
+    public void setBodyParts(List<BodyPart> bodyParts) {
+        this.bodyParts = bodyParts;
     }
 
-    public void setBody(javax.mail.Message message) throws IOException, MessagingException {
-        String bodyString = null;
-        try {
-            Multipart mp = (Multipart) message.getContent();
-            // todo this index might be specific to a single email or to AOL, not sure yet
-            Object bodyPart = null;
-            try {
-                bodyPart = mp.getBodyPart(1).getContent();
-            } catch (ArrayIndexOutOfBoundsException e) {
+    public void setBodyParts(javax.mail.Message message) throws IOException, MessagingException {
+        Object content = message.getContent();
+        String contentType = message.getContentType();
+        if (content instanceof Multipart) {
+            Multipart mp = (Multipart) content;
+
+            boolean moreBodyParts = true;
+            int index = 0;
+            while (moreBodyParts) {
                 try {
-                    bodyPart = mp.getBodyPart(0).getContent();
-                } catch (ArrayIndexOutOfBoundsException e1) {
-                    bodyPart = null;
+                    bodyParts.add(new BodyPart(index, mp.getBodyPart(index)));
+                    index++;
+                } catch (IndexOutOfBoundsException e) {
+                    moreBodyParts = false;
                 }
             }
-            if (bodyPart != null) {
-                bodyString = bodyPart.toString();
-            }
-//            System.out.println("GOOD: " + message.getContentType());
-        } catch (ClassCastException e) {
-//            System.out.println("BAD: " + message.getContentType());
-            bodyString = (String) message.getContent();
+        } else if (content instanceof String) {
+            bodyParts.add(new BodyPart(0, contentType, ((String) content).getBytes()));
         }
-        this.body = bodyString;
+
+
     }
 
     public boolean isReadInd() {
