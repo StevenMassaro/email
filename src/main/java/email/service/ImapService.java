@@ -3,6 +3,9 @@ package email.service;
 import com.sun.mail.imap.IMAPFolder;
 import email.model.Account;
 import email.model.Message;
+import email.processor.EmailSyncProcessor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +17,8 @@ import java.util.Properties;
 
 @Service
 public class ImapService {
+
+    private Logger logger = LoggerFactory.getLogger(ImapService.class);
 
     @Autowired
     private MessageService messageService;
@@ -28,8 +33,10 @@ public class ImapService {
 
         javax.mail.Message messages[] = inbox.getMessages();
         List<Message> returnMessages = new ArrayList<>();
-        for(javax.mail.Message message : messages){
+        for (int i = 0; i < messages.length; i++) {
+            javax.mail.Message message = messages[i];
             long uid = inbox.getUID(message);
+            logger.debug(String.format("Processing email %s of %s for %s", i, messages.length, username));
             returnMessages.add(new Message(message, uid));
         }
         store.close();

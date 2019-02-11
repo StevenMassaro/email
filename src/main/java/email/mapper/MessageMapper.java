@@ -22,14 +22,13 @@ public interface MessageMapper {
 //            "#{accountId}, #{subject}, #{dateReceived}, #{child}, #{fromId}, #{bodyId}, #{dateCreated}"+
 //            "</foreach>)"
 //    )
-    void insertMessage(@Param("uid") long uid,
+    long insertMessage(@Param("uid") long uid,
                        @Param("accountId") long accountId,
                        @Param("subject") String subject,
                        @Param("dateReceived") Date dateReceived,
                        @Param("readInd") boolean readInd,
                        @Param("recipientId") long recipientId,
-                       @Param("fromId") long fromId,
-                       @Param("body") String body);
+                       @Param("fromId") long fromId);
 
     long count(@Param("accountId") long accountId, @Param("subject") String subject, @Param("dateReceived") Date dateReceived);
 
