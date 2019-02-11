@@ -7,6 +7,7 @@ import email.processor.EmailSyncProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
@@ -43,6 +44,7 @@ public class ImapService {
         return returnMessages;
     }
 
+    @Async
     public void setReadIndicator(long messageUid, boolean readInd) throws MessagingException {
         Store store = getStore(messageUid);
 

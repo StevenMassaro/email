@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.mail.MessagingException;
 import java.util.Date;
 import java.util.List;
 
@@ -52,7 +53,8 @@ public class MessageService {
         return messageMapper.deleteById(uid);
     }
 
-    public void setReadIndicator(long messageId, boolean readInd) {
+    public void setReadIndicator(long messageId, boolean readInd) throws MessagingException {
+        imapService.setReadIndicator(messageId, readInd);
         messageMapper.setReadIndicator(messageId, readInd);
     }
 

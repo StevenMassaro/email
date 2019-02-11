@@ -4,7 +4,8 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="email.mapper.MessageMapper">
     <select id="get" resultMap="messageResultMap">
-        SELECT *
+        SELECT
+        <include refid="columns"/>
         <include refid="fromMessageJoin"/>
         WHERE uid = #{uid}
     </select>
@@ -31,13 +32,14 @@
     </update>
 
     <select id="listAll" resultMap="messageResultMap">
-        SELECT m.uid, m.accountid, m.subject, m.datereceived, m.readind, m.recipientid, m.fromid, m.datecreated, a.id,
-        a.hostname, a.authentication, a.port, a.inboxname, a.username, a.datecreated
+        SELECT
+        <include refid="columnsNoPassword"/>
         <include refid="fromMessageJoin"/>
     </select>
 
     <select id="list" resultMap="messageResultMap">
-        SELECT *
+        SELECT
+        <include refid="columns"/>
         <include refid="fromMessageJoin"/>
         WHERE m.accountid = #{accountId}
     </select>
@@ -46,6 +48,33 @@
         FROM email.message m
         INNER JOIN email.account a ON m.accountid = a.id
         JOIN email.bodypart b on m.id = b.messageId
+    </sql>
+
+    <sql id="columnsNoPassword">
+        m.id                mid,
+        m.uid,
+        m.accountid,
+        m.subject,
+        m.datereceived,
+        m.readind,
+        m.recipientid,
+        m.fromid,
+        m.datecreated       mdatecreated,
+        a.id,
+        a.hostname,
+        a.authentication,
+        a.port,
+        a.inboxname,
+        a.username,
+        a.datecreated
+    </sql>
+
+    <sql id="columns">
+        a.password,
+        b.seqNum,
+        b.contentType,
+        b.content,
+        <include refid="columnsNoPassword"/>
     </sql>
 
     <delete id="delete">
@@ -60,10 +89,11 @@
     </delete>
 
     <resultMap id="messageResultMap" type="email.model.Message">
-        <id property="uid" column="uid"/>
+        <id property="id" column="mid"/>
+        <result property="uid" column="uid"/>
         <result property="subject" column="subject"/>
         <result property="dateReceived" column="datereceived"/>
-        <result property="dateCreated" column="dateCreated"/>
+        <result property="dateCreated" column="mdateCreated"/>
         <result property="readInd" column="readInd"/>
         <association property="bodyParts" resultMap="email.mapper.BodyPartMapper.bodyResultMap"/>
         <association property="account" resultMap="email.mapper.AccountMapper.accountResultMap"/>
