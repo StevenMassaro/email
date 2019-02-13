@@ -4,11 +4,20 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="email.mapper.MessageMapper">
     <select id="get" resultMap="messageResultMap">
+        <include refid="getSql"/>
+        WHERE m.id = #{id}
+    </select>
+
+    <select id="getByUid" resultMap="messageResultMap">
+        <include refid="getSql"/>
+        WHERE uid = #{uid}
+    </select>
+
+    <sql id="getSql">
         SELECT
         <include refid="columns"/>
         <include refid="fromMessageJoin"/>
-        WHERE uid = #{uid}
-    </select>
+    </sql>
 
     <select id="insertMessage" resultType="long">
         INSERT INTO email.message (uid, accountid, subject, datereceived, readind, recipientid, fromid)
@@ -28,7 +37,7 @@
     <update id="setReadIndicator">
         UPDATE email.message
         SET readInd = #{readInd}
-        WHERE uid = #{uid}
+        WHERE id = #{id}
     </update>
 
     <select id="listAll" resultMap="messageResultMap">
@@ -77,15 +86,8 @@
         <include refid="columnsNoPassword"/>
     </sql>
 
-    <delete id="delete">
-        DELETE FROM email.message WHERE uid IN
-        <foreach collection="messages" item="message" separator="," open="(" close=")">
-            #{message.uid}
-        </foreach>
-    </delete>
-
     <delete id="deleteById">
-        DELETE FROM email.message WHERE uid = #{uid}
+        DELETE FROM email.message WHERE id = #{id}
     </delete>
 
     <resultMap id="messageResultMap" type="email.model.Message">

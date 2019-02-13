@@ -23,8 +23,13 @@ public class MessageService {
     @Autowired
     private MessageMapper messageMapper;
 
-    public Message get(long uid) {
-        return messageMapper.get(uid);
+    @Deprecated
+    public Message getByUid(long uid) {
+        return messageMapper.getByUid(uid);
+    }
+
+    public Message get(long id) {
+        return messageMapper.get(id);
     }
 
     public void insertMessage(Message message) {
@@ -45,17 +50,14 @@ public class MessageService {
         return messageMapper.list(accountId);
     }
 
-    public long delete(List<Message> messages) {
-        return messageMapper.delete(messages);
+    public long delete(long id) {
+        bodyPartService.delete(id);
+        return messageMapper.deleteById(id);
     }
 
-    public long delete(long uid) {
-        return messageMapper.deleteById(uid);
-    }
-
-    public void setReadIndicator(long messageId, boolean readInd) throws MessagingException {
-        imapService.setReadIndicator(messageId, readInd);
-        messageMapper.setReadIndicator(messageId, readInd);
+    public void setReadIndicator(long id, boolean readInd) throws MessagingException {
+        imapService.setReadIndicator(id, readInd);
+        messageMapper.setReadIndicator(id, readInd);
     }
 
     public static Message findMatch(List<Message> messages, Message key) {

@@ -1,5 +1,6 @@
 package email.endpoint;
 
+import email.model.Message;
 import email.service.ImapService;
 import email.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,9 +24,10 @@ public class BodyEndpoint {
     private ImapService imapService;
 
     @GetMapping()
-    public String getBody(@RequestParam("uid") long uid) throws MessagingException {
-        messageService.setReadIndicator(uid, true);
+    public String getBody(@RequestParam("id") long id) throws MessagingException {
+        Message message = messageService.get(id);
+        messageService.setReadIndicator(message.getId(), true);
         // todo, specify the type of body that is desired here, rather than just assuming a particular type is requested
-        return messageService.get(uid).getBodyParts().get(0).getContentAsString();
+        return message.getBodyParts().get(0).getContentAsString();
     }
 }
