@@ -63,7 +63,8 @@ class TableComponent extends Component {
         return url;
     };
 
-    closeModal = () => {
+    closeModal = (currentEmail) => {
+        this.markMessageReadIndInState(currentEmail.id, true);
         this.setState({
             showReadModal: false
         });
@@ -97,6 +98,19 @@ class TableComponent extends Component {
         });
         this.setState({
             emails: emails
+        });
+    };
+
+    markMessageReadIndInState = (id, readInd) => {
+        let emails = Object.assign([], this.state.emails);
+        let adjustedEmails = emails.map(function (email) {
+            if (email.id === id) {
+                email.readInd = readInd;
+            }
+            return email;
+        });
+        this.setState({
+            emails: adjustedEmails
         });
     };
 
@@ -140,7 +154,7 @@ class TableComponent extends Component {
                         />
                         <div style={{"width": "100%"}}>
                             <div style={{"float": "left", "width": "50%"}}>
-                                <Button onClick={this.closeModal}>Close</Button>
+                                <Button onClick={() => this.closeModal(currentEmail)}>Close</Button>
                             </div>
                             <div style={{"float": "right", "width": "50%", "text-align": "right"}}>
                                 <Button negative onClick={() => this.deleteMessage(currentEmail)}>Delete</Button>
@@ -168,7 +182,11 @@ class TableComponent extends Component {
                             accessor: "subject",
                             Cell: row => {
                                 return (
-                                    <a href="#" onClick={(e) => this.onSubjectClick(e, row.original)}>{row.value}</a>
+                                    <a href="#"
+                                       onClick={(e) => this.onSubjectClick(e, row.original)}>
+                                        {row.original.readInd ? row.value :
+                                            <span style={{"font-weight": "bold"}}>{row.value}</span>}
+                                    </a>
                                 );
 
                             }
