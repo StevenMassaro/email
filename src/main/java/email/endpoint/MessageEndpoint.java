@@ -27,8 +27,8 @@ public class MessageEndpoint {
     }
 
     @DeleteMapping()
-    public void deleteMessage(@RequestParam("uid") long uid) throws Exception {
-        imapService.deleteMessage(uid);
-        messageService.delete(uid);
+    public void deleteMessage(@RequestParam("id") long id) throws Exception {
+        imapService.deleteMessage(id);
+        messageService.delete(id);
     }
 }

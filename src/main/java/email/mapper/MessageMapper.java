@@ -9,7 +9,9 @@ import java.util.List;
 @Mapper
 public interface MessageMapper {
 
-    Message get(@Param("uid") long uid);
+    Message getByUid(@Param("uid") long uid);
+
+    Message get(@Param("id") long id);
 
     // I think this is right but it probably should be in an xml file
 //    @Insert("INSERT INTO " + schema + "(accountid, subject, datereceived, recipientid, fromid, bodyid, datecreated) VALUES(" +
@@ -36,9 +38,7 @@ public interface MessageMapper {
 
     List<Message> list(@Param("accountId") long accountId);
 
-    long delete(@Param("messages") List<Message> messages);
+    long deleteById(@Param("id") long id);
 
-    long deleteById(@Param("uid") long uid);
-
-    void setReadIndicator(@Param("uid") long uid, @Param("readInd") boolean readInd);
+    void setReadIndicator(@Param("id") long id, @Param("readInd") boolean readInd);
 }

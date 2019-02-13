@@ -54,7 +54,7 @@ public class EmailSyncProcessor implements IProcessor {
                 for (Message dbMessage : dbMessages) {
                     Message match = MessageService.findMatch(imapMessages, dbMessage);
                     if (match == null) {
-                        messageService.delete(Collections.singletonList(dbMessage));
+                        messageService.delete(dbMessage.getId());
                         deletedCount++;
                     }
                 }
@@ -74,14 +74,14 @@ public class EmailSyncProcessor implements IProcessor {
                             insertedCount++;
                         } catch (Exception e) {
                             messageFailure = true;
-                            logger.error(String.format("Failed to insert new message %s while processing account %s.", imapMessage.getUid(), account.getUsername()), e);
+                            logger.error(String.format("Failed to insert new message with UID %s while processing account %s.", imapMessage.getUid(), account.getUsername()), e);
                         }
                     } else {
                         // if the message has a different read indicator in the database than IMAP
                         if (imapMessage.isReadInd() != match.isReadInd()) {
-                            messageService.setReadIndicator(match.getUid(), imapMessage.isReadInd());
-                            logger.debug(String.format("Changed read indicator for email %s to %s.",
-                                    match.getUid(), imapMessage.isReadInd() ? "read" : "unread"));
+                            messageService.setReadIndicator(match.getId(), imapMessage.isReadInd());
+                            logger.debug(String.format("Changed read indicator for email ID %s to %s.",
+                                    match.getId(), imapMessage.isReadInd() ? "read" : "unread"));
                             changedReadIndCount++;
                         }
                     }

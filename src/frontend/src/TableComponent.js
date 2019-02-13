@@ -51,15 +51,16 @@ class TableComponent extends Component {
             );
     };
 
-    getBodyUrl = (messageUid) => {
+    getBodyUrl = (id) => {
         let host = window.location.host;
         let url = "";
         if (host.includes("localhost:3000")) {
-            url = 'http://localhost:8080/body?uid='
+            url = 'http://localhost:8080'
         } else {
-            url += './body?uid=';
+            url += '.';
         }
-        url += messageUid;
+        url += "/body?id=";
+        url += id;
         return url;
     };
 
@@ -71,9 +72,9 @@ class TableComponent extends Component {
     };
 
     deleteMessage = (currentEmail) => {
-        this.closeModal();
-        this.removeMessageFromState(currentEmail.uid);
-        fetch("./message?uid=" + currentEmail.uid, {method: "DELETE"})
+        this.closeModal(currentEmail);
+        this.removeMessageFromState(currentEmail.id);
+        fetch("./message?id=" + currentEmail.id, {method: "DELETE"})
             .then((response) => {
                     if (!response.ok) {
                         toast.error("Failed to delete '" + currentEmail.subject + "' with error '" + response.statusText + "', readding to list.", {
@@ -91,10 +92,10 @@ class TableComponent extends Component {
             )
     };
 
-    removeMessageFromState = (uid) => {
+    removeMessageFromState = (id) => {
         let emails = Object.assign([], this.state.emails);
         emails = emails.filter(function (email) {
-            return email.uid !== uid;
+            return email.id !== id;
         });
         this.setState({
             emails: emails
@@ -149,7 +150,7 @@ class TableComponent extends Component {
                                 {currentEmail.dateReceived}
                             </Grid.Column>
                         </Grid>
-                        <iframe src={this.getBodyUrl(currentEmail.uid)}
+                        <iframe src={this.getBodyUrl(currentEmail.id)}
                                 style={{"flex-grow": "1", "border": "none"}}
                         />
                         <div style={{"width": "100%"}}>

@@ -23,4 +23,8 @@ public class BodyPartService {
             bodyPartMapper.insert(messageId, seqNum, bodyPart.getContentType(), bodyPart.getContent());
         }
     }
+
+    public void delete(long messageId) {
+        bodyPartMapper.delete(messageId);
+    }
 }

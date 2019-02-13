@@ -8,6 +8,11 @@
         VALUES(#{messageId}, #{seqNum}, #{contentType}, #{content})
     </insert>
 
+    <delete id="delete">
+        DELETE FROM email.bodyPart
+        WHERE messageId = #{messageId}
+    </delete>
+
     <resultMap id="bodyResultMap" type="email.model.BodyPart">
         <result property="seqNum" column="seqNum"/>
         <result property="contentType" column="contentType"/>

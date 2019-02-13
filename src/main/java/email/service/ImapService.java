@@ -45,21 +45,22 @@ public class ImapService {
     }
 
     @Async
-    public void setReadIndicator(long messageUid, boolean readInd) throws MessagingException {
-        Store store = getStore(messageUid);
+    public void setReadIndicator(long id, boolean readInd) throws MessagingException {
+        Message message = messageService.get(id);
+        Store store = getStore(message);
 
         IMAPFolder imapFolder = openInbox(store, Folder.READ_WRITE);
 
-        javax.mail.Message readMessage = imapFolder.getMessageByUID(messageUid);
+        javax.mail.Message readMessage = imapFolder.getMessageByUID(message.getUid());
         imapFolder.setFlags(new javax.mail.Message[]{readMessage}, new Flags(Flags.Flag.SEEN), readInd);
 
         store.close();
     }
 
-    public void deleteMessage(long messageUid) throws Exception {
-        Store store = getStore(messageUid);
+    public void deleteMessage(long id) throws Exception {
+        Message message = messageService.get(id);
+        Store store = getStore(message);
 
-        Message message = messageService.get(messageUid);
         String hostname = message.getAccount().getHostname();
 
         String trashFolderName;
@@ -74,14 +75,13 @@ public class ImapService {
         IMAPFolder inbox = openInbox(store, Folder.READ_WRITE);
         IMAPFolder trash = openFolder(store, Folder.READ_WRITE, trashFolderName);
 
-        javax.mail.Message readMessage = inbox.getMessageByUID(messageUid);
+        javax.mail.Message readMessage = inbox.getMessageByUID(message.getUid());
         inbox.moveMessages(new javax.mail.Message[]{readMessage}, trash);
 
         store.close();
     }
 
-    private Store getStore(long messageUid) throws MessagingException {
-        Message message = messageService.get(messageUid);
+    private Store getStore(Message message) throws MessagingException {
         Account account = accountService.getDecrypted(message.getAccount().getId());
         return getStore(account.getHostname(), account.getPort(), account.getUsername(), account.getPassword());
     }
