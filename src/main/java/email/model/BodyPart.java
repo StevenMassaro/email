@@ -1,6 +1,7 @@
 package email.model;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.mail.MessagingException;
 import java.io.IOException;
@@ -24,7 +25,15 @@ public class BodyPart {
     public BodyPart(long seqNum, javax.mail.BodyPart bodyPart) throws MessagingException, IOException {
         this.seqNum = seqNum;
         this.contentType = bodyPart.getContentType();
-        if (contentType.contains("text/html") || contentType.contains("text/plain") || contentType.contains("alternative")) {
+
+        boolean stringContentType = false;
+        for (ContentTypeEnum contentTypeEnum : ContentTypeEnum.values()) {
+            if (StringUtils.containsIgnoreCase(contentType, contentTypeEnum.getImapContentType())) {
+                stringContentType = true;
+            }
+        }
+
+        if (stringContentType) {
             String x = bodyPart.getContent().toString();
             this.content = x.getBytes();
         } else {
