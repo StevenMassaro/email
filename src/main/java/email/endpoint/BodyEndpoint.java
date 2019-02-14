@@ -1,5 +1,7 @@
 package email.endpoint;
 
+import email.model.BodyPart;
+import email.model.ContentTypeEnum;
 import email.model.Message;
 import email.service.ImapService;
 import email.service.MessageService;
@@ -10,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.mail.MessagingException;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -27,7 +31,17 @@ public class BodyEndpoint {
     public String getBody(@RequestParam("id") long id) throws MessagingException {
         Message message = messageService.get(id);
         messageService.setReadIndicator(message.getId(), true);
-        // todo, specify the type of body that is desired here, rather than just assuming a particular type is requested
-        return message.getBodyParts().get(0).getContentAsString();
+        List<BodyPart> bodyParts = message.getBodyParts();
+
+        // pick the most favorable body part
+        for (ContentTypeEnum contentTypeEnum : ContentTypeEnum.values()) {
+            for (BodyPart bodyPart : bodyParts) {
+                if (bodyPart.getContentType().contains(contentTypeEnum.getImapContentType())) {
+                    return bodyPart.getContentAsString();
+                }
+            }
+        }
+
+        return "";
     }
 }
