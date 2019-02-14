@@ -175,8 +175,18 @@ class TableComponent extends Component {
                         {
                             Header: "Account",
                             id: "account",
-                            maxWidth: 250,
+                            maxWidth: 200,
                             accessor: a => a.account.username
+                        },
+                        {
+                            Header: "From",
+                            id: "from",
+                            Cell: row => {
+                                return (
+                                    <span>{row.original.fromPersonal} <span style={row.original.fromPersonal ? {"font-style":"italic"}:{}}>{row.original.fromAddress}</span></span>
+                                );
+                            },
+                            maxWidth: 250
                         },
                         {
                             Header: "Subject",
