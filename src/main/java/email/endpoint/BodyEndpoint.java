@@ -5,6 +5,7 @@ import email.model.ContentTypeEnum;
 import email.model.Message;
 import email.service.ImapService;
 import email.service.MessageService;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,7 +37,7 @@ public class BodyEndpoint {
         // pick the most favorable body part
         for (ContentTypeEnum contentTypeEnum : ContentTypeEnum.values()) {
             for (BodyPart bodyPart : bodyParts) {
-                if (bodyPart.getContentType().contains(contentTypeEnum.getImapContentType())) {
+                if (StringUtils.containsIgnoreCase(bodyPart.getContentType(), contentTypeEnum.getImapContentType())) {
                     return bodyPart.getContentAsString();
                 }
             }
