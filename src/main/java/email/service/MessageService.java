@@ -34,7 +34,7 @@ public class MessageService {
 
     public void insertMessage(Message message) {
         long messageId = messageMapper.insertMessage(message.getUid(), message.getAccount().getId(), message.getSubject(), message.getDateReceived(),
-                message.isReadInd(), 1L, 1L);
+                message.isReadInd(), 1L, message.getFromAddress(), message.getFromPersonal());
         bodyPartService.insert(messageId, message.getBodyParts());
     }
 

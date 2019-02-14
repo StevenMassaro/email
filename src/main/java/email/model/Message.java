@@ -1,10 +1,12 @@
 package email.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.sun.mail.imap.IMAPMessage;
 
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
+import javax.mail.internet.InternetAddress;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -20,7 +22,8 @@ public class Message {
     private Date dateReceived;
     private Date dateCreated;
     private List<Address> recipient;
-    private List<Address> from;
+    private String fromAddress;
+    private String fromPersonal;
     private List<BodyPart> bodyParts = new ArrayList<>();
     private boolean readInd;
 
@@ -34,6 +37,9 @@ public class Message {
         setBodyParts(message);
         this.readInd = determineReadInd(message);
         this.uid = uid;
+        InternetAddress sender = (InternetAddress)((IMAPMessage) message).getSender();
+        this.fromAddress = sender.getAddress();
+        this.fromPersonal = sender.getPersonal();
     }
 
     private boolean determineReadInd(javax.mail.Message message) throws MessagingException {
@@ -121,12 +127,20 @@ public class Message {
         this.recipient = recipient;
     }
 
-    public List<Address> getFrom() {
-        return from;
+    public String getFromAddress() {
+        return fromAddress;
     }
 
-    public void setFrom(List<Address> from) {
-        this.from = from;
+    public void setFromAddress(String fromAddress) {
+        this.fromAddress = fromAddress;
+    }
+
+    public String getFromPersonal() {
+        return fromPersonal;
+    }
+
+    public void setFromPersonal(String fromPersonal) {
+        this.fromPersonal = fromPersonal;
     }
 
     public List<BodyPart> getBodyParts() {

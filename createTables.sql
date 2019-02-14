@@ -24,7 +24,8 @@ create table email.message (
 	dateReceived timestamp not null,
 	readInd boolean not null,
 	recipientid int null,
-	fromid int null,
+	fromAddress varchar(1000),
+	fromPersonal varchar(1000),
 	dateCreated timestamp default now(),
 	primary key (accountid, subject, dateReceived)
 );
