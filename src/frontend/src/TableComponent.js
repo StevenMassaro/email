@@ -170,7 +170,7 @@ class TableComponent extends Component {
                         {
                             Header: "Date received",
                             accessor: "dateReceived",
-                            maxWidth: 200
+                            maxWidth: 175
                         },
                         {
                             Header: "Account",
