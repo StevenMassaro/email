@@ -18,7 +18,6 @@ class TableComponent extends Component {
 
     onSubjectClick = (e, row) => {
         e.preventDefault();
-        toast.dismiss();
         this.setState({
             currentEmail: row,
             showReadModal: true
