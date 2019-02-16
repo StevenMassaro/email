@@ -77,13 +77,13 @@ class TableComponent extends Component {
             .then((response) => {
                     if (!response.ok) {
                         toast.error("Failed to delete '" + currentEmail.subject + "' with error '" + response.statusText + "', readding to list.", {
-                            position: toast.POSITION.BOTTOM_RIGHT
+                            position: toast.POSITION.TOP_RIGHT
                         });
                         this.addMessageToState(currentEmail);
                         console.warn(response);
                     } else {
                         toast.success("Message '" + currentEmail.subject + "' successfully deleted.", {
-                            position: toast.POSITION.BOTTOM_RIGHT
+                            position: toast.POSITION.TOP_RIGHT
                         });
                     }
                     return response;
