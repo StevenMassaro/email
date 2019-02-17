@@ -122,6 +122,21 @@ class TableComponent extends Component {
         });
     };
 
+    print = (email) => {
+        let w = window.open();
+        w.document.write(
+            '<span style="all:unset">' +
+            '<b>From: </b><span>' + (email.fromPersonal ? (email.fromPersonal + " ") : "") + '&#8249;' + email.fromAddress + '&#8250;</span><br>' +
+            '<b>Sent: </b>' + email.dateReceived + '<br>' +
+            '<b>To: </b>' + email.account.username + '<br>' +
+            '<b>Subject: </b>' + email.subject +
+            '<hr/><br></span>'
+        );
+        w.document.write(document.getElementById('emailContent').contentWindow.document.body.innerHTML);
+        w.print();
+        w.close();
+    };
+
     render() {
         const {error, isLoaded, emails, currentEmail} = this.state;
 
@@ -151,10 +166,12 @@ class TableComponent extends Component {
                         </Grid>
                         <iframe src={this.getBodyUrl(currentEmail.id)}
                                 style={{"flex-grow": "1", "border": "none"}}
+                                id="emailContent"
                         />
                         <div style={{"width": "100%"}}>
                             <div style={{"float": "left", "width": "50%"}}>
                                 <Button onClick={() => this.closeModal(currentEmail)}>Close</Button>
+                                <Button onClick={() => this.print(currentEmail)}>Print</Button>
                             </div>
                             <div style={{"float": "right", "width": "50%", "text-align": "right"}}>
                                 <Button negative onClick={() => this.deleteMessage(currentEmail)}>Delete</Button>
