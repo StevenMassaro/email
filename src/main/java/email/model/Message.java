@@ -32,14 +32,21 @@ public class Message {
     }
 
     public Message(javax.mail.Message message, long uid) throws MessagingException, IOException {
-        this.subject = message.getSubject();
-        this.dateReceived = message.getReceivedDate();
-        setBodyParts(message);
-        this.readInd = determineReadInd(message);
+        this(message, uid, false);
+    }
+
+    public Message(javax.mail.Message message, long uid, boolean alreadyExists) throws MessagingException, IOException {
+        if (!alreadyExists) {
+            this.subject = message.getSubject();
+            this.dateReceived = message.getReceivedDate();
+            setBodyParts(message);
+            InternetAddress sender = (InternetAddress) ((IMAPMessage) message).getSender();
+            this.fromAddress = sender.getAddress();
+            this.fromPersonal = sender.getPersonal();
+        }
+
         this.uid = uid;
-        InternetAddress sender = (InternetAddress)((IMAPMessage) message).getSender();
-        this.fromAddress = sender.getAddress();
-        this.fromPersonal = sender.getPersonal();
+        this.readInd = determineReadInd(message);
     }
 
     private boolean determineReadInd(javax.mail.Message message) throws MessagingException {
@@ -67,8 +74,7 @@ public class Message {
         }
 
         Message message1 = (Message) message;
-        return this.subject.equals(message1.getSubject()) &&
-                this.dateReceived.equals(message1.getDateReceived());
+        return this.uid == message1.getUid();
     }
 
     public long getId() {

@@ -46,8 +46,8 @@ public class EmailSyncProcessor implements IProcessor {
         for (Account account : accounts) {
             try {
                 String decryptedPassword = encryptionService.decrypt(account.getPassword());
-                List<Message> imapMessages = imapService.getInboxMessages(account.getHostname(), account.getPort(), account.getUsername(), decryptedPassword);
                 List<Message> dbMessages = messageService.list(account.getId());
+                List<Message> imapMessages = imapService.getInboxMessages(account.getHostname(), account.getPort(), account.getUsername(), decryptedPassword, dbMessages);
 
                 // first delete all messages from the local db that no longer exist on the imap server
                 long deletedCount = 0;
