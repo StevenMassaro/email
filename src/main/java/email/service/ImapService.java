@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import javax.mail.*;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -27,21 +28,33 @@ public class ImapService {
     @Autowired
     private AccountService accountService;
 
-    public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword) throws MessagingException, IOException {
+    public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword, List<Message> existingMessages) throws MessagingException, IOException {
         Store store = getStore(hostname, port, username, decryptedPassword);
 
         IMAPFolder inbox = openInbox(store, Folder.READ_ONLY);
 
-        javax.mail.Message messages[] = inbox.getMessages();
+        javax.mail.Message[] messages = inbox.getMessages();
         List<Message> returnMessages = new ArrayList<>();
         for (int i = 0; i < messages.length; i++) {
             javax.mail.Message message = messages[i];
             long uid = inbox.getUID(message);
+
+            boolean messageAlreadyDownloaded = false;
+            for (Message existingMessage : existingMessages) {
+                if (existingMessage.getUid() == uid) {
+                    messageAlreadyDownloaded = true;
+                }
+            }
+
             logger.debug(String.format("Processing email %s of %s for %s", i, messages.length, username));
-            returnMessages.add(new Message(message, uid));
+            returnMessages.add(new Message(message, uid, messageAlreadyDownloaded));
         }
         store.close();
         return returnMessages;
+    }
+
+    public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword) throws MessagingException, IOException {
+        return getInboxMessages(hostname, port, username, decryptedPassword, Collections.emptyList());
     }
 
     @Async
