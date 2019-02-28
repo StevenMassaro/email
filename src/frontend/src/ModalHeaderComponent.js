@@ -24,6 +24,9 @@ class ModalHeaderComponent extends Component {
             </div>
             {attachments &&
             <div className="flex-container attachments">
+                {attachments.length > 1 &&
+                <div><a href={'#'} className="bold">Download all</a></div>
+                }
                 {attachments.map((attachment) => {
                     return <div><a href={'#'} onClick={() => this.fetchAttachment(attachment)}>{attachment.name}</a>
                     </div>;

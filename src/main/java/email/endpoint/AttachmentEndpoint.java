@@ -28,4 +28,11 @@ public class AttachmentEndpoint {
         return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
                 "attachment; filename=\"" + attachment.getName() + "\"").body(file);
     }
+
+    public void getAll(long messageId) throws IOException, ZipException {
+        File temp = File.createTempFile("attachments", ".zip");
+        temp.deleteOnExit();
+        ZipFile zipFile = new ZipFile(temp);
+        zipFile.addFile();
+    }
 }
