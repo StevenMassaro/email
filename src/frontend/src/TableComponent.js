@@ -7,6 +7,7 @@ import {Button, Grid} from "semantic-ui-react";
 import {toast, ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.min.css';
 import ModalHeaderComponent from "./ModalHeaderComponent";
+import './paper-clip.svg';
 
 
 class TableComponent extends Component {
@@ -203,6 +204,19 @@ class TableComponent extends Component {
                                 );
                             },
                             maxWidth: 250
+                        },
+                        {
+                            Header: "",
+                            id: "attachment",
+                            Cell: row => {
+                                return <span>{row.original.attachments.length > 0 ?
+                                    <img width={15}
+                                         height={15}
+                                         src={'./paper-clip.svg'}
+                                         alt={"attachment"}/>
+                                    : ""}</span>;
+                            },
+                            maxWidth: 25
                         },
                         {
                             Header: "Subject",
