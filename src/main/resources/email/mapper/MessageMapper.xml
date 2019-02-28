@@ -56,8 +56,8 @@
     <sql id="fromMessageJoin">
         FROM email.message m
         INNER JOIN email.account a ON m.accountid = a.id
-        JOIN email.bodypart b on m.id = b.messageId
-        JOIN email.attachment at ON m.id = at.messageId
+        FULL JOIN email.bodypart b on m.id = b.messageId
+        FULL JOIN email.attachment at ON m.id = at.messageId
     </sql>
 
     <sql id="columnsNoPassword">
