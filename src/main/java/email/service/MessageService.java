@@ -23,6 +23,9 @@ public class MessageService {
     @Autowired
     private MessageMapper messageMapper;
 
+    @Autowired
+    private AttachmentService attachmentService;
+
     @Deprecated
     public Message getByUid(long uid) {
         return messageMapper.getByUid(uid);
@@ -36,6 +39,7 @@ public class MessageService {
         long messageId = messageMapper.insertMessage(message.getUid(), message.getAccount().getId(), message.getSubject(), message.getDateReceived(),
                 message.isReadInd(), 1L, message.getFromAddress(), message.getFromPersonal());
         bodyPartService.insert(messageId, message.getBodyParts());
+        attachmentService.insert(messageId, message.getAttachments());
     }
 
     public long count(long accountId, String subject, Date dateReceived){
@@ -52,6 +56,7 @@ public class MessageService {
 
     public long delete(long id) {
         bodyPartService.delete(id);
+        attachmentService.delete(id);
         return messageMapper.deleteById(id);
     }
 

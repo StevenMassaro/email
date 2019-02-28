@@ -28,7 +28,7 @@ public class ImapService {
     @Autowired
     private AccountService accountService;
 
-    public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword, List<Message> existingMessages) throws MessagingException, IOException {
+    public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword, List<Message> existingMessages) throws Exception {
         Store store = getStore(hostname, port, username, decryptedPassword);
 
         IMAPFolder inbox = openInbox(store, Folder.READ_ONLY);
@@ -47,13 +47,13 @@ public class ImapService {
             }
 
             logger.debug(String.format("Processing email %s of %s for %s", i, messages.length, username));
-            returnMessages.add(new Message(message, uid, messageAlreadyDownloaded));
+            returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username));
         }
         store.close();
         return returnMessages;
     }
 
-    public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword) throws MessagingException, IOException {
+    public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword) throws Exception {
         return getInboxMessages(hostname, port, username, decryptedPassword, Collections.emptyList());
     }
 

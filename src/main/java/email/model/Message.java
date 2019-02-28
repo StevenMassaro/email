@@ -2,15 +2,23 @@ package email.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sun.mail.imap.IMAPMessage;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.mail.util.MimeMessageParser;
 
+import javax.activation.DataSource;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import static email.model.ProviderEnum.AOL;
 
 public class Message {
 
@@ -26,20 +34,29 @@ public class Message {
     private String fromPersonal;
     private List<BodyPart> bodyParts = new ArrayList<>();
     private boolean readInd;
+    private List<Attachment> attachments = new ArrayList<>();
 
     public Message() {
 
     }
 
-    public Message(javax.mail.Message message, long uid) throws MessagingException, IOException {
-        this(message, uid, false);
-    }
-
-    public Message(javax.mail.Message message, long uid, boolean alreadyExists) throws MessagingException, IOException {
+    public Message(javax.mail.Message message, long uid, boolean alreadyExists, String username) throws Exception {
+        // only care to parse out the parts of the email for emails that are not in the database already
+        // parsing is an expensive IMAP operation
         if (!alreadyExists) {
+            // there is some bug in the MimeMessageParser where it cannot handle an AOL email with an attachment, not
+            // sure what's up, but these need to be handled differently
+            if (!StringUtils.containsIgnoreCase(username, AOL.toString())) {
+                MimeMessageParser mimeMessageParser = new MimeMessageParser((MimeMessage) message);
+                mimeMessageParser.parse();
+                setAttachments(mimeMessageParser);
+                setBodyParts(mimeMessageParser);
+            } else {
+                setBodyParts(message);
+            }
+
             this.subject = message.getSubject();
             this.dateReceived = message.getReceivedDate();
-            setBodyParts(message);
             InternetAddress sender = (InternetAddress) ((IMAPMessage) message).getSender();
             this.fromAddress = sender.getAddress();
             this.fromPersonal = sender.getPersonal();
@@ -176,8 +193,30 @@ public class Message {
         } else if (content instanceof String) {
             bodyParts.add(new BodyPart(0, contentType, ((String) content).getBytes()));
         }
+    }
 
+    public void setBodyParts(MimeMessageParser mimeMessageParser) {
+        String plain = mimeMessageParser.getPlainContent();
+        if (StringUtils.isNotEmpty(plain)) {
+            bodyParts.add(new BodyPart(0, ContentTypeEnum.TEXT_PLAIN.getImapContentType(), plain.getBytes(StandardCharsets.UTF_8)));
+        }
 
+        String html = mimeMessageParser.getHtmlContent();
+        if (StringUtils.isNotEmpty(html)) {
+            bodyParts.add(new BodyPart(1, ContentTypeEnum.TEXT_HTML.getImapContentType(), html.getBytes(StandardCharsets.UTF_8)));
+        }
+    }
+
+    public void setAttachments(MimeMessageParser mimeMessageParser) throws IOException {
+        List<DataSource> attachments = mimeMessageParser.getAttachmentList();
+        for (DataSource attachment : attachments) {
+            String name = attachment.getName();
+            String contentType = attachment.getContentType();
+            byte[] file = IOUtils.toByteArray(attachment.getInputStream());
+            if (StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(contentType) && file != null) {
+                this.attachments.add(new Attachment(attachment.getName(), attachment.getContentType(), IOUtils.toByteArray(attachment.getInputStream())));
+            }
+        }
     }
 
     public boolean isReadInd() {
@@ -186,5 +225,13 @@ public class Message {
 
     public void setReadInd(boolean readInd) {
         this.readInd = readInd;
+    }
+
+    public List<Attachment> getAttachments() {
+        return attachments;
+    }
+
+    public void setAttachments(List<Attachment> attachments) {
+        this.attachments = attachments;
     }
 }

@@ -38,6 +38,16 @@ create table email.bodyPart (
 	content bytea
 );
 
+drop table if exists email.attachment;
+create table email.attachment (
+  id serial,
+  messageId int not null,
+  seqNum int not null,
+  name varchar(1000) not null,
+  contentType varchar(1000) not null,
+  file bytea not null
+);
+
 drop table if exists email.executionlog;
 create table email.executionlog (
 	id serial not null,
