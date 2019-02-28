@@ -6,6 +6,7 @@ import 'semantic-ui-css/semantic.min.css';
 import {Button, Grid} from "semantic-ui-react";
 import {toast, ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.min.css';
+import ModalHeaderComponent from "./ModalHeaderComponent";
 
 
 class TableComponent extends Component {
@@ -156,14 +157,13 @@ class TableComponent extends Component {
                         "flex-direction": "column",
                         "overflow": "hidden"
                     }}>
-                        <Grid>
-                            <Grid.Column width={13}>
-                                <b>{currentEmail.subject}</b>
-                            </Grid.Column>
-                            <Grid.Column width={3} style={{"text-align": "right"}}>
-                                {currentEmail.dateReceived}
-                            </Grid.Column>
-                        </Grid>
+
+                        <ModalHeaderComponent
+                            email={currentEmail}
+                        />
+
+
+
                         <iframe src={this.getBodyUrl(currentEmail.id)}
                                 style={{"flex-grow": "1", "border": "none"}}
                                 id="emailContent"

@@ -88,7 +88,7 @@ public class EmailSyncProcessor implements IProcessor {
                 }
                 logger.debug(String.format("Inserted %s messages into local database while processing account %s.", insertedCount, account.getUsername()));
                 logger.debug(String.format("Changed read indicator for %s messages while processing account %s.", changedReadIndCount, account.getUsername()));
-            } catch (MessagingException | IOException e) {
+            } catch (Exception e) {
                 accountFailure = true;
                 logger.error(String.format("Exception while processing account %s.", account.getUsername()), e);
             }

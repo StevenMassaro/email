@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="email.mapper.AttachmentMapper">
+    <select id="get" resultMap="attachmentResultMap">
+        SELECT
+        <include refid="attachmentColumns"/>
+        FROM email.attachment at
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert">
+        INSERT INTO email.attachment (messageid, seqnum, "name", contenttype, file)
+        VALUES(#{messageId}, #{seqNum}, #{name}, #{contentType}, #{file});
+    </insert>
+
+    <delete id="delete">
+        DELETE FROM email.attachment
+        WHERE messageId = #{messageId}
+    </delete>
+
+    <sql id="attachmentColumnsLite">
+        at.id atid,
+        at.messageId atmessageId,
+        at.seqNum atseqNum,
+        at.name atname,
+        at.contentType atcontentType
+    </sql>
+
+    <sql id="attachmentColumns">
+        <include refid="attachmentColumnsLite"/>,
+        at.file atfile
+    </sql>
+
+    <resultMap id="attachmentResultMap" type="email.model.Attachment">
+        <id property="id" column="atid"/>
+        <result property="messageId" column="atmessageId"/>
+        <result property="seqNum" column="atseqNum"/>
+        <result property="name" column="atname"/>
+        <result property="contentType" column="atcontentType"/>
+        <result property="file" column="atfile"/>
+    </resultMap>
+</mapper>
