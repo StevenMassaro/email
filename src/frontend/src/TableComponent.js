@@ -222,11 +222,17 @@ class TableComponent extends Component {
                             Header: "Subject",
                             accessor: "subject",
                             Cell: row => {
+                                const originalSubject = row.value;
+                                const displaySubject = originalSubject ? originalSubject : "no subject";
                                 return (
                                     <a href="#"
                                        onClick={(e) => this.onSubjectClick(e, row.original)}>
-                                        {row.original.readInd ? row.value :
-                                            <span style={{"font-weight": "bold"}}>{row.value}</span>}
+                                        <span style={{
+                                            "font-weight": row.original.readInd ? "normal" : "bold",
+                                            "font-style": (originalSubject ? "normal" : "italic")
+                                        }}>
+                                            {displaySubject}
+                                        </span>
                                     </a>
                                 );
 

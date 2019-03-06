@@ -26,8 +26,7 @@ create table email.message (
 	recipientid int null,
 	fromAddress varchar(1000),
 	fromPersonal varchar(1000),
-	dateCreated timestamp default now(),
-	primary key (accountid, subject, dateReceived)
+	dateCreated timestamp default now()
 );
 
 drop table if exists email.bodyPart;
@@ -53,14 +52,4 @@ create table email.executionlog (
 	id serial not null,
 	datecreated timestamp default now(),
 	execstatusenum int not null
-);
-
-drop table if exists email.address;
-create table email.address (
-	id serial not null,
-	groupind boolean null,
-	grouplist varchar(1000) null,
-	groupname varchar(1000) null,
-	address varchar(1000) null,
-	encodedPersonal varchar(1000) null
 );
