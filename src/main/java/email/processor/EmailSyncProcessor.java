@@ -1,108 +1,28 @@
 package email.processor;
 
-import email.model.*;
-import email.service.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import email.service.SyncService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.mail.MessagingException;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 @Component
-public class EmailSyncProcessor implements IProcessor {
-
-    private Logger logger = LoggerFactory.getLogger(EmailSyncProcessor.class);
+public class EmailSyncProcessor {
 
     @Autowired
-    private ImapService imapService;
+    private SyncService syncService;
 
     @Autowired
-    private MessageService messageService;
+    private ThreadPoolTaskExecutor threadPoolTaskExecutor;
 
-    @Autowired
-    private AccountService accountService;
-
-    @Autowired
-    private EncryptionService encryptionService;
-
-    @Autowired
-    private ExecutionLogService executionLogService;
-
-    @Override
     @Scheduled(fixedDelay = 15 * 60 * 1000)
-    public void run() {
-        logger.info(ExecStatusEnum.RULE_START.getMessage());
-        executionLogService.insert(ExecStatusEnum.RULE_START);
-        boolean messageFailure = false;
-        boolean accountFailure = false;
-        List<Account> accounts = accountService.list();
-
-        for (Account account : accounts) {
-            try {
-                String decryptedPassword = encryptionService.decrypt(account.getPassword());
-                List<Message> dbMessages = messageService.list(account.getId());
-                List<Message> imapMessages = imapService.getInboxMessages(account.getHostname(), account.getPort(), account.getUsername(), decryptedPassword, dbMessages);
-
-                // first delete all messages from the local db that no longer exist on the imap server
-                long deletedCount = 0;
-                for (Message dbMessage : dbMessages) {
-                    Message match = MessageService.findMatch(imapMessages, dbMessage);
-                    if (match == null) {
-                        messageService.delete(dbMessage.getId());
-                        deletedCount++;
-                    }
-                }
-                logger.debug(String.format("Deleted %s messages from local database while processing account %s.",
-                        deletedCount, account.getUsername()));
-
-                // then add all messages that do exist on the imap server
-                long insertedCount = 0;
-                long changedReadIndCount = 0;
-                for (Message imapMessage : imapMessages) {
-                    Message match = MessageService.findMatch(dbMessages, imapMessage);
-
-                    if (match == null) {
-                        try {
-                            imapMessage.setAccount(account);
-                            messageService.insertMessage(imapMessage);
-                            insertedCount++;
-                        } catch (Exception e) {
-                            messageFailure = true;
-                            logger.error(String.format("Failed to insert new message with UID %s while processing account %s.", imapMessage.getUid(), account.getUsername()), e);
-                        }
-                    } else {
-                        // if the message has a different read indicator in the database than IMAP
-                        if (imapMessage.isReadInd() != match.isReadInd()) {
-                            messageService.setReadIndicator(match.getId(), imapMessage.isReadInd());
-                            logger.debug(String.format("Changed read indicator for email ID %s to %s.",
-                                    match.getId(), imapMessage.isReadInd() ? "read" : "unread"));
-                            changedReadIndCount++;
-                        }
-                    }
-                }
-                logger.debug(String.format("Inserted %s messages into local database while processing account %s.", insertedCount, account.getUsername()));
-                logger.debug(String.format("Changed read indicator for %s messages while processing account %s.", changedReadIndCount, account.getUsername()));
-            } catch (Exception e) {
-                accountFailure = true;
-                logger.error(String.format("Exception while processing account %s.", account.getUsername()), e);
-            }
-        }
-
-        ExecStatusEnum result;
-        if (!accountFailure && !messageFailure) {
-            result = ExecStatusEnum.RULE_END_SUCCESS;
-        } else if (messageFailure && !accountFailure) {
-            result = ExecStatusEnum.RULE_END_MESSAGE_FAILURE;
-        } else {
-            result = ExecStatusEnum.RULE_END_ACCOUNT_FAILURE;
-        }
-        executionLogService.insert(result);
-        logger.info(result.getMessage());
+    public void recurringScheduler() throws ExecutionException, InterruptedException {
+        // submit the task for execution
+        Future future = threadPoolTaskExecutor.submit(() -> syncService.differentialSync());
+        // only return from here once the task has finished executing, otherwise the task is scheduled too often
+        future.get();
     }
 }
