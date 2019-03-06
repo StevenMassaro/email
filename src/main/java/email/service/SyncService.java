@@ -4,10 +4,11 @@ import email.model.Account;
 import email.model.ExecStatusEnum;
 import email.model.Message;
 import email.model.SyncStatusResult;
-import email.processor.EmailSyncProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskRejectedException;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -32,7 +33,20 @@ public class SyncService {
     @Autowired
     private ExecutionLogService executionLogService;
 
-    public SyncStatusResult differentialSync() {
+    @Autowired
+    private ThreadPoolTaskExecutor taskExecutor;
+
+    /**
+     * Attempts to execute a differential sync. If there is a running task and the queue is full, the sync will fail
+     * to be scheduled.
+     *
+     * @throws TaskRejectedException when there is a running task and/or the queue is full.
+     */
+    public void attemptToScheduleDifferentialSync() throws TaskRejectedException {
+        taskExecutor.execute(this::executeDifferentialSync);
+    }
+
+    public SyncStatusResult executeDifferentialSync() {
         logger.info(ExecStatusEnum.RULE_START.getMessage());
         executionLogService.insert(ExecStatusEnum.RULE_START);
         boolean messageFailure = false;

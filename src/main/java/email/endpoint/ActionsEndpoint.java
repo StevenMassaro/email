@@ -18,16 +18,13 @@ public class ActionsEndpoint {
     @Autowired
     private SyncService syncService;
 
-    @Autowired
-    private ThreadPoolTaskExecutor taskExecutor;
-
     @GetMapping("/sync/{type}")
     public String performSync(@PathVariable String type) {
         try {
-            taskExecutor.execute(() -> syncService.differentialSync());
+            syncService.attemptToScheduleDifferentialSync();
+            return "Inserted new sync job.";
         } catch (TaskRejectedException e) {
-            return "Failed to insert new job.";
+            return "Failed to insert new sync job.";
         }
-        return String.valueOf(taskExecutor.getActiveCount());
     }
 }

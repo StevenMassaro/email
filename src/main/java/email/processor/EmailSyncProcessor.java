@@ -21,7 +21,7 @@ public class EmailSyncProcessor {
     @Scheduled(fixedDelay = 15 * 60 * 1000)
     public void recurringScheduler() throws ExecutionException, InterruptedException {
         // submit the task for execution
-        Future future = threadPoolTaskExecutor.submit(() -> syncService.differentialSync());
+        Future future = threadPoolTaskExecutor.submit(() -> syncService.executeDifferentialSync());
         // only return from here once the task has finished executing, otherwise the task is scheduled too often
         future.get();
     }
