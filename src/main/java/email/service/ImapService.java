@@ -57,7 +57,6 @@ public class ImapService {
         return getInboxMessages(hostname, port, username, decryptedPassword, Collections.emptyList());
     }
 
-    @Async
     public void setReadIndicator(long id, boolean readInd) throws MessagingException {
         Message message = messageService.get(id);
         Store store = getStore(message);

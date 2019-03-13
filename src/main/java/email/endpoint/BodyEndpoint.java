@@ -31,7 +31,6 @@ public class BodyEndpoint {
     @GetMapping()
     public String getBody(@RequestParam("id") long id) throws MessagingException {
         Message message = messageService.get(id);
-        messageService.setReadIndicator(message.getId(), true);
         List<BodyPart> bodyParts = message.getBodyParts();
 
         // pick the most favorable body part

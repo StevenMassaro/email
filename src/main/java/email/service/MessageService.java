@@ -60,8 +60,7 @@ public class MessageService {
         return messageMapper.deleteById(id);
     }
 
-    public void setReadIndicator(long id, boolean readInd) throws MessagingException {
-        imapService.setReadIndicator(id, readInd);
+    public void setReadIndicator(long id, boolean readInd) {
         messageMapper.setReadIndicator(id, readInd);
     }
 

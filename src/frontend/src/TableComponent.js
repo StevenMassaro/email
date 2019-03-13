@@ -24,6 +24,13 @@ class TableComponent extends Component {
             currentEmail: row,
             showReadModal: true
         });
+        this.setReadIndicator(row.id);
+    };
+
+    setReadIndicator = (id) => {
+        fetch("./message/" + id + "/read", {method: "PATCH"})
+            .then(() => console.log("Marked message " + id + " as read."),
+                () => console.log("Failed to mark message " + id + " as read."));
     };
 
     componentDidMount() {
