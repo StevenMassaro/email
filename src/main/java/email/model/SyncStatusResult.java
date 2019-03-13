@@ -48,4 +48,8 @@ public class SyncStatusResult {
     public void setExecStatusEnum(ExecStatusEnum execStatusEnum) {
         this.execStatusEnum = execStatusEnum;
     }
+
+    public long getTotalChanges() {
+        return insertedCount + deletedCount + changedReadIndCount;
+    }
 }

@@ -14,6 +14,8 @@ class TableComponent extends Component {
     constructor() {
         super();
         this.state = {
+            loadingEmails: false,
+            loadedEmails: false,
             showReadModal: false
         };
     }
@@ -35,15 +37,21 @@ class TableComponent extends Component {
 
     componentDidMount() {
         this.listMessages();
+        this.performSync();
     }
 
     listMessages = () => {
+        this.setState({
+            loadingEmails: true,
+            loadedEmails: false
+        });
         fetch("./message/listMessages")
             .then(res => res.json())
             .then(
                 (result) => {
                     this.setState({
-                        isLoaded: true,
+                        loadingEmails: false,
+                        loadedEmails: true,
                         emails: result
                     });
                 },
@@ -52,11 +60,32 @@ class TableComponent extends Component {
                 // exceptions from actual bugs in components.
                 (error) => {
                     this.setState({
-                        isLoaded: true,
+                        loadingEmails: false,
+                        loadedEmails: true,
                         error
                     });
                 }
             );
+    };
+
+    performSync = () => {
+        fetch("./actions/sync/perform/differential")
+            .then(res => res.json())
+            .then(
+                (result) => {
+                    this.setState({
+                        syncResults: result
+                    });
+                    if (result.totalChanges > 0) {
+                        this.listMessages();
+                    }
+                },
+                (result) => {
+                    this.setState({
+                        syncResults: result
+                    })
+                }
+            )
     };
 
     getBodyUrl = (id) => {
@@ -147,7 +176,7 @@ class TableComponent extends Component {
     };
 
     render() {
-        const {error, isLoaded, emails, currentEmail} = this.state;
+        const {error, loadedEmails, emails, currentEmail} = this.state;
 
         return (
             <div>
@@ -248,7 +277,7 @@ class TableComponent extends Component {
                     ]}
                     defaultPageSize={100}
                     minRows={0}
-                    noDataText={isLoaded ? (error ? error : "No emails in database.") : "Loading emails..."}
+                    noDataText={loadedEmails ? (error ? error : "No emails in database.") : "Loading emails..."}
                     defaultSorted={[
                         {
                             id: "dateReceived",

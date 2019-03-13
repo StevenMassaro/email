@@ -46,6 +46,10 @@ public class SyncService {
         taskExecutor.execute(this::executeDifferentialSync);
     }
 
+    public int currentJobCount() {
+        return taskExecutor.getActiveCount();
+    }
+
     public SyncStatusResult executeDifferentialSync() {
         logger.info(ExecStatusEnum.RULE_START.getMessage());
         executionLogService.insert(ExecStatusEnum.RULE_START);
