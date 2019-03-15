@@ -26,7 +26,7 @@ public class Message {
     private long uid;
     private Account account;
     private String subject;
-    @JsonFormat(pattern = "yyyy-MM-dd h:mm:ss a", timezone = "America/New_York")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/New_York")
     private Date dateReceived;
     private Date dateCreated;
     private List<Address> recipient;
