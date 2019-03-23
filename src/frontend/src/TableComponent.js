@@ -76,6 +76,12 @@ class TableComponent extends Component {
                     this.setState({
                         syncResults: result
                     });
+                    toast.success("Sync results: "
+                        + result.insertedCount + " inserted; "
+                        + result.deletedCount + " deleted; "
+                        + result.changedReadIndCount + " changed read indicator.", {
+                        position: toast.POSITION.TOP_RIGHT
+                    });
                     if (result.totalChanges > 0) {
                         this.listMessages();
                     }
@@ -83,7 +89,9 @@ class TableComponent extends Component {
                 (result) => {
                     this.setState({
                         syncResults: result
-                    })
+                    });
+                    toast.error("Sync failed.");
+                    console.warn(result);
                 }
             )
     };

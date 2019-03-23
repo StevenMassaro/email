@@ -17,10 +17,6 @@ public class SyncStatusResult {
         return insertedCount;
     }
 
-    public String getInsertedCountMessage() {
-        return String.format("Inserted %s new messages.", insertedCount);
-    }
-
     public void setInsertedCount(long insertedCount) {
         this.insertedCount = insertedCount;
     }
