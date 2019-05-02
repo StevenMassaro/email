@@ -3,15 +3,12 @@ package email.service;
 import com.sun.mail.imap.IMAPFolder;
 import email.model.Account;
 import email.model.Message;
-import email.processor.EmailSyncProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

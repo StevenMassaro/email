@@ -69,20 +69,32 @@ class TableComponent extends Component {
     };
 
     performSync = () => {
-        fetch("./actions/sync/perform/differential")
+        fetch("./actions/sync")
             .then(res => res.json())
             .then(
-                (result) => {
+                (results) => {
                     this.setState({
-                        syncResults: result
+                        syncResults: results
                     });
+
+                    let insertedCount = 0;
+                    let deletedCount = 0;
+                    let changedReadIndCount = 0;
+                    // let failedAccounts = "";'
+
+                    results.forEach(function (result) {
+                        insertedCount += result.insertedCount;
+                        deletedCount += result.deletedCount;
+                        changedReadIndCount += result.changedReadIndCount;
+                    });
+
                     toast.success("Sync results: "
-                        + result.insertedCount + " inserted; "
-                        + result.deletedCount + " deleted; "
-                        + result.changedReadIndCount + " changed read indicator.", {
+                        + insertedCount + " inserted; "
+                        + deletedCount + " deleted; "
+                        + changedReadIndCount + " changed read indicator.", {
                         position: toast.POSITION.TOP_RIGHT
                     });
-                    if (result.totalChanges > 0) {
+                    if (insertedCount + deletedCount + changedReadIndCount > 0) {
                         this.listMessages();
                     }
                 },

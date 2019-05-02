@@ -5,12 +5,14 @@ public class SyncStatusResult {
     private long deletedCount;
     private long changedReadIndCount;
     private ExecStatusEnum execStatusEnum;
+    private String username;
 
-    public SyncStatusResult(long insertedCount, long deletedCount, long changedReadIndCount, ExecStatusEnum execStatusEnum) {
+    public SyncStatusResult(long insertedCount, long deletedCount, long changedReadIndCount, ExecStatusEnum execStatusEnum, String username) {
         this.insertedCount = insertedCount;
         this.deletedCount = deletedCount;
         this.changedReadIndCount = changedReadIndCount;
         this.execStatusEnum = execStatusEnum;
+        this.username = username;
     }
 
     public long getInsertedCount() {
@@ -47,5 +49,13 @@ public class SyncStatusResult {
 
     public long getTotalChanges() {
         return insertedCount + deletedCount + changedReadIndCount;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }
