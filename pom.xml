@@ -129,7 +129,6 @@
                         <version>1.6</version>
                         <configuration>
                             <workingDirectory>src/frontend</workingDirectory>
-                            <!--<installDirectory>src/main/resources/static</installDirectory>-->
                         </configuration>
                         <executions>
                             <execution>
@@ -140,7 +139,6 @@
                                 <configuration>
                                     <!-- See https://nodejs.org/en/download/ for latest node and npm (lts) versions -->
                                     <nodeVersion>v10.15.0</nodeVersion>
-                                    <!--<npmVersion>5.6.0</npmVersion>-->
                                 </configuration>
                             </execution>
 
