@@ -4,6 +4,7 @@ import ReactModal from "react-modal";
 import "react-table/react-table.css";
 import 'semantic-ui-css/semantic.min.css';
 import {Button, Grid} from "semantic-ui-react";
+import {isMobile} from "react-device-detect";
 import {toast, ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.min.css';
 import './TableComponent.css';
@@ -199,6 +200,66 @@ class TableComponent extends Component {
     render() {
         const {error, loadedEmails, emails, currentEmail} = this.state;
 
+        let columns = [
+            {
+                Header: "Account",
+                id: "account",
+                maxWidth: 200,
+                accessor: a => a.account.username
+            },
+            {
+                Header: "From",
+                id: "from",
+                Cell: row => {
+                    return (
+                        <span>{row.original.fromPersonal} <span
+                            style={row.original.fromPersonal ? {"font-style": "italic"} : {}}>{row.original.fromAddress}</span></span>
+                    );
+                },
+                maxWidth: 250
+            },
+            {
+                Header: "",
+                id: "attachment",
+                Cell: row => {
+                    return <span>{row.original.attachments.length > 0 ?
+                        <img width={15}
+                             height={15}
+                             src={'./paper-clip.svg'}
+                             alt={"attachment"}/>
+                        : ""}</span>;
+                },
+                maxWidth: 25
+            },
+            {
+                Header: "Subject",
+                accessor: "subject",
+                Cell: row => {
+                    const originalSubject = row.value;
+                    const displaySubject = originalSubject ? originalSubject : "no subject";
+                    return (
+                        <a href="#"
+                           onClick={(e) => this.onSubjectClick(e, row.original)}>
+                                        <span style={{
+                                            "font-weight": row.original.readInd ? "normal" : "bold",
+                                            "font-style": (originalSubject ? "normal" : "italic")
+                                        }}>
+                                            {displaySubject}
+                                        </span>
+                        </a>
+                    );
+                }
+            }
+        ];
+
+        if (!isMobile) {
+            columns.unshift({
+                Header: "Date received",
+                accessor: "dateReceived",
+                maxWidth: 145
+            });
+        }
+
         return (
             <div>
                 <ToastContainer/>
@@ -220,8 +281,6 @@ class TableComponent extends Component {
                             email={currentEmail}
                         />
 
-
-
                         <iframe src={this.getBodyUrl(currentEmail.id)}
                                 style={{"flex-grow": "1"}}
                                 id="emailContent"
@@ -240,62 +299,7 @@ class TableComponent extends Component {
                 }
                 <ReactTable
                     data={emails}
-                    columns={[
-                        {
-                            Header: "Date received",
-                            accessor: "dateReceived",
-                            maxWidth: 175
-                        },
-                        {
-                            Header: "Account",
-                            id: "account",
-                            maxWidth: 200,
-                            accessor: a => a.account.username
-                        },
-                        {
-                            Header: "From",
-                            id: "from",
-                            Cell: row => {
-                                return (
-                                    <span>{row.original.fromPersonal} <span style={row.original.fromPersonal ? {"font-style":"italic"}:{}}>{row.original.fromAddress}</span></span>
-                                );
-                            },
-                            maxWidth: 250
-                        },
-                        {
-                            Header: "",
-                            id: "attachment",
-                            Cell: row => {
-                                return <span>{row.original.attachments.length > 0 ?
-                                    <img width={15}
-                                         height={15}
-                                         src={'./paper-clip.svg'}
-                                         alt={"attachment"}/>
-                                    : ""}</span>;
-                            },
-                            maxWidth: 25
-                        },
-                        {
-                            Header: "Subject",
-                            accessor: "subject",
-                            Cell: row => {
-                                const originalSubject = row.value;
-                                const displaySubject = originalSubject ? originalSubject : "no subject";
-                                return (
-                                    <a href="#"
-                                       onClick={(e) => this.onSubjectClick(e, row.original)}>
-                                        <span style={{
-                                            "font-weight": row.original.readInd ? "normal" : "bold",
-                                            "font-style": (originalSubject ? "normal" : "italic")
-                                        }}>
-                                            {displaySubject}
-                                        </span>
-                                    </a>
-                                );
-
-                            }
-                        }
-                    ]}
+                    columns={columns}
                     defaultPageSize={100}
                     minRows={0}
                     noDataText={loadedEmails ? (error ? error : "No emails in database.") : "Loading emails..."}
