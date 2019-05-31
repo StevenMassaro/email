@@ -6,6 +6,7 @@ import 'semantic-ui-css/semantic.min.css';
 import {Button, Grid} from "semantic-ui-react";
 import {toast, ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.min.css';
+import './TableComponent.css';
 import ModalHeaderComponent from "./ModalHeaderComponent";
 import './paper-clip.svg';
 
