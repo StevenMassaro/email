@@ -222,7 +222,7 @@ class TableComponent extends Component {
 
 
                         <iframe src={this.getBodyUrl(currentEmail.id)}
-                                style={{"flex-grow": "1", "border": "none"}}
+                                style={{"flex-grow": "1"}}
                                 id="emailContent"
                         />
                         <div style={{"width": "100%"}}>
