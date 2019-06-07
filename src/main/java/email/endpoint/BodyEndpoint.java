@@ -47,7 +47,7 @@ public class BodyEndpoint {
                 if (StringUtils.isEmpty(body) && // stop after finding the best match
                         StringUtils.containsIgnoreCase(bodyPart.getContentType(), contentTypeEnum.getImapContentType())) {
                     body = bodyPart.getContentAsString();
-                    responseHeaders.set("Content-Type", contentTypeEnum.getImapContentType());
+                    responseHeaders.set("Content-Type", contentTypeEnum.getImapContentType() + "; charset=utf-8");
                 }
             }
         }
