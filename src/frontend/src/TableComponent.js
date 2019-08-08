@@ -197,6 +197,16 @@ class TableComponent extends Component {
         w.close();
     };
 
+    filterRow = (filter, row) => {
+        let comparisonValue;
+        if (filter.id === 'from') {
+            comparisonValue = row._original.fromPersonal + ' ' + row._original.fromAddress;
+        } else {
+            comparisonValue = row[filter.id]
+        }
+        return String(comparisonValue).toLowerCase().includes(String(filter.value).toLowerCase());
+    };
+
     render() {
         const {error, loadedEmails, emails, currentEmail} = this.state;
 
@@ -221,6 +231,7 @@ class TableComponent extends Component {
             {
                 Header: "",
                 id: "attachment",
+                filterable: false,
                 Cell: row => {
                     return <span>{row.original.attachments.length > 0 ?
                         <img width={15}
@@ -310,6 +321,8 @@ class TableComponent extends Component {
                         }
                     ]}
                     className="-striped -highlight"
+                    filterable={true}
+                    defaultFilterMethod={this.filterRow}
                 />
                 <br/>
             </div>);
