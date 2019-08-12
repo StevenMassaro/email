@@ -100,13 +100,11 @@ class TableComponent extends Component {
                         position: toast.POSITION.TOP_RIGHT
                     });
 
-                    if (failedAccounts.length > 0) {
-                        for (let account in failedAccounts) {
-                            toast.error("Failed to sync: " + account.username, {
-                                position: toast.POSITION.TOP_RIGHT
-                            });
-                        }
-                    }
+                    failedAccounts.forEach((account) => {
+                        toast.error("Failed to sync: " + account.username, {
+                            position: toast.POSITION.TOP_RIGHT
+                        });
+                    });
 
                     if (insertedCount + deletedCount + changedReadIndCount > 0) {
                         this.listMessages();
