@@ -82,12 +82,15 @@ class TableComponent extends Component {
                     let insertedCount = 0;
                     let deletedCount = 0;
                     let changedReadIndCount = 0;
-                    // let failedAccounts = "";'
+                    let failedAccounts = [];
 
                     results.forEach(function (result) {
                         insertedCount += result.insertedCount;
                         deletedCount += result.deletedCount;
                         changedReadIndCount += result.changedReadIndCount;
+                        if (result.execStatusEnum === "RULE_END_ACCOUNT_FAILURE") {
+                            failedAccounts.push(result);
+                        }
                     });
 
                     toast.success("Sync results: "
@@ -96,6 +99,15 @@ class TableComponent extends Component {
                         + changedReadIndCount + " changed read indicator.", {
                         position: toast.POSITION.TOP_RIGHT
                     });
+
+                    if (failedAccounts.length > 0) {
+                        for (let account in failedAccounts) {
+                            toast.error("Failed to sync: " + account.username, {
+                                position: toast.POSITION.TOP_RIGHT
+                            });
+                        }
+                    }
+
                     if (insertedCount + deletedCount + changedReadIndCount > 0) {
                         this.listMessages();
                     }
