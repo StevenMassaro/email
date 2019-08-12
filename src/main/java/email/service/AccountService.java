@@ -30,4 +30,14 @@ public class AccountService {
         String encryptedPassword = encryptionService.encrypt(account.getPassword());
         accountMapper.insert(account.getHostname(), account.getPort(), account.getAuthentication(), account.getInboxName(), account.getUsername(), encryptedPassword);
     }
+
+    public Account updatePassword(long accountId, String newPassword, boolean newPasswordIsEncrypted) {
+        if (!newPasswordIsEncrypted) {
+            newPassword = encryptionService.encrypt(newPassword);
+        }
+        accountMapper.updatePassword(accountId, newPassword);
+        Account account = accountMapper.get(accountId);
+        account.setPassword(null);
+        return account;
+    }
 }

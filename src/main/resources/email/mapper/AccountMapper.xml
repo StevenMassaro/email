@@ -31,4 +31,10 @@
         INSERT INTO email.account(hostname, port, authentication, inboxname, username, "password")
         VALUES(#{hostname}, #{port}, #{authentication}, #{inboxName}, #{username}, #{password})
     </insert>
+
+    <update id="updatePassword">
+        UPDATE email.account a
+        SET password = #{newPassword}
+        WHERE a.id = #{accountId}
+    </update>
 </mapper>
