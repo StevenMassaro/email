@@ -93,7 +93,7 @@ class TableComponent extends Component {
                         }
                     });
 
-                    toast.success("Sync results: "
+                    toast.info("Sync results: "
                         + insertedCount + " inserted; "
                         + deletedCount + " deleted; "
                         + changedReadIndCount + " changed read indicator.", {
