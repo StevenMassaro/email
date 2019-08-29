@@ -34,3 +34,11 @@
 .bold {
     font-weight: bold;
 }
+
+.ReactTable {
+    height: 100vh;
+}
+
+.rt-tr-group {
+    flex: 0 0 auto !important;
+}
