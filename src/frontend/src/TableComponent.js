@@ -334,7 +334,6 @@ class TableComponent extends Component {
                     filterable={true}
                     defaultFilterMethod={this.filterRow}
                 />
-                <br/>
             </div>);
     }
 }
