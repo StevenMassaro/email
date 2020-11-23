@@ -1,24 +1,40 @@
-node {
-    def mvnHome
-    properties([buildDiscarder(logRotator(artifactDaysToKeepStr: '', artifactNumToKeepStr: '', daysToKeepStr: '', numToKeepStr: '10')), disableConcurrentBuilds()])
-    stage('Preparation') {
-        sh 'curl https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage -d chat_id=${TELEGRAM_CHAT_ID} -d text="${JOB_BASE_NAME} - ${BUILD_NUMBER} started" || true'
-        checkout scm
-        mvnHome = tool 'M3'
+pipeline {
+    agent {
+        label 'master'
     }
-    stage('Build') {
-        // Run the maven build
-        withEnv(["MVN_HOME=$mvnHome"]) {
-            if (isUnix()) {
-                sh '"$MVN_HOME/bin/mvn" clean install -P prod,ui'
-            } else {
-                bat(/"%MVN_HOME%\bin\mvn" clean install -P prod,ui/)
+
+    tools {
+        maven 'M3'
+    }
+
+    environment {
+        pom = readMavenPom().getVersion()
+    }
+
+    stages {
+        stage('Build') {
+            steps {
+                sh 'curl https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage -d chat_id=${TELEGRAM_CHAT_ID} -d text="${JOB_BASE_NAME} - ${BUILD_NUMBER} started" || true'
+                sh 'mvn clean install -P prod,ui'
             }
         }
-    }
-    stage('Results') {
-        junit '**/target/surefire-reports/TEST-*.xml'
-        archiveArtifacts 'target/*.war'
-        sh 'curl https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage -d chat_id=${TELEGRAM_CHAT_ID} -d text="${JOB_BASE_NAME} - ${BUILD_NUMBER} finished" || true'
+        stage('Docker') {
+            steps {
+                script {
+                    image = docker.build("stevenmassaro/email:latest")
+//                    docker.withRegistry('', 'DockerHub') {
+//                        image.push()
+//                        image.push(pom)
+//                    }
+                }
+            }
+        }
+        stage('Results') {
+            steps {
+                junit '**/target/surefire-reports/TEST-*.xml'
+                archiveArtifacts 'target/*.jar'
+                sh 'curl https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage -d chat_id=${TELEGRAM_CHAT_ID} -d text="${JOB_BASE_NAME} - ${BUILD_NUMBER} finished" || true'
+            }
+        }
     }
 }
