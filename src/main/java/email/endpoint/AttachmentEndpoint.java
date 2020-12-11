@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,7 +26,10 @@ public class AttachmentEndpoint {
     public ResponseEntity<Resource> get(@RequestParam("id") long id) {
         Attachment attachment = attachmentService.get(id);
         Resource file = new ByteArrayResource(attachment.getFile());
-        return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION,
-                "attachment; filename=\"" + attachment.getName() + "\"").body(file);
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + attachment.getName() + "\"")
+                .contentType(MediaType.parseMediaType(attachment.getContentType()))
+                .body(file);
     }
 }
