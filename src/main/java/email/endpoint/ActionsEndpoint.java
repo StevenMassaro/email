@@ -25,7 +25,7 @@ import java.util.concurrent.Future;
 @RequestMapping("/actions")
 public class ActionsEndpoint {
 
-    private Logger logger = LoggerFactory.getLogger(SyncService.class);
+    private final Logger logger = LoggerFactory.getLogger(ActionsEndpoint.class);
 
     @Autowired
     private SyncService syncService;
