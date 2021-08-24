@@ -71,6 +71,9 @@ class TableComponent extends Component {
     };
 
     performSync = () => {
+        const syncToastId = toast.info("Starting sync...", {
+            position: toast.POSITION.TOP_RIGHT
+        })
         fetch("./actions/sync")
             .then(res => res.json())
             .then(
@@ -92,6 +95,7 @@ class TableComponent extends Component {
                             failedAccounts.push(result);
                         }
                     });
+                    toast.dismiss(syncToastId)
 
                     toast.info("Sync results: "
                         + insertedCount + " inserted; "
