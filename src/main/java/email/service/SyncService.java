@@ -40,7 +40,7 @@ public class SyncService {
 
     @Async
     public Future<SyncStatusResult> sync(Account account) {
-        logger.debug(String.format("Sync started for %s", account.getUsername()));
+        logger.debug("Sync started for {}", account.getUsername());
         boolean messageFailure = false;
         boolean accountFailure = false;
         long totalDeletedCount = 0;
@@ -61,8 +61,8 @@ public class SyncService {
                     deletedCount++;
                 }
             }
-            logger.debug(String.format("Deleted %s messages from local database while processing account %s.",
-                    deletedCount, account.getUsername()));
+            logger.debug("Deleted {} messages from local database while processing account {}.",
+                    deletedCount, account.getUsername());
 
             // then add all messages that do exist on the imap server
             long insertedCount = 0;
@@ -77,26 +77,26 @@ public class SyncService {
                         insertedCount++;
                     } catch (Exception e) {
                         messageFailure = true;
-                        logger.error(String.format("Failed to insert new message with UID %s while processing account %s.", imapMessage.getUid(), account.getUsername()), e);
+                        logger.error("Failed to insert new message with UID {} while processing account {}.", imapMessage.getUid(), account.getUsername(), e);
                     }
                 } else {
                     // if the message has a different read indicator in the database than IMAP
                     if (imapMessage.isReadInd() != match.isReadInd()) {
                         messageService.setReadIndicator(match.getId(), imapMessage.isReadInd());
-                        logger.debug(String.format("Changed read indicator for email ID %s to %s.",
-                                match.getId(), imapMessage.isReadInd() ? "read" : "unread"));
+                        logger.debug("Changed read indicator for email ID {} to {}.",
+                                match.getId(), imapMessage.isReadInd() ? "read" : "unread");
                         changedReadIndCount++;
                     }
                 }
             }
-            logger.debug(String.format("Inserted %s messages into local database while processing account %s.", insertedCount, account.getUsername()));
-            logger.debug(String.format("Changed read indicator for %s messages while processing account %s.", changedReadIndCount, account.getUsername()));
+            logger.debug("Inserted {} messages into local database while processing account {}.", insertedCount, account.getUsername());
+            logger.debug("Changed read indicator for {} messages while processing account {}.", changedReadIndCount, account.getUsername());
             totalChangedReadIndCount += changedReadIndCount;
             totalDeletedCount += deletedCount;
             totalInsertedCount += insertedCount;
         } catch (Exception e) {
             accountFailure = true;
-            logger.error(String.format("Exception while processing account %s.", account.getUsername()), e);
+            logger.error("Exception while processing account {}.", account.getUsername(), e);
         }
 
         ExecStatusEnum result;

@@ -43,7 +43,7 @@ public class ImapService {
                 }
             }
 
-            logger.debug(String.format("Processing email %s of %s for %s", i, messages.length, username));
+            logger.debug("Processing email {} of {} for {}", i, messages.length, username);
             returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username));
         }
         store.close();

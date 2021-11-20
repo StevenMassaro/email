@@ -41,7 +41,7 @@ public class ActionsEndpoint {
 
         List<Future<SyncStatusResult>> syncFutures = new ArrayList<>();
         for (Account account : accounts) {
-            logger.debug(String.format("Submitting task for account %s", account.getUsername()));
+            logger.debug("Submitting task for account {}", account.getUsername());
             syncFutures.add(syncService.sync(account));
         }
 
