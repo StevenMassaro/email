@@ -26,7 +26,8 @@ create table email.message (
 	recipientid int null,
 	fromAddress varchar(1000),
 	fromPersonal varchar(1000),
-	dateCreated timestamp default now()
+	dateCreated timestamp default now(),
+	primary key (uid, accountid)
 );
 
 drop table if exists email.bodyPart;
