@@ -10,8 +10,10 @@ An email inbox aggregator, supporting listing emails from Gmail and AOL in one a
 
 Run the docker image with environment variables for:
 ```
-spring.datasource.url
-spring.datasource.username
-spring.datasource.password
+accounts={'id|imap_hostname|username|encrypted_password','...'}
+initVector=
+key=
 ```
-and point to a Postgres database.
+
+## Future plans
+- Connect to Bitwarden to obtain passwords for clients on the fly

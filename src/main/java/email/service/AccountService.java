@@ -1,43 +1,44 @@
 package email.service;
 
-import email.mapper.AccountMapper;
 import email.model.Account;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class AccountService {
 
-    @Autowired
-    private AccountMapper accountMapper;
+    @Value("#{${accounts}}")
+    private List<String> accounts;
 
     @Autowired
     private EncryptionService encryptionService;
 
     public List<Account> list() {
-        return accountMapper.list();
+        List<Account> accountList = new ArrayList<>(accounts.size());
+        for (String accountString : accounts) {
+            String[] accountStringSplit = accountString.split("\\|");
+
+            Account account = new Account();
+            account.setId(Long.parseLong(accountStringSplit[0]));
+            account.setUsername(accountStringSplit[2]);
+            account.setPassword(accountStringSplit[3]);
+            account.setAuthentication("SSL");
+            account.setHostname(accountStringSplit[1]);
+            account.setInboxName("Inbox");
+            account.setPort(993);
+            accountList.add(account);
+        }
+
+        return accountList;
     }
 
     public Account getDecrypted(long accountid) {
-        Account account = accountMapper.get(accountid);
+        Account account = list().stream().filter(a -> a.getId() == accountid).findFirst().get();
         account.setPassword(encryptionService.decrypt(account.getPassword()));
-        return account;
-    }
-
-    public void insert(Account account) {
-        String encryptedPassword = encryptionService.encrypt(account.getPassword());
-        accountMapper.insert(account.getHostname(), account.getPort(), account.getAuthentication(), account.getInboxName(), account.getUsername(), encryptedPassword);
-    }
-
-    public Account updatePassword(long accountId, String newPassword, boolean newPasswordIsEncrypted) {
-        if (!newPasswordIsEncrypted) {
-            newPassword = encryptionService.encrypt(newPassword);
-        }
-        accountMapper.updatePassword(accountId, newPassword);
-        Account account = accountMapper.get(accountId);
-        account.setPassword(null);
         return account;
     }
 }
