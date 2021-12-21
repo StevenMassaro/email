@@ -1,5 +1,7 @@
 package email.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.Date;
 
 public class Account {
@@ -9,6 +11,7 @@ public class Account {
     private String authentication;
     private String inboxName;
     private String username;
+    @JsonIgnore
     private String password;
     private Date dateCreated;
 
