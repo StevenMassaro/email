@@ -1,67 +1,50 @@
 package email.service;
 
-import email.mapper.MessageMapper;
 import email.model.Message;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.mail.MessagingException;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Component
-@Transactional
 public class MessageService {
 
-    @Autowired
-    private ImapService imapService;
+    /**
+     * Sequence generator for generating unique IDs for messages.
+     */
+    public static final AtomicLong messageIdSequence = new AtomicLong(0);
+    /**
+     * Sequence generator for generating unique IDs for attachments.
+     */
+    public static final AtomicLong attachmentIdSequence = new AtomicLong(0);
 
-    @Autowired
-    private BodyPartService bodyPartService;
-
-    @Autowired
-    private MessageMapper messageMapper;
-
-    @Autowired
-    private AttachmentService attachmentService;
-
-    @Deprecated
-    public Message getByUid(long uid) {
-        return messageMapper.getByUid(uid);
-    }
+    private static final List<Message> messageList = new ArrayList<>();
 
     public Message get(long id) {
-        return messageMapper.get(id);
+        return messageList.stream().filter(m -> m.getId() == id).findFirst().orElse(null);
     }
 
     public void insertMessage(Message message) {
-        long messageId = messageMapper.insertMessage(message.getUid(), message.getAccount().getId(), message.getSubject(), message.getDateReceived(),
-                message.isReadInd(), 1L, message.getFromAddress(), message.getFromPersonal());
-        bodyPartService.insert(messageId, message.getBodyParts());
-        attachmentService.insert(messageId, message.getAttachments());
-    }
-
-    public long count(long accountId, String subject, Date dateReceived){
-        return messageMapper.count(accountId, subject, dateReceived);
+        messageList.add(message);
     }
 
     public List<Message> list() {
-        return messageMapper.listAll();
+        return Collections.unmodifiableList(messageList);
     }
 
     public List<Message> list(long accountId) {
-        return messageMapper.list(accountId);
+        return Collections.unmodifiableList(messageList.stream().filter(m -> m.getAccount().getId() == accountId).collect(Collectors.toList()));
     }
 
-    public long delete(long id) {
-        bodyPartService.delete(id);
-        attachmentService.delete(id);
-        return messageMapper.deleteById(id);
+    public void delete(long id) {
+        messageList.removeIf(m -> m.getId() == id);
     }
 
     public void setReadIndicator(long id, boolean readInd) {
-        messageMapper.setReadIndicator(id, readInd);
+        messageList.stream().filter(m -> m.getId() == id).forEach(m -> m.setReadInd(readInd));
     }
 
     public static Message findMatch(List<Message> messages, Message key) {

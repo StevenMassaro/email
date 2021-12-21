@@ -30,9 +30,6 @@ public class SyncService {
     private MessageService messageService;
 
     @Autowired
-    private AccountService accountService;
-
-    @Autowired
     private EncryptionService encryptionService;
 
     @Async

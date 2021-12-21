@@ -1,5 +1,7 @@
 package email.model;
 
+import email.service.MessageService;
+
 public class Attachment {
 
     private long id;
@@ -13,6 +15,7 @@ public class Attachment {
     }
 
     public Attachment(String name, String contentType, byte[] file) {
+        this.id = MessageService.attachmentIdSequence.incrementAndGet();
         this.name = name;
         this.contentType = contentType;
         this.file = file;
