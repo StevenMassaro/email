@@ -35,9 +35,6 @@ public class SyncService {
     @Autowired
     private EncryptionService encryptionService;
 
-    @Autowired
-    private ExecutionLogService executionLogService;
-
     @Async
     public Future<SyncStatusResult> sync(Account account) {
         logger.debug("Sync started for {}", account.getUsername());

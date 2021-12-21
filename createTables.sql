@@ -47,10 +47,3 @@ create table email.attachment (
   contentType varchar(1000) not null,
   file bytea not null
 );
-
-drop table if exists email.executionlog;
-create table email.executionlog (
-	id serial not null,
-	datecreated timestamp default now(),
-	execstatusenum int not null
-);
