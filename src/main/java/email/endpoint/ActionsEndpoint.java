@@ -34,9 +34,7 @@ public class ActionsEndpoint {
     private AccountService accountService;
 
     @GetMapping("/sync")
-    public List<SyncStatusResult> performSync() throws ExecutionException, InterruptedException {
-//        logger.info(ExecStatusEnum.RULE_START.getMessage());
-//        executionLogService.insert(ExecStatusEnum.RULE_START);
+    public synchronized List<SyncStatusResult> performSync() throws ExecutionException, InterruptedException {
         List<Account> accounts = accountService.list();
 
         List<Future<SyncStatusResult>> syncFutures = new ArrayList<>();
