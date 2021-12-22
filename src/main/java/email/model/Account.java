@@ -1,13 +1,9 @@
 package email.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
 
-import java.util.Date;
-
-@Getter
-@Setter
+@Data
 public class Account {
     private long id;
     private String hostname;
@@ -17,5 +13,4 @@ public class Account {
     private String username;
     @JsonIgnore
     private String password;
-    private Date dateCreated;
 }

@@ -99,7 +99,12 @@ public class Message {
         }
 
         Message message1 = (Message) message;
-        return this.uid == message1.getUid();
+        boolean matches = this.uid == message1.getUid();
+        if (this.account != null && message1.account != null) {
+            return matches && this.account.equals(message1.account);
+        } else {
+            return matches;
+        }
     }
 
     public void setBodyParts(javax.mail.Message message) throws IOException, MessagingException {

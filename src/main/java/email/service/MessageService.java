@@ -3,9 +3,7 @@ package email.service;
 import email.model.Message;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -21,7 +19,7 @@ public class MessageService {
      */
     public static final AtomicLong attachmentIdSequence = new AtomicLong(0);
 
-    private static final List<Message> messageList = new ArrayList<>();
+    private static final Set<Message> messageList = new HashSet<>();
 
     public Message get(long id) {
         return messageList.stream().filter(m -> m.getId() == id).findFirst().orElse(null);
@@ -31,8 +29,8 @@ public class MessageService {
         messageList.add(message);
     }
 
-    public List<Message> list() {
-        return Collections.unmodifiableList(messageList);
+    public Set<Message> list() {
+        return Collections.unmodifiableSet(messageList);
     }
 
     public List<Message> list(long accountId) {

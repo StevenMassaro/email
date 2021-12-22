@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.mail.MessagingException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping(value = "/message")
@@ -22,7 +23,7 @@ public class MessageEndpoint {
     private ImapService imapService;
 
     @GetMapping("/listMessages")
-    public List<Message> listMessages() {
+    public Set<Message> listMessages() {
         return messageService.list();
     }
 
