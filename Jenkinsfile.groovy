@@ -15,7 +15,7 @@ pipeline {
         stage('Build') {
             steps {
                 sh 'curl https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage -d chat_id=${TELEGRAM_CHAT_ID} -d text="${JOB_BASE_NAME} - ${BUILD_NUMBER} started" || true'
-                sh 'mvn clean install -P prod,ui'
+                sh 'mvn clean install -P ui'
             }
         }
         stage('Docker') {
