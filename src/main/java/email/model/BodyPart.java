@@ -1,6 +1,8 @@
 package email.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -8,6 +10,8 @@ import javax.mail.MessagingException;
 import java.io.IOException;
 import java.util.Arrays;
 
+@Getter
+@Setter
 public class BodyPart {
 
     private long seqNum;
@@ -43,32 +47,8 @@ public class BodyPart {
         }
     }
 
-    public long getSeqNum() {
-        return seqNum;
-    }
-
-    public void setSeqNum(long seqNum) {
-        this.seqNum = seqNum;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
-
-    public void setContentType(String contentType) {
-        this.contentType = contentType;
-    }
-
-    public byte[] getContent() {
-        return content;
-    }
-
     @JsonIgnore
     public String getContentAsString() {
         return new String(content);
-    }
-
-    public void setContent(byte[] content) {
-        this.content = content;
     }
 }
