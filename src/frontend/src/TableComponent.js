@@ -16,7 +16,6 @@ class TableComponent extends Component {
     constructor() {
         super();
         this.state = {
-            loadingEmails: false,
             loadedEmails: false,
             showReadModal: false
         };
@@ -44,7 +43,6 @@ class TableComponent extends Component {
 
     listMessages = () => {
         this.setState({
-            loadingEmails: true,
             loadedEmails: false
         });
         fetch("./message/listMessages")
@@ -52,7 +50,6 @@ class TableComponent extends Component {
             .then(
                 (result) => {
                     this.setState({
-                        loadingEmails: false,
                         loadedEmails: true,
                         emails: result
                     });
@@ -62,7 +59,6 @@ class TableComponent extends Component {
                 // exceptions from actual bugs in components.
                 (error) => {
                     this.setState({
-                        loadingEmails: false,
                         loadedEmails: true,
                         error
                     });
