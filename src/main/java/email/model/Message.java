@@ -1,6 +1,7 @@
 package email.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sun.mail.imap.IMAPMessage;
 import email.service.MessageService;
 import org.apache.commons.io.IOUtils;
@@ -33,6 +34,7 @@ public class Message {
     private List<Address> recipient;
     private String fromAddress;
     private String fromPersonal;
+    @JsonIgnore
     private List<BodyPart> bodyParts = new ArrayList<>();
     private boolean readInd;
     private List<Attachment> attachments = new ArrayList<>();

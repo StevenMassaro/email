@@ -1,5 +1,6 @@
 package email.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import email.service.MessageService;
 import lombok.Getter;
 import lombok.Setter;
@@ -13,6 +14,7 @@ public class Attachment {
     private long seqNum;
     private String name;
     private String contentType;
+    @JsonIgnore
     private byte[] file;
 
     public Attachment(String name, String contentType, byte[] file) {
