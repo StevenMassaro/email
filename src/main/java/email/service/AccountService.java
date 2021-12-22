@@ -14,8 +14,11 @@ public class AccountService {
     @Value("#{${accounts}}")
     private List<String> accounts;
 
-    @Autowired
-    private EncryptionService encryptionService;
+    private final EncryptionService encryptionService;
+
+    public AccountService(EncryptionService encryptionService) {
+        this.encryptionService = encryptionService;
+    }
 
     public List<Account> list() {
         List<Account> accountList = new ArrayList<>(accounts.size());

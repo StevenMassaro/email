@@ -16,11 +16,13 @@ import java.util.Set;
 @RequestMapping(value = "/message")
 public class MessageEndpoint {
 
-    @Autowired
-    private MessageService messageService;
+    private final MessageService messageService;
+    private final ImapService imapService;
 
-    @Autowired
-    private ImapService imapService;
+    public MessageEndpoint(MessageService messageService, ImapService imapService) {
+        this.messageService = messageService;
+        this.imapService = imapService;
+    }
 
     @GetMapping("/listMessages")
     public Set<Message> listMessages() {

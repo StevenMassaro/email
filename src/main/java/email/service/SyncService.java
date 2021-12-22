@@ -4,6 +4,7 @@ import email.model.Account;
 import email.model.ExecStatusEnum;
 import email.model.Message;
 import email.model.SyncStatusResult;
+import lombok.extern.log4j.Log4j2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,22 +20,22 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 @Service
+@Log4j2
 public class SyncService {
 
-    private Logger logger = LoggerFactory.getLogger(SyncService.class);
+    private final ImapService imapService;
+    private final MessageService messageService;
+    private final EncryptionService encryptionService;
 
-    @Autowired
-    private ImapService imapService;
-
-    @Autowired
-    private MessageService messageService;
-
-    @Autowired
-    private EncryptionService encryptionService;
+    public SyncService(ImapService imapService, MessageService messageService, EncryptionService encryptionService) {
+        this.imapService = imapService;
+        this.messageService = messageService;
+        this.encryptionService = encryptionService;
+    }
 
     @Async
     public Future<SyncStatusResult> sync(Account account) {
-        logger.debug("Sync started for {}", account.getUsername());
+        log.debug("Sync started for {}", account.getUsername());
         boolean messageFailure = false;
         boolean accountFailure = false;
         long totalDeletedCount = 0;
@@ -55,7 +56,7 @@ public class SyncService {
                     deletedCount++;
                 }
             }
-            logger.debug("Deleted {} messages from local database while processing account {}.",
+            log.debug("Deleted {} messages from local database while processing account {}.",
                     deletedCount, account.getUsername());
 
             // then add all messages that do exist on the imap server
@@ -71,26 +72,26 @@ public class SyncService {
                         insertedCount++;
                     } catch (Exception e) {
                         messageFailure = true;
-                        logger.error("Failed to insert new message with UID {} while processing account {}.", imapMessage.getUid(), account.getUsername(), e);
+                        log.error("Failed to insert new message with UID {} while processing account {}.", imapMessage.getUid(), account.getUsername(), e);
                     }
                 } else {
                     // if the message has a different read indicator in the database than IMAP
                     if (imapMessage.isReadInd() != match.isReadInd()) {
                         messageService.setReadIndicator(match.getId(), imapMessage.isReadInd());
-                        logger.debug("Changed read indicator for email ID {} to {}.",
+                        log.debug("Changed read indicator for email ID {} to {}.",
                                 match.getId(), imapMessage.isReadInd() ? "read" : "unread");
                         changedReadIndCount++;
                     }
                 }
             }
-            logger.debug("Inserted {} messages into local database while processing account {}.", insertedCount, account.getUsername());
-            logger.debug("Changed read indicator for {} messages while processing account {}.", changedReadIndCount, account.getUsername());
+            log.debug("Inserted {} messages into local database while processing account {}.", insertedCount, account.getUsername());
+            log.debug("Changed read indicator for {} messages while processing account {}.", changedReadIndCount, account.getUsername());
             totalChangedReadIndCount += changedReadIndCount;
             totalDeletedCount += deletedCount;
             totalInsertedCount += insertedCount;
         } catch (Exception e) {
             accountFailure = true;
-            logger.error("Exception while processing account {}.", account.getUsername(), e);
+            log.error("Exception while processing account {}.", account.getUsername(), e);
         }
 
         ExecStatusEnum result;

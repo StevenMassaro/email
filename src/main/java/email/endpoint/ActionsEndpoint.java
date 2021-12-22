@@ -1,18 +1,11 @@
 package email.endpoint;
 
 import email.model.Account;
-import email.model.ExecStatusEnum;
 import email.model.SyncStatusResult;
 import email.service.AccountService;
 import email.service.SyncService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
-import org.springframework.core.task.TaskRejectedException;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,15 +16,16 @@ import java.util.concurrent.Future;
 
 @RestController
 @RequestMapping("/actions")
+@Log4j2
 public class ActionsEndpoint {
 
-    private final Logger logger = LoggerFactory.getLogger(ActionsEndpoint.class);
+    private final SyncService syncService;
+    private final AccountService accountService;
 
-    @Autowired
-    private SyncService syncService;
-
-    @Autowired
-    private AccountService accountService;
+    public ActionsEndpoint(SyncService syncService, AccountService accountService) {
+        this.syncService = syncService;
+        this.accountService = accountService;
+    }
 
     @GetMapping("/sync")
     public synchronized List<SyncStatusResult> performSync() throws ExecutionException, InterruptedException {
@@ -39,7 +33,7 @@ public class ActionsEndpoint {
 
         List<Future<SyncStatusResult>> syncFutures = new ArrayList<>();
         for (Account account : accounts) {
-            logger.debug("Submitting task for account {}", account.getUsername());
+            log.debug("Submitting task for account {}", account.getUsername());
             syncFutures.add(syncService.sync(account));
         }
 

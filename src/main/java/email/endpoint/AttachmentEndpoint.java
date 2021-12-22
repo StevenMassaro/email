@@ -22,8 +22,11 @@ import java.util.Optional;
 @RequestMapping("/attachment")
 public class AttachmentEndpoint {
 
-    @Autowired
-    private MessageService messageService;
+    private final MessageService messageService;
+
+    public AttachmentEndpoint(MessageService messageService) {
+        this.messageService = messageService;
+    }
 
     @GetMapping
     public ResponseEntity<Resource> get(@RequestParam("id") long id) {

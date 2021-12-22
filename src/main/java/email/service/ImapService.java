@@ -3,6 +3,7 @@ package email.service;
 import com.sun.mail.imap.IMAPFolder;
 import email.model.Account;
 import email.model.Message;
+import lombok.extern.log4j.Log4j2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +16,16 @@ import java.util.List;
 import java.util.Properties;
 
 @Service
+@Log4j2
 public class ImapService {
 
-    private Logger logger = LoggerFactory.getLogger(ImapService.class);
+    private final MessageService messageService;
+    private final AccountService accountService;
 
-    @Autowired
-    private MessageService messageService;
-
-    @Autowired
-    private AccountService accountService;
+    public ImapService(MessageService messageService, AccountService accountService) {
+        this.messageService = messageService;
+        this.accountService = accountService;
+    }
 
     public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword, List<Message> existingMessages) throws Exception {
         Store store = getStore(hostname, port, username, decryptedPassword);
@@ -43,7 +45,7 @@ public class ImapService {
                 }
             }
 
-            logger.debug("Processing email {} of {} for {}", i, messages.length, username);
+            log.debug("Processing email {} of {} for {}", i, messages.length, username);
             returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username));
         }
         store.close();

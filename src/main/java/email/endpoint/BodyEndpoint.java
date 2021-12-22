@@ -26,11 +26,11 @@ import java.util.concurrent.Executors;
 @RequestMapping(value = "/body")
 public class BodyEndpoint {
 
-    @Autowired
-    private MessageService messageService;
+    private final MessageService messageService;
 
-    @Autowired
-    private ImapService imapService;
+    public BodyEndpoint(MessageService messageService) {
+        this.messageService = messageService;
+    }
 
     @GetMapping()
     public ResponseEntity<String> getBody(@RequestParam("id") long id) throws MessagingException {
