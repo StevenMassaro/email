@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sun.mail.imap.IMAPMessage;
 import email.service.MessageService;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.util.MimeMessageParser;
@@ -22,6 +24,8 @@ import java.util.List;
 
 import static email.model.ProviderEnum.AOL;
 
+@Getter
+@Setter
 public class Message {
 
     private long id;
@@ -98,86 +102,6 @@ public class Message {
         return this.uid == message1.getUid();
     }
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public long getUid() {
-        return uid;
-    }
-
-    public void setUid(long uid) {
-        this.uid = uid;
-    }
-
-    public Account getAccount() {
-        return account;
-    }
-
-    public void setAccount(Account account) {
-        this.account = account;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    public Date getDateReceived() {
-        return dateReceived;
-    }
-
-    public void setDateReceived(Date dateReceived) {
-        this.dateReceived = dateReceived;
-    }
-
-    public Date getDateCreated() {
-        return dateCreated;
-    }
-
-    public void setDateCreated(Date dateCreated) {
-        this.dateCreated = dateCreated;
-    }
-
-    public List<Address> getRecipient() {
-        return recipient;
-    }
-
-    public void setRecipient(List<Address> recipient) {
-        this.recipient = recipient;
-    }
-
-    public String getFromAddress() {
-        return fromAddress;
-    }
-
-    public void setFromAddress(String fromAddress) {
-        this.fromAddress = fromAddress;
-    }
-
-    public String getFromPersonal() {
-        return fromPersonal;
-    }
-
-    public void setFromPersonal(String fromPersonal) {
-        this.fromPersonal = fromPersonal;
-    }
-
-    public List<BodyPart> getBodyParts() {
-        return bodyParts;
-    }
-
-    public void setBodyParts(List<BodyPart> bodyParts) {
-        this.bodyParts = bodyParts;
-    }
-
     public void setBodyParts(javax.mail.Message message) throws IOException, MessagingException {
         Object content = message.getContent();
         String contentType = message.getContentType();
@@ -221,21 +145,5 @@ public class Message {
                 this.attachments.add(new Attachment(attachment.getName(), attachment.getContentType(), IOUtils.toByteArray(attachment.getInputStream())));
             }
         }
-    }
-
-    public boolean isReadInd() {
-        return readInd;
-    }
-
-    public void setReadInd(boolean readInd) {
-        this.readInd = readInd;
-    }
-
-    public List<Attachment> getAttachments() {
-        return attachments;
-    }
-
-    public void setAttachments(List<Attachment> attachments) {
-        this.attachments = attachments;
     }
 }
