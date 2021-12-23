@@ -4,14 +4,10 @@ import com.sun.mail.imap.IMAPFolder;
 import email.model.Account;
 import email.model.Message;
 import lombok.extern.log4j.Log4j2;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 
@@ -20,11 +16,11 @@ import java.util.Properties;
 public class ImapService {
 
     private final MessageService messageService;
-    private final AccountService accountService;
+    private final BitwardenService bitwardenService;
 
-    public ImapService(MessageService messageService, AccountService accountService) {
+    public ImapService(MessageService messageService, BitwardenService bitwardenService) {
         this.messageService = messageService;
-        this.accountService = accountService;
+        this.bitwardenService = bitwardenService;
     }
 
     public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword, List<Message> existingMessages) throws Exception {
@@ -45,18 +41,14 @@ public class ImapService {
                 }
             }
 
-            log.debug("Processing email {} of {} for {}", i, messages.length, username);
+            log.debug("Processing email {} of {} for {}", i + 1, messages.length, username);
             returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username));
         }
         store.close();
         return returnMessages;
     }
 
-    public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword) throws Exception {
-        return getInboxMessages(hostname, port, username, decryptedPassword, Collections.emptyList());
-    }
-
-    public void setReadIndicator(long id, boolean readInd) throws MessagingException {
+    public void setReadIndicator(long id, boolean readInd) throws Exception {
         Message message = messageService.get(id);
         Store store = getStore(message);
 
@@ -92,13 +84,14 @@ public class ImapService {
         store.close();
     }
 
-    private Store getStore(Message message) throws MessagingException {
-        Account account = accountService.getDecrypted(message.getAccount().getId());
-        return getStore(account.getHostname(), account.getPort(), account.getUsername(), account.getPassword());
+    private Store getStore(Message message) throws Exception {
+        Account account = message.getAccount();
+        String password = bitwardenService.getPasswordFromCache(account.getBitwardenItemId());
+        return getStore(account.getHostname(), account.getPort(), account.getUsername(), password);
     }
 
     private Store getStore(String hostname, long port, String username, String decryptedPassword) throws MessagingException {
-        int p = Integer.valueOf(Long.toString(port));
+        int p = Integer.parseInt(Long.toString(port));
 
         Properties props = System.getProperties();
         props.setProperty("mail.store.protocol", "imaps");

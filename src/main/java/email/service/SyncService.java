@@ -5,18 +5,11 @@ import email.model.ExecStatusEnum;
 import email.model.Message;
 import email.model.SyncStatusResult;
 import lombok.extern.log4j.Log4j2;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskRejectedException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
 @Service
@@ -25,16 +18,16 @@ public class SyncService {
 
     private final ImapService imapService;
     private final MessageService messageService;
-    private final EncryptionService encryptionService;
+    private final BitwardenService bitwardenService;
 
-    public SyncService(ImapService imapService, MessageService messageService, EncryptionService encryptionService) {
+    public SyncService(ImapService imapService, MessageService messageService, BitwardenService bitwardenService) {
         this.imapService = imapService;
         this.messageService = messageService;
-        this.encryptionService = encryptionService;
+        this.bitwardenService = bitwardenService;
     }
 
     @Async
-    public Future<SyncStatusResult> sync(Account account) {
+    public Future<SyncStatusResult> sync(Account account, String bitwardenMasterPassword) {
         log.debug("Sync started for {}", account.getUsername());
         boolean messageFailure = false;
         boolean accountFailure = false;
@@ -43,9 +36,9 @@ public class SyncService {
         long totalChangedReadIndCount = 0;
 
         try {
-            String decryptedPassword = encryptionService.decrypt(account.getPassword());
+            String password = bitwardenService.getPassword(account.getBitwardenItemId(), bitwardenMasterPassword);
             List<Message> dbMessages = messageService.list(account.getId());
-            List<Message> imapMessages = imapService.getInboxMessages(account.getHostname(), account.getPort(), account.getUsername(), decryptedPassword, dbMessages);
+            List<Message> imapMessages = imapService.getInboxMessages(account.getHostname(), account.getPort(), account.getUsername(), password, dbMessages);
 
             // first delete all messages from the local db that no longer exist on the imap server
             long deletedCount = 0;

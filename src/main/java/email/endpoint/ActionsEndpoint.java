@@ -5,9 +5,7 @@ import email.model.SyncStatusResult;
 import email.service.AccountService;
 import email.service.SyncService;
 import lombok.extern.log4j.Log4j2;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,14 +25,14 @@ public class ActionsEndpoint {
         this.accountService = accountService;
     }
 
-    @GetMapping("/sync")
-    public synchronized List<SyncStatusResult> performSync() throws ExecutionException, InterruptedException {
+    @PostMapping("/sync")
+    public synchronized List<SyncStatusResult> performSync(@RequestBody String bitwardenMasterPassword) throws ExecutionException, InterruptedException {
         List<Account> accounts = accountService.list();
 
         List<Future<SyncStatusResult>> syncFutures = new ArrayList<>();
         for (Account account : accounts) {
             log.debug("Submitting task for account {}", account.getUsername());
-            syncFutures.add(syncService.sync(account));
+            syncFutures.add(syncService.sync(account, bitwardenMasterPassword));
         }
 
         List<SyncStatusResult> results = new ArrayList<>();

@@ -17,7 +17,9 @@ class TableComponent extends Component {
         super();
         this.state = {
             loadedEmails: false,
-            showReadModal: false
+            showReadModal: false,
+            showPasswordModal: true,
+            password: ''
         };
     }
 
@@ -38,7 +40,6 @@ class TableComponent extends Component {
 
     componentDidMount() {
         this.listMessages();
-        this.performSync();
     }
 
     listMessages = () => {
@@ -66,11 +67,14 @@ class TableComponent extends Component {
             );
     };
 
-    performSync = () => {
+    performSync = (password) => {
         const syncToastId = toast.info("Starting sync...", {
             position: toast.POSITION.TOP_RIGHT
         })
-        fetch("./actions/sync")
+        fetch("./actions/sync", {
+            body: password,
+            method: 'POST'
+        })
             .then(res => res.json())
             .then(
                 (results) => {
@@ -133,15 +137,21 @@ class TableComponent extends Component {
         return url;
     };
 
-    closeModal = (currentEmail) => {
+    closeReadModal = (currentEmail) => {
         this.markMessageReadIndInState(currentEmail.id, true);
         this.setState({
             showReadModal: false
         });
     };
 
+    closePasswordModal = () => {
+        this.setState({
+            showPasswordModal: false
+        })
+    }
+
     deleteMessage = (currentEmail) => {
-        this.closeModal(currentEmail);
+        this.closeReadModal(currentEmail);
         this.removeMessageFromState(currentEmail.id);
         fetch("./message?id=" + currentEmail.id, {method: "DELETE"})
             .then((response) => {
@@ -215,6 +225,16 @@ class TableComponent extends Component {
             comparisonValue = row[filter.id]
         }
         return String(comparisonValue).toLowerCase().includes(String(filter.value).toLowerCase());
+    };
+
+    handlePasswordFieldChange = event => {
+        this.setState({password: event.target.value});
+    };
+
+    handlePasswordFormSubmit = event => {
+        this.closePasswordModal();
+        this.performSync(this.state.password);
+        event.preventDefault();
     };
 
     render() {
@@ -308,7 +328,7 @@ class TableComponent extends Component {
                         />
                         <div style={{"width": "100%"}}>
                             <div style={{"float": "left", "width": "50%"}}>
-                                <Button onClick={() => this.closeModal(currentEmail)}>Close</Button>
+                                <Button onClick={() => this.closeReadModal(currentEmail)}>Close</Button>
                                 <Button onClick={() => this.print(currentEmail)}>Print</Button>
                             </div>
                             <div style={{"float": "right", "width": "50%", "text-align": "right"}}>
@@ -318,6 +338,24 @@ class TableComponent extends Component {
                     </div>
                 </ReactModal>
                 }
+                <ReactModal
+                    isOpen={this.state.showPasswordModal}
+                    contentLabel={"EnterPassword"}
+                    ariaHideApp={false}
+                >
+                    <div className={"modalContentWrapper"} style={{
+                        "display": "flex",
+                        "width": "100%",
+                        "height": "100%",
+                        "flex-direction": "column",
+                        "overflow": "hidden"
+                    }}>
+                        <form onSubmit={this.handlePasswordFormSubmit}>
+                            <label>Bitwarden Master Password: <input type="password" value={this.state.password} onChange={this.handlePasswordFieldChange} /></label>
+                            <input type="submit" value="Submit" />
+                        </form>
+                    </div>
+                </ReactModal>
                 <ReactTable
                     data={emails}
                     columns={columns}

@@ -3,6 +3,8 @@ package email.model;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class Account {
     private long id;
@@ -12,5 +14,5 @@ public class Account {
     private String inboxName;
     private String username;
     @JsonIgnore
-    private String password;
+    private UUID bitwardenItemId;
 }

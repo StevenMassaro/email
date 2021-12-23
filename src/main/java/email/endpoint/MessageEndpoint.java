@@ -36,7 +36,7 @@ public class MessageEndpoint {
     }
 
     @PatchMapping("{id}/read")
-    public long setReadIndicator(@PathVariable("id") long id) throws MessagingException {
+    public long setReadIndicator(@PathVariable("id") long id) throws Exception {
         imapService.setReadIndicator(id, true);
         messageService.setReadIndicator(id, true);
         return id;

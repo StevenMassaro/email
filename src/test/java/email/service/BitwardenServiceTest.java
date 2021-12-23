@@ -1,0 +1,58 @@
+package email.service;
+
+import email.model.bitwarden.Item;
+import email.service.BitwardenService;
+import org.apache.commons.io.IOUtils;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.core.io.Resource;
+import org.springframework.test.context.junit4.SpringRunner;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+
+import static org.junit.Assert.assertEquals;
+
+@SpringBootTest
+@RunWith(SpringRunner.class)
+public class BitwardenServiceTest {
+
+    @Autowired
+    private BitwardenService bitwardenService;
+
+    @Value("classpath:BitwardenListItems.json")
+    private Resource bitwardenListItemsJson;
+
+    @Test
+    public void parseSessionKeyFromUnlockOutput() {
+        String unlockConsoleOutput = "Your vault is now unlocked!\n" +
+                "\n" +
+                "To unlock your vault, set your session key to the `BW_SESSION` environment variable. ex:\n" +
+                "$ export BW_SESSION=\"cAQ0Wyv6WGURtRg0MgQl5mDWUAGFXKowuNUePMUITkM+HcKfIaz6OVvfV9/XBZ8qzG7a5PTqT4BqNxrqBfzumQ==\"\n" +
+                "> $env:BW_SESSION=\"cAQ0Wyv6WGURtRg0MgQl5mDWUAGFXKowuNUePMUITkM+HcKfIaz6OVvfV9/XBZ8qzG7a5PTqT4BqNxrqBfzumQ==\"\n" +
+                "\n" +
+                "You can also pass the session key to any command with the `--session` option. ex:\n" +
+                "$ bw list items --session cAQ0Wyv6WGURtRg0MgQl5mDWUAGFXKowuNUePMUITkM+HcKfIaz6OVvfV9/XBZ8qzG7a5PTqT4BqNxrqBfzumQ==";
+
+        String sessionKey = BitwardenService.parseSessionKeyFromUnlockOutput(unlockConsoleOutput);
+        assertEquals("cAQ0Wyv6WGURtRg0MgQl5mDWUAGFXKowuNUePMUITkM+HcKfIaz6OVvfV9/XBZ8qzG7a5PTqT4BqNxrqBfzumQ==", sessionKey);
+    }
+
+    @Test
+    public void testDeserializingBitwardenJson() throws IOException {
+        String json = IOUtils.toString(bitwardenListItemsJson.getInputStream(), StandardCharsets.UTF_8);
+        List<Item> items = bitwardenService.deserializeBitwardenJson(json);
+        Item one = items.get(0);
+        assertEquals(UUID.fromString("d0f3b7f6-8fc5-41fa-9b4e-acd190ce21d1"), one.getId());
+        assertEquals("crappypassword", one.getLogin().getPassword());
+        Item two = items.get(1);
+        assertEquals(UUID.fromString("8d607371-6e50-4802-845e-acd200ce21d1"), two.getId());
+        assertEquals("mompassword", two.getLogin().getPassword());
+    }
+}

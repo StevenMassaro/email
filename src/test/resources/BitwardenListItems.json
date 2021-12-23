@@ -1,0 +1,58 @@
+[
+  {
+    "object": "item",
+    "id": "d0f3b7f6-8fc5-41fa-9b4e-acd190ce21d1",
+    "organizationId": null,
+    "folderId": "311a06b9-ecf3-481c-b219-acd200ce21d1",
+    "type": 1,
+    "reprompt": 0,
+    "name": "accounts.google.com (7)",
+    "notes": null,
+    "favorite": false,
+    "login": {
+      "uris": [
+        {
+          "match": null,
+          "uri": "https://accounts.google.com/ServiceLogin"
+        }
+      ],
+      "username": "steveusername",
+      "password": "crappypassword",
+      "totp": null,
+      "passwordRevisionDate": null
+    },
+    "collectionIds": [],
+    "revisionDate": "2021-02-17T12:30:30.237Z"
+  },
+  {
+    "object": "item",
+    "id": "8d607371-6e50-4802-845e-acd200ce21d1",
+    "organizationId": null,
+    "folderId": "311a06b9-ecf3-591c-b219-acd200ce21d1",
+    "type": 1,
+    "reprompt": 0,
+    "name": "Aol",
+    "notes": "notes here",
+    "favorite": false,
+    "login": {
+      "uris": [
+        {
+          "match": null,
+          "uri": "https://my.screenname.aol.com/_cqr/login/login.psp"
+        }
+      ],
+      "username": "momusername",
+      "password": "mompassword",
+      "totp": null,
+      "passwordRevisionDate": "2021-04-04T12:02:06.264Z"
+    },
+    "collectionIds": [],
+    "revisionDate": "2021-04-04T12:02:04.503Z",
+    "passwordHistory": [
+      {
+        "lastUsedDate": "2021-04-04T12:02:06.264Z",
+        "password": "oldpassword"
+      }
+    ]
+  }
+]

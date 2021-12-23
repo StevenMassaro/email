@@ -1,6 +1,6 @@
 # Email
 
-An email inbox aggregator, supporting listing emails from Gmail and AOL in one aggregated view.
+An email inbox aggregator, supporting listing emails via IMAP from Gmail and AOL in one aggregated view. Passwords are loaded from Bitwarden vault.
 
 ![Email list](img/list.png)
 
@@ -10,10 +10,9 @@ An email inbox aggregator, supporting listing emails from Gmail and AOL in one a
 
 Run the docker image with environment variables for:
 ```
-accounts={'id|imap_hostname|username|encrypted_password','...'}
-initVector=
-key=
+accounts={'id|imap_hostname|username|bitwarden','...'}
+bitwardenEmailFolderId=<get from bitwarden CLI, bw list folders>
+bitwardenCliLocation=<path to bitwarden CLI>
+BW_CLIENTID=<get from bitwarden vault>
+BW_CLIENTSECRET=<get from bitwarden vault>
 ```
-
-## Future plans
-- Connect to Bitwarden to obtain passwords for clients on the fly
