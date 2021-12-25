@@ -6,6 +6,7 @@ import com.sun.mail.imap.IMAPMessage;
 import email.service.MessageService;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.mail.util.MimeMessageParser;
@@ -26,6 +27,7 @@ import static email.model.ProviderEnum.AOL;
 
 @Getter
 @Setter
+@Log4j2
 public class Message {
 
     private long id;
@@ -113,14 +115,11 @@ public class Message {
         if (content instanceof Multipart) {
             Multipart mp = (Multipart) content;
 
-            boolean moreBodyParts = true;
-            int index = 0;
-            while (moreBodyParts) {
+            for (int i = 0; i < mp.getCount(); i++) {
                 try {
-                    bodyParts.add(new BodyPart(index, mp.getBodyPart(index)));
-                    index++;
-                } catch (IndexOutOfBoundsException e) {
-                    moreBodyParts = false;
+                    bodyParts.add(new BodyPart(i, mp.getBodyPart(i)));
+                } catch (Exception e) {
+                    log.warn("Failed to get body part from message", e);
                 }
             }
         } else if (content instanceof String) {
