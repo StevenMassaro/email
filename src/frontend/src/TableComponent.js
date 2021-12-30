@@ -39,6 +39,7 @@ class TableComponent extends Component {
     };
 
     componentDidMount() {
+        this.hidePasswordModalIfPasswordNotNeeded();
         this.listMessages();
         document.addEventListener('keydown', this.keydownHandler);
     }
@@ -169,6 +170,22 @@ class TableComponent extends Component {
                     } else {
                         toast.success("Message '" + currentEmail.subject + "' successfully deleted.", {
                             position: toast.POSITION.TOP_RIGHT
+                        });
+                    }
+                    return response;
+                }
+            )
+    };
+
+    hidePasswordModalIfPasswordNotNeeded = () => {
+        fetch("./actions/requiresPassword")
+            .then((response) => {
+                    if (response.ok) {
+                        response.text().then((text) => {
+                            if (text === "false") {
+                                this.closePasswordModal();
+                                this.performSync();
+                            }
                         });
                     }
                     return response;

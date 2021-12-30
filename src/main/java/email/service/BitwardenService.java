@@ -106,6 +106,10 @@ public class BitwardenService {
         return sessionKey;
     }
 
+    public boolean isCacheEmpty() {
+        return passwordCache.size() == 0;
+    }
+
     private String listPasswordsFromCli(String sessionKey) throws IOException {
         return runCommand(new String[]{bitwardenCliLocation, "list", "items", "--folderid", bitwardenEmailFolderId.toString(), "--session", sessionKey});
     }

@@ -3,6 +3,7 @@ package email.endpoint;
 import email.model.Account;
 import email.model.SyncStatusResult;
 import email.service.AccountService;
+import email.service.BitwardenService;
 import email.service.SyncService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
@@ -19,14 +20,16 @@ public class ActionsEndpoint {
 
     private final SyncService syncService;
     private final AccountService accountService;
+    private final BitwardenService bitwardenService;
 
-    public ActionsEndpoint(SyncService syncService, AccountService accountService) {
+    public ActionsEndpoint(SyncService syncService, AccountService accountService, BitwardenService bitwardenService) {
         this.syncService = syncService;
         this.accountService = accountService;
+        this.bitwardenService = bitwardenService;
     }
 
     @PostMapping("/sync")
-    public synchronized List<SyncStatusResult> performSync(@RequestBody String bitwardenMasterPassword) throws ExecutionException, InterruptedException {
+    public synchronized List<SyncStatusResult> performSync(@RequestBody(required = false) String bitwardenMasterPassword) throws ExecutionException, InterruptedException {
         List<Account> accounts = accountService.list();
 
         List<Future<SyncStatusResult>> syncFutures = new ArrayList<>();
@@ -41,6 +44,11 @@ public class ActionsEndpoint {
         }
 
         return results;
+    }
+
+    @GetMapping("/requiresPassword")
+    public boolean doesSyncRequirePassword() {
+        return bitwardenService.isCacheEmpty();
     }
 
 }
