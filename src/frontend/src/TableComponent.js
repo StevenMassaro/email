@@ -40,6 +40,11 @@ class TableComponent extends Component {
 
     componentDidMount() {
         this.listMessages();
+        document.addEventListener('keydown', this.keydownHandler);
+    }
+
+    componentWillUnmount(){
+        document.removeEventListener('keydown', this.keydownHandler);
     }
 
     listMessages = () => {
@@ -67,12 +72,12 @@ class TableComponent extends Component {
             );
     };
 
-    performSync = (password) => {
+    performSync = () => {
         const syncToastId = toast.info("Starting sync...", {
             position: toast.POSITION.TOP_RIGHT
         })
         fetch("./actions/sync", {
-            body: password,
+            body: this.state.password,
             method: 'POST'
         })
             .then(res => res.json())
@@ -233,8 +238,16 @@ class TableComponent extends Component {
 
     handlePasswordFormSubmit = event => {
         this.closePasswordModal();
-        this.performSync(this.state.password);
+        this.performSync();
         event.preventDefault();
+    };
+
+    keydownHandler = e => {
+        if (e.key === 's' && e.ctrlKey) {
+            e.preventDefault();
+            e.stopPropagation();
+            this.performSync();
+        }
     };
 
     render() {
