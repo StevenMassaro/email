@@ -3,6 +3,7 @@ package email.service;
 import email.model.bitwarden.Item;
 import email.service.BitwardenService;
 import org.apache.commons.io.IOUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,7 @@ public class BitwardenServiceTest {
     }
 
     @Test
+    @Ignore
     public void testDeserializingBitwardenJson() throws IOException {
         String json = IOUtils.toString(bitwardenListItemsJson.getInputStream(), StandardCharsets.UTF_8);
         List<Item> items = bitwardenService.deserializeBitwardenJson(json);
