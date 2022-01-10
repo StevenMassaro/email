@@ -22,10 +22,10 @@ pipeline {
             steps {
                 script {
                     image = docker.build("stevenmassaro/email:latest")
-//                    docker.withRegistry('', 'DockerHub') {
-//                        image.push()
-//                        image.push(pom)
-//                    }
+                    docker.withRegistry('', 'DockerHub') {
+                        image.push()
+                        image.push(pom)
+                    }
                 }
             }
         }
