@@ -327,6 +327,11 @@ class TableComponent extends Component {
             columns.unshift({
                 Header: "Date received",
                 accessor: "dateReceived",
+                Cell: row => {
+                    const date = new Date(row.value);
+                    // fr-CA is yyyy-MM-dd, see https://stackoverflow.com/questions/27939773/tolocaledatestring-short-format for more info
+                    return (<div title={row.original.originalDateReceived}>{date.toLocaleDateString("fr-CA")} {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>);
+                },
                 maxWidth: 145
             });
         }

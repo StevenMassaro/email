@@ -1,6 +1,5 @@
 package email.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.sun.mail.imap.IMAPMessage;
 import email.service.MessageService;
@@ -9,6 +8,7 @@ import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.mail.util.MimeMessageParser;
 
 import javax.activation.DataSource;
@@ -34,8 +34,8 @@ public class Message {
     private long uid;
     private Account account;
     private String subject;
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "America/New_York")
-    private Date dateReceived;
+    private String originalDateReceived;
+    private long dateReceived;
     private Date dateCreated;
     private List<Address> recipient;
     private String fromAddress;
@@ -66,7 +66,8 @@ public class Message {
 
             this.id = MessageService.messageIdSequence.incrementAndGet();
             this.subject = message.getSubject();
-            this.dateReceived = message.getReceivedDate();
+            this.dateReceived = getReceivedDate(message).getTime();
+            this.originalDateReceived = getOriginalDateReceived(message);
             InternetAddress sender = (InternetAddress) ((IMAPMessage) message).getSender();
             this.fromAddress = sender.getAddress();
             this.fromPersonal = sender.getPersonal();
@@ -74,6 +75,23 @@ public class Message {
 
         this.uid = uid;
         this.readInd = determineReadInd(message);
+    }
+
+    public static Date getReceivedDate(javax.mail.Message message) throws MessagingException {
+        try {
+            String[] dates = message.getHeader("Date");
+            return DateUtils.parseDate(dates[0], ProviderEnum.getAllDateFormats());
+        } catch (Exception e) {
+            return message.getReceivedDate();
+        }
+    }
+
+    public static String getOriginalDateReceived(javax.mail.Message message) throws MessagingException {
+        try {
+            return message.getHeader("Date")[0];
+        } catch (Exception e) {
+            return message.getReceivedDate().toString();
+        }
     }
 
     private boolean determineReadInd(javax.mail.Message message) throws MessagingException {
