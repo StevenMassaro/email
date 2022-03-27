@@ -74,8 +74,9 @@ class TableComponent extends Component {
     };
 
     performSync = () => {
-        const syncToastId = toast.info("Starting sync...", {
-            position: toast.POSITION.TOP_RIGHT
+        const syncToastId = toast.info("Syncing...", {
+            position: toast.POSITION.TOP_RIGHT,
+            autoClose: false
         })
         fetch("./actions/sync", {
             body: this.state.password,
@@ -124,6 +125,7 @@ class TableComponent extends Component {
                     this.setState({
                         syncResults: result
                     });
+                    toast.dismiss(syncToastId);
                     toast.error("Sync failed.");
                     console.warn(result);
                 }
