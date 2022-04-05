@@ -4,6 +4,7 @@ import com.sun.mail.imap.IMAPFolder;
 import email.model.Account;
 import email.model.Message;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
@@ -95,6 +96,19 @@ public class ImapService {
 
         Properties props = System.getProperties();
         props.setProperty("mail.store.protocol", "imaps");
+        /*
+        Partial fetch is disabled because I was sometimes getting the following exception when attempting to download
+        large/corrupted email attachments from AOL:
+
+        com.sun.mail.util.DecodingException: BASE64Decoder: Error in encoded stream: needed 4 valid base64 characters but only got 2 before EOF
+
+        This stackoverflow page suggested I disable this: https://stackoverflow.com/questions/1755414/javamail-baseencode64-error
+
+        It seems to have had no effect.
+         */
+        if (StringUtils.containsIgnoreCase(hostname, "aol")) {
+            props.setProperty("mail.imap.partialfetch", "false");
+        }
         Session session = Session.getDefaultInstance(props, null);
         Store store = session.getStore("imaps");
         store.connect(hostname, p, username, decryptedPassword);

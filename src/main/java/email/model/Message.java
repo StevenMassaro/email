@@ -53,14 +53,13 @@ public class Message {
         // only care to parse out the parts of the email for emails that are not in the database already
         // parsing is an expensive IMAP operation
         if (!alreadyExists) {
-            // there is some bug in the MimeMessageParser where it cannot handle an AOL email with an attachment, not
-            // sure what's up, but these need to be handled differently
-            if (!StringUtils.containsIgnoreCase(username, AOL.toString())) {
+            try {
                 MimeMessageParser mimeMessageParser = new MimeMessageParser((MimeMessage) message);
                 mimeMessageParser.parse();
                 setAttachments(mimeMessageParser);
                 setBodyParts(mimeMessageParser);
-            } else {
+            } catch (Exception e) {
+                log.warn("Failed to parse message using commons email parser, resorting to fallback method (which is less mature)", e);
                 setBodyParts(message);
             }
 

@@ -7,6 +7,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import javax.mail.MessagingException;
+import javax.mail.internet.MimeMultipart;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 
@@ -32,7 +34,7 @@ public class BodyPart {
         this.contentType = bodyPart.getContentType();
 
         boolean stringContentType = false;
-        for (ContentTypeEnum contentTypeEnum : ContentTypeEnum.values()) {
+        for (ContentTypeEnum contentTypeEnum : ContentTypeEnum.getNonMultipartContentTypeEnums()) {
             if (StringUtils.containsIgnoreCase(contentType, contentTypeEnum.getImapContentType())) {
                 stringContentType = true;
             }
@@ -42,8 +44,14 @@ public class BodyPart {
             String x = bodyPart.getContent().toString();
             this.content = x.getBytes();
         } else {
-            // todo, uncomment this when I figure out how to handle attachments
-//            this.content = IOUtils.toByteArray(bodyPart.getInputStream());
+            // note this does not properly handle the case where there is an attachment in AOL
+            if (bodyPart.getContent() instanceof MimeMultipart) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ((MimeMultipart)bodyPart.getContent()).writeTo(baos);
+                this.content = baos.toString().getBytes();
+            } else {
+                this.content = "Unable to process body part".getBytes();
+            }
         }
     }
 
