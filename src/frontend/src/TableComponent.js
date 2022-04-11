@@ -93,6 +93,7 @@ class TableComponent extends Component {
                     let deletedCount = 0;
                     let changedReadIndCount = 0;
                     let failedAccounts = [];
+                    let partiallyFailedAccounts = [];
 
                     results.forEach(function (result) {
                         insertedCount += result.insertedCount;
@@ -100,6 +101,8 @@ class TableComponent extends Component {
                         changedReadIndCount += result.changedReadIndCount;
                         if (result.execStatusEnum === "RULE_END_ACCOUNT_FAILURE") {
                             failedAccounts.push(result);
+                        } else if (result.execStatusEnum === "RULE_END_MESSAGE_FAILURE") {
+                            partiallyFailedAccounts.push(result);
                         }
                     });
                     toast.dismiss(syncToastId)
@@ -113,9 +116,17 @@ class TableComponent extends Component {
 
                     failedAccounts.forEach((account) => {
                         toast.error("Failed to sync: " + account.username, {
-                            position: toast.POSITION.TOP_RIGHT
+                            position: toast.POSITION.TOP_RIGHT,
+                            autoClose: false
                         });
                     });
+
+                    partiallyFailedAccounts.forEach((account) => {
+                        toast.warn("Partially failed to sync (some messages may be missing): " + account.username, {
+                            position: toast.POSITION.TOP_RIGHT,
+                            autoClose: false
+                        })
+                    })
 
                     if (insertedCount + deletedCount + changedReadIndCount > 0) {
                         this.listMessages();

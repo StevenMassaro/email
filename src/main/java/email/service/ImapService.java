@@ -1,6 +1,7 @@
 package email.service;
 
 import com.sun.mail.imap.IMAPFolder;
+import email.exception.SomeMessagesFailedToDownloadException;
 import email.model.Account;
 import email.model.Message;
 import lombok.extern.log4j.Log4j2;
@@ -11,6 +12,7 @@ import javax.mail.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.*;
 
 @Service
 @Log4j2
@@ -31,22 +33,46 @@ public class ImapService {
 
         javax.mail.Message[] messages = inbox.getMessages();
         List<Message> returnMessages = new ArrayList<>();
+        boolean allSuccess = true;
         for (int i = 0; i < messages.length; i++) {
-            javax.mail.Message message = messages[i];
-            long uid = inbox.getUID(message);
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            int finalI = i;
+            Future<Void> messageProcessingFuture = executor.submit(() -> {
+                javax.mail.Message message = messages[finalI];
+                long uid = inbox.getUID(message);
 
-            boolean messageAlreadyDownloaded = false;
-            for (Message existingMessage : existingMessages) {
-                if (existingMessage.getUid() == uid) {
-                    messageAlreadyDownloaded = true;
+                boolean messageAlreadyDownloaded = false;
+                for (Message existingMessage : existingMessages) {
+                    if (existingMessage.getUid() == uid) {
+                        messageAlreadyDownloaded = true;
+                    }
                 }
-            }
 
-            log.debug("Processing email {} of {} for {}", i + 1, messages.length, username);
-            returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username));
+                log.debug("Processing email {} of {} for {}", finalI + 1, messages.length, username);
+                /*
+                TODO: There is an issue with this implementation. Let's say that we are waiting a really long time for a
+                message. In that case, the response will be serialized back to the client, and adding the message to
+                the returnMessages list won't add it to the internal message db. We need to do something with messages
+                that we download after returning from this method.
+                 */
+                returnMessages.add(new Message(message, uid, messageAlreadyDownloaded));
+                return null; // this is useless, but is here to make this a callable, so that we can throw exceptions
+            });
+
+            try {
+                messageProcessingFuture.get(10, TimeUnit.SECONDS);
+            } catch (TimeoutException e) {
+                log.warn("Ran out of time while processing message", e);
+                messageProcessingFuture.cancel(true);
+                allSuccess = false;
+            }
         }
         store.close();
-        return returnMessages;
+        if (!allSuccess) {
+            throw new SomeMessagesFailedToDownloadException(returnMessages);
+        } else {
+            return returnMessages;
+        }
     }
 
     public void setReadIndicator(long id, boolean readInd) throws Exception {
@@ -92,6 +118,7 @@ public class ImapService {
     }
 
     private Store getStore(String hostname, long port, String username, String decryptedPassword) throws MessagingException {
+        log.debug("Getting store for {} {}", hostname, username);
         int p = Integer.parseInt(Long.toString(port));
 
         Properties props = System.getProperties();
@@ -112,6 +139,7 @@ public class ImapService {
         Session session = Session.getDefaultInstance(props, null);
         Store store = session.getStore("imaps");
         store.connect(hostname, p, username, decryptedPassword);
+        log.debug("Connected to store for {} {}", hostname, username);
         return store;
     }
 

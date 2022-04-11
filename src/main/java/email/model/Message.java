@@ -49,7 +49,7 @@ public class Message {
 
     }
 
-    public Message(javax.mail.Message message, long uid, boolean alreadyExists, String username) throws Exception {
+    public Message(javax.mail.Message message, long uid, boolean alreadyExists) throws Exception {
         // only care to parse out the parts of the email for emails that are not in the database already
         // parsing is an expensive IMAP operation
         if (!alreadyExists) {

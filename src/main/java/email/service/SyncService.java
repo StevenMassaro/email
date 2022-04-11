@@ -1,5 +1,6 @@
 package email.service;
 
+import email.exception.SomeMessagesFailedToDownloadException;
 import email.model.Account;
 import email.model.ExecStatusEnum;
 import email.model.Message;
@@ -38,7 +39,13 @@ public class SyncService {
         try {
             String password = bitwardenService.getPassword(account.getBitwardenItemId(), bitwardenMasterPassword);
             List<Message> dbMessages = messageService.list(account.getId());
-            List<Message> imapMessages = imapService.getInboxMessages(account.getHostname(), account.getPort(), account.getUsername(), password, dbMessages);
+            List<Message> imapMessages;
+            try {
+                imapMessages = imapService.getInboxMessages(account.getHostname(), account.getPort(), account.getUsername(), password, dbMessages);
+            } catch (SomeMessagesFailedToDownloadException e) {
+                imapMessages = e.getReturnMessages();
+                messageFailure = true;
+            }
 
             // first delete all messages from the local db that no longer exist on the imap server
             long deletedCount = 0;
@@ -95,6 +102,7 @@ public class SyncService {
         } else {
             result = ExecStatusEnum.RULE_END_ACCOUNT_FAILURE;
         }
+        log.debug("Sync finished for {}", account.getUsername());
         return new AsyncResult<>(new SyncStatusResult(totalInsertedCount, totalDeletedCount, totalChangedReadIndCount, result, account.getUsername()));
     }
 }
