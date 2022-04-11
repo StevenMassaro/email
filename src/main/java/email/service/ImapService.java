@@ -62,7 +62,7 @@ public class ImapService {
             try {
                 messageProcessingFuture.get(10, TimeUnit.SECONDS);
             } catch (TimeoutException e) {
-                log.warn("Ran out of time while processing message", e);
+                log.warn("Ran out of time while processing message {} of {} for {}", finalI + 1, messages.length, username, e);
                 messageProcessingFuture.cancel(true);
                 allSuccess = false;
             }
