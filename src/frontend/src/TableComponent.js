@@ -346,7 +346,7 @@ class TableComponent extends Component {
                     // fr-CA is yyyy-MM-dd, see https://stackoverflow.com/questions/27939773/tolocaledatestring-short-format for more info
                     return (<div title={row.original.originalDateReceived}>{formatDate(date)}</div>);
                 },
-                maxWidth: 145
+                maxWidth: 148
             });
         }
 
