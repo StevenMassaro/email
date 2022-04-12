@@ -3,7 +3,7 @@ import ReactTable from "react-table";
 import ReactModal from "react-modal";
 import "react-table/react-table.css";
 import 'semantic-ui-css/semantic.min.css';
-import {Button, Grid} from "semantic-ui-react";
+import {Button} from "semantic-ui-react";
 import {isMobile} from "react-device-detect";
 import {toast, ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.min.css';
@@ -297,7 +297,7 @@ class TableComponent extends Component {
                 Cell: row => {
                     return (
                         <span>{row.original.fromPersonal} <span
-                            style={row.original.fromPersonal ? {"font-style": "italic"} : {}}>{row.original.fromAddress}</span></span>
+                            style={row.original.fromPersonal ? {"fontStyle": "italic"} : {}}>{row.original.fromAddress}</span></span>
                     );
                 },
                 maxWidth: 250
@@ -323,15 +323,18 @@ class TableComponent extends Component {
                     const originalSubject = row.value;
                     const displaySubject = originalSubject ? originalSubject : "no subject";
                     return (
-                        <a href="#"
-                           onClick={(e) => this.onSubjectClick(e, row.original)}>
-                                        <span style={{
-                                            "font-weight": row.original.readInd ? "normal" : "bold",
-                                            "font-style": (originalSubject ? "normal" : "italic")
-                                        }}>
-                                            {displaySubject}
-                                        </span>
-                        </a>
+                        <button
+                            type="button"
+                            className="link-button"
+                            onClick={(e) => this.onSubjectClick(e, row.original)}
+                        >
+                            <span style={{
+                                "fontWeight": row.original.readInd ? "normal" : "bold",
+                                "fontStyle": (originalSubject ? "normal" : "italic")
+                            }}>
+                                {displaySubject}
+                            </span>
+                        </button>
                     );
                 }
             }
@@ -363,7 +366,7 @@ class TableComponent extends Component {
                         "display": "flex",
                         "width": "100%",
                         "height": "100%",
-                        "flex-direction": "column",
+                        "flexDirection": "column",
                         "overflow": "hidden"
                     }}>
 
@@ -372,15 +375,16 @@ class TableComponent extends Component {
                         />
 
                         <iframe src={this.getBodyUrl(currentEmail.id)}
-                                style={{"flex-grow": "1"}}
+                                style={{"flexGrow": "1"}}
                                 id="emailContent"
+                                title="email contents"
                         />
                         <div style={{"width": "100%"}}>
                             <div style={{"float": "left", "width": "50%"}}>
                                 <Button onClick={() => this.closeReadModal(currentEmail)}>Close</Button>
                                 <Button onClick={() => this.print(currentEmail)}>Print</Button>
                             </div>
-                            <div style={{"float": "right", "width": "50%", "text-align": "right"}}>
+                            <div style={{"float": "right", "width": "50%", "textAlign": "right"}}>
                                 <Button negative onClick={() => this.deleteMessage(currentEmail)}>Delete</Button>
                             </div>
                         </div>
@@ -396,7 +400,7 @@ class TableComponent extends Component {
                         "display": "flex",
                         "width": "100%",
                         "height": "100%",
-                        "flex-direction": "column",
+                        "flexDirection": "column",
                         "overflow": "hidden"
                     }}>
                         <form onSubmit={this.handlePasswordFormSubmit}>

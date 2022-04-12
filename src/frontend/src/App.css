@@ -42,3 +42,13 @@
 .rt-tr-group {
     flex: 0 0 auto !important;
 }
+
+.link-button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    color: #4183c4;
+    display: inline;
+    margin: 0;
+    padding: 0;
+}
