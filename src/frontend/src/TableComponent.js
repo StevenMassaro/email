@@ -10,6 +10,7 @@ import 'react-toastify/dist/ReactToastify.min.css';
 import './TableComponent.css';
 import ModalHeaderComponent from "./ModalHeaderComponent";
 import './paper-clip.svg';
+import {formatDate} from "./Utils";
 
 
 class TableComponent extends Component {
@@ -343,7 +344,7 @@ class TableComponent extends Component {
                 Cell: row => {
                     const date = new Date(row.value);
                     // fr-CA is yyyy-MM-dd, see https://stackoverflow.com/questions/27939773/tolocaledatestring-short-format for more info
-                    return (<div title={row.original.originalDateReceived}>{date.toLocaleDateString("fr-CA")} {date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>);
+                    return (<div title={row.original.originalDateReceived}>{formatDate(date)}</div>);
                 },
                 maxWidth: 145
             });

@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import './ModalHeaderComponent.css';
 import download from 'downloadjs';
+import {formatDate} from "./Utils";
 
 class ModalHeaderComponent extends Component {
 
@@ -20,7 +21,7 @@ class ModalHeaderComponent extends Component {
         return <div>
             <div className="flex-container">
                 <div className="subject bold">{currentEmail.subject}</div>
-                <div className="dateReceived">{currentEmail.dateReceived}</div>
+                <div className="dateReceived">{formatDate(new Date(currentEmail.dateReceived))}</div>
             </div>
             {attachments &&
             <div className="flex-container attachments">
