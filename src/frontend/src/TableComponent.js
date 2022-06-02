@@ -243,7 +243,7 @@ class TableComponent extends Component {
         w.document.write(
             '<span style="all:unset">' +
             '<b>From: </b><span>' + (email.fromPersonal ? (email.fromPersonal + " ") : "") + '&#8249;' + email.fromAddress + '&#8250;</span><br>' +
-            '<b>Sent: </b>' + email.dateReceived + '<br>' +
+            '<b>Sent: </b>' + formatDate(new Date(email.dateReceived)) + '<br>' +
             '<b>To: </b>' + email.account.username + '<br>' +
             '<b>Subject: </b>' + email.subject +
             '<hr/><br></span>'
