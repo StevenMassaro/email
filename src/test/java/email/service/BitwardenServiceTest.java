@@ -21,7 +21,6 @@ import java.util.concurrent.ExecutionException;
 import static org.junit.Assert.assertEquals;
 
 @SpringBootTest
-@RunWith(SpringRunner.class)
 public class BitwardenServiceTest {
 
     @Autowired
