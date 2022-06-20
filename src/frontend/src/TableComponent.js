@@ -82,67 +82,88 @@ class TableComponent extends Component {
         fetch("./actions/sync", {
             body: this.state.password,
             method: 'POST'
-        })
-            .then(res => res.json())
-            .then(
-                (results) => {
-                    this.setState({
-                        syncResults: results
-                    });
+        }).then(() => {
+            this.syncPollStatus(syncToastId)
+        });
+    };
 
-                    let insertedCount = 0;
-                    let deletedCount = 0;
-                    let changedReadIndCount = 0;
-                    let failedAccounts = [];
-                    let partiallyFailedAccounts = [];
+    syncPollStatus = (syncToastId) => {
+        fetch("./actions/sync/status")
+            .then((response) => {
+                    if (response.ok) {
+                        response.text().then((text) => {
+                            if (text === "true") {
+                                fetch("./actions/sync/results")
+                                    .then(res => res.json())
+                                    .then(
+                                        (results) => {
+                                            this.setState({
+                                                syncResults: results
+                                            });
 
-                    results.forEach(function (result) {
-                        insertedCount += result.insertedCount;
-                        deletedCount += result.deletedCount;
-                        changedReadIndCount += result.changedReadIndCount;
-                        if (result.execStatusEnum === "RULE_END_ACCOUNT_FAILURE") {
-                            failedAccounts.push(result);
-                        } else if (result.execStatusEnum === "RULE_END_MESSAGE_FAILURE") {
-                            partiallyFailedAccounts.push(result);
-                        }
-                    });
-                    toast.dismiss(syncToastId)
+                                            let insertedCount = 0;
+                                            let deletedCount = 0;
+                                            let changedReadIndCount = 0;
+                                            let failedAccounts = [];
+                                            let partiallyFailedAccounts = [];
 
-                    toast.info("Sync results: "
-                        + insertedCount + " inserted; "
-                        + deletedCount + " deleted; "
-                        + changedReadIndCount + " changed read indicator.", {
-                        position: toast.POSITION.TOP_RIGHT
-                    });
+                                            results.forEach(function (result) {
+                                                insertedCount += result.insertedCount;
+                                                deletedCount += result.deletedCount;
+                                                changedReadIndCount += result.changedReadIndCount;
+                                                if (result.execStatusEnum === "RULE_END_ACCOUNT_FAILURE") {
+                                                    failedAccounts.push(result);
+                                                } else if (result.execStatusEnum === "RULE_END_MESSAGE_FAILURE") {
+                                                    partiallyFailedAccounts.push(result);
+                                                }
+                                            });
+                                            toast.dismiss(syncToastId)
 
-                    failedAccounts.forEach((account) => {
-                        toast.error("Failed to sync: " + account.username, {
-                            position: toast.POSITION.TOP_RIGHT,
-                            autoClose: false
+                                            toast.info("Sync results: "
+                                                + insertedCount + " inserted; "
+                                                + deletedCount + " deleted; "
+                                                + changedReadIndCount + " changed read indicator.", {
+                                                position: toast.POSITION.TOP_RIGHT
+                                            });
+
+                                            failedAccounts.forEach((account) => {
+                                                toast.error("Failed to sync: " + account.username, {
+                                                    position: toast.POSITION.TOP_RIGHT,
+                                                    autoClose: false
+                                                });
+                                            });
+
+                                            partiallyFailedAccounts.forEach((account) => {
+                                                toast.warn("Partially failed to sync (some messages may be missing): " + account.username, {
+                                                    position: toast.POSITION.TOP_RIGHT,
+                                                    autoClose: false
+                                                })
+                                            })
+
+                                            if (insertedCount + deletedCount + changedReadIndCount > 0) {
+                                                this.listMessages();
+                                            }
+                                        },
+                                        (result) => {
+                                            this.setState({
+                                                syncResults: result
+                                            });
+                                            toast.dismiss(syncToastId);
+                                            toast.error("Sync failed.");
+                                            console.warn(result);
+                                        }
+                                    )
+                            } else {
+                                setTimeout(() => {
+                                    this.syncPollStatus(syncToastId)
+                                }, 2000);
+                            }
                         });
-                    });
-
-                    partiallyFailedAccounts.forEach((account) => {
-                        toast.warn("Partially failed to sync (some messages may be missing): " + account.username, {
-                            position: toast.POSITION.TOP_RIGHT,
-                            autoClose: false
-                        })
-                    })
-
-                    if (insertedCount + deletedCount + changedReadIndCount > 0) {
-                        this.listMessages();
                     }
-                },
-                (result) => {
-                    this.setState({
-                        syncResults: result
-                    });
-                    toast.dismiss(syncToastId);
-                    toast.error("Sync failed.");
-                    console.warn(result);
+                    return response;
                 }
             )
-    };
+    }
 
     getBodyUrl = (id) => {
         let host = window.location.host;
