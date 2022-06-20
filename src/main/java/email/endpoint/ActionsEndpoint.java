@@ -1,7 +1,7 @@
 package email.endpoint;
 
 import email.job.SyncJob;
-import email.model.SyncStatusResult;
+import email.model.ResultsWrapper;
 import email.service.AccountService;
 import email.service.BitwardenService;
 import email.service.SyncService;
@@ -29,14 +29,9 @@ public class ActionsEndpoint {
         syncJob.startSync(bitwardenMasterPassword);
     }
 
-    @GetMapping("/sync/status")
-    public synchronized boolean isSyncComplete() {
-        return syncJob.isComplete();
-    }
-
     @GetMapping("/sync/results")
-    public synchronized List<SyncStatusResult> getSyncResults() {
-        return syncJob.getResults();
+    public synchronized ResultsWrapper getSyncResults() {
+        return new ResultsWrapper(syncJob.getResults(), syncJob.isComplete());
     }
 
     @GetMapping("/requiresPassword")
