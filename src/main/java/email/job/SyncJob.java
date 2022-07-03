@@ -27,6 +27,7 @@ public class SyncJob {
 
     public synchronized void startSync(String bitwardenMasterPassword) throws ExecutionException, InterruptedException {
         inProgress.set(true);
+        results.clear();
         new Thread(() -> {
             List<Account> accounts = accountService.list();
 
