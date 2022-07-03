@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import ReactTable from "react-table";
 import ReactModal from "react-modal";
 import "react-table/react-table.css";
-import 'semantic-ui-css/semantic.min.css';
 import {Button} from "semantic-ui-react";
 import {isMobile} from "react-device-detect";
 import {toast, ToastContainer} from "react-toastify";
