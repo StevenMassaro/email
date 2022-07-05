@@ -8,7 +8,6 @@ import {toast, ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.min.css';
 import './TableComponent.css';
 import ModalHeaderComponent from "./ModalHeaderComponent";
-import './paper-clip.svg';
 import {formatDate} from "./Utils";
 
 
