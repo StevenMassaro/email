@@ -1,4 +1,4 @@
-FROM openjdk:13
+FROM arm64v8/openjdk:17
 EXPOSE 8080
 RUN yum install unzip wget -y && \
     wget --no-verbose https://github.com/bitwarden/cli/releases/download/v1.22.1/bw-linux-1.22.1.zip && \
