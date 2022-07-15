@@ -1,6 +1,6 @@
 FROM eclipse-temurin:17-jre
 EXPOSE 8080
-RUN apt-get install unzip wget -y && \
+RUN apt-get update && apt-get install unzip wget -y && \
     wget --no-verbose https://github.com/bitwarden/cli/releases/download/v1.22.1/bw-linux-1.22.1.zip && \
     unzip bw-linux-1.22.1.zip && \
     install bw /usr/local/bin/ && \
