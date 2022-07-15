@@ -1,10 +1,6 @@
 FROM eclipse-temurin:17-jre
 EXPOSE 8080
-RUN apt-get update && apt-get install unzip wget -y && \
-    wget --no-verbose https://github.com/bitwarden/cli/releases/download/v1.22.1/bw-linux-1.22.1.zip && \
-    unzip bw-linux-1.22.1.zip && \
-    install bw /usr/local/bin/ && \
-    rm -rf bw* && \
-    apt-get remove unzip wget -y
+RUN apt-get update && apt-get install npm -y && \
+    npm install -g @bitwarden/cli
 ADD /target/Email.jar Email.jar
 ENTRYPOINT ["java","-jar","Email.jar"]
