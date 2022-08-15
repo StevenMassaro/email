@@ -11,4 +11,5 @@ public class ResultsWrapper {
 
     private final List<SyncStatusResult> results;
     private final boolean complete;
+    private final int numberOfAccounts;
 }

@@ -19,6 +19,7 @@ public class SyncJob {
     private final SyncService syncService;
     private final List<SyncStatusResult> results = new ArrayList<>();
     private final AtomicBoolean inProgress = new AtomicBoolean(false);
+    private int numberOfAccounts;
 
     public SyncJob(AccountService accountService, SyncService syncService) {
         this.accountService = accountService;
@@ -30,6 +31,7 @@ public class SyncJob {
         results.clear();
         new Thread(() -> {
             List<Account> accounts = accountService.list();
+            numberOfAccounts = accounts.size();
 
             List<Future<SyncStatusResult>> syncFutures = new ArrayList<>();
             for (Account account : accounts) {
@@ -54,5 +56,9 @@ public class SyncJob {
 
     public List<SyncStatusResult> getResults() {
         return results;
+    }
+
+    public int getNumberOfAccounts() {
+        return numberOfAccounts;
     }
 }

@@ -73,7 +73,7 @@ class TableComponent extends Component {
     };
 
     performSync = () => {
-        const syncToastId = toast.info("Syncing...", {
+        const syncToastId = toast.info(this.buildSyncStatusToastMessage(0, null), {
             position: toast.POSITION.TOP_RIGHT,
             autoClose: false
         })
@@ -85,12 +85,22 @@ class TableComponent extends Component {
         });
     };
 
+    buildSyncStatusToastMessage(completedAccountCount, totalAccountCount) {
+        const innerMessage = totalAccountCount ? `/${totalAccountCount}` : ""
+        return `Syncing... ${completedAccountCount}${innerMessage} accounts complete`
+    }
+
     syncPollStatus = (syncToastId) => {
         fetch("./actions/sync/results")
             .then(res => res.json())
             .then(
                 (resultWrapper) => {
                     if (!resultWrapper.complete) {
+                        const completedAccountCount = resultWrapper.results.length
+                        const totalAccountsCount = resultWrapper.numberOfAccounts
+                        toast.update(syncToastId, {
+                            render: this.buildSyncStatusToastMessage(completedAccountCount, totalAccountsCount)
+                        })
                         setTimeout(() => {
                             this.syncPollStatus(syncToastId);
                         }, 2000);

@@ -31,7 +31,7 @@ public class ActionsEndpoint {
 
     @GetMapping("/sync/results")
     public synchronized ResultsWrapper getSyncResults() {
-        return new ResultsWrapper(syncJob.getResults(), syncJob.isComplete());
+        return new ResultsWrapper(syncJob.getResults(), syncJob.isComplete(), syncJob.getNumberOfAccounts());
     }
 
     @GetMapping("/requiresPassword")
