@@ -19,9 +19,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static email.model.ProviderEnum.AOL;
 
@@ -44,6 +42,10 @@ public class Message {
     private List<BodyPart> bodyParts = new ArrayList<>();
     private boolean readInd;
     private List<Attachment> attachments = new ArrayList<>();
+    /**
+     * Map of Content-ID's to their respective attachments.
+     */
+    private Map<String, Attachment> cidMap = new HashMap<>();
 
     public Message() {
 
@@ -58,6 +60,7 @@ public class Message {
                 mimeMessageParser.parse();
                 setAttachments(mimeMessageParser);
                 setBodyParts(mimeMessageParser);
+                setCidMap(mimeMessageParser);
             } catch (Exception e) {
                 log.warn("Failed to parse message using commons email parser, resorting to fallback method (which is less mature)", e);
                 setBodyParts(message);
@@ -74,6 +77,17 @@ public class Message {
 
         this.uid = uid;
         this.readInd = determineReadInd(message);
+    }
+
+    private void setCidMap(MimeMessageParser mimeMessageParser) throws IOException {
+        Collection<String> contentIds = mimeMessageParser.getContentIds();
+        for (String contentId : contentIds) {
+            DataSource attachmentDs = mimeMessageParser.findAttachmentByCid(contentId);
+            Attachment attachment = Attachment.fromDataSource(attachmentDs);
+            if (attachment != null) {
+                this.cidMap.put(contentId, attachment);
+            }
+        }
     }
 
     public static Date getReceivedDate(javax.mail.Message message) throws MessagingException {
@@ -158,12 +172,10 @@ public class Message {
 
     public void setAttachments(MimeMessageParser mimeMessageParser) throws IOException {
         List<DataSource> attachments = mimeMessageParser.getAttachmentList();
-        for (DataSource attachment : attachments) {
-            String name = attachment.getName();
-            String contentType = attachment.getContentType();
-            byte[] file = IOUtils.toByteArray(attachment.getInputStream());
-            if (StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(contentType) && file != null) {
-                this.attachments.add(new Attachment(attachment.getName(), attachment.getContentType(), IOUtils.toByteArray(attachment.getInputStream())));
+        for (DataSource attachmentDs : attachments) {
+            Attachment attachment = Attachment.fromDataSource(attachmentDs);
+            if (attachment != null) {
+                this.attachments.add(attachment);
             }
         }
     }

@@ -1,5 +1,6 @@
 package email.endpoint;
 
+import email.model.Attachment;
 import email.model.BodyPart;
 import email.model.ContentTypeEnum;
 import email.model.Message;
@@ -50,6 +51,14 @@ public class BodyEndpoint {
                     responseHeaders.set("Content-Type", contentTypeEnum.getReturnContentType() + "; charset=utf-8");
                 }
             }
+        }
+
+        // replace all cid (Content-Id) identifiers with a link to the attachment endpoint
+        for (Map.Entry<String, Attachment> cidMapEntry : message.getCidMap().entrySet()) {
+            Attachment attachment = cidMapEntry.getValue();
+            String contentId = cidMapEntry.getKey();
+
+            body = body.replace("cid:" + contentId, "./attachment?id=" + attachment.getId());
         }
 
         return new ResponseEntity<>(body, responseHeaders, HttpStatus.OK);
