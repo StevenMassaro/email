@@ -7,6 +7,10 @@ import email.model.Message;
 import email.service.ImapService;
 import email.service.MessageService;
 import org.apache.commons.lang3.StringUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -41,6 +45,7 @@ public class BodyEndpoint {
         List<BodyPart> bodyParts = message.getBodyParts();
 
         String body = "";
+        ContentTypeEnum selectedContentType = null;
 
         // pick the most favorable body part
         for (ContentTypeEnum contentTypeEnum : ContentTypeEnum.values()) {
@@ -48,6 +53,7 @@ public class BodyEndpoint {
                 if (StringUtils.isEmpty(body) && // stop after finding the best match
                         StringUtils.containsIgnoreCase(bodyPart.getContentType(), contentTypeEnum.getImapContentType())) {
                     body = bodyPart.getContentAsString();
+                    selectedContentType = contentTypeEnum;
                     responseHeaders.set("Content-Type", contentTypeEnum.getReturnContentType() + "; charset=utf-8");
                 }
             }
@@ -59,6 +65,18 @@ public class BodyEndpoint {
             String contentId = cidMapEntry.getKey();
 
             body = body.replace("cid:" + contentId, "./attachment?id=" + attachment.getId());
+        }
+
+        // add open in new tab to all links
+        if (selectedContentType == ContentTypeEnum.TEXT_HTML) {
+            Document parse = Jsoup.parse(body);
+            Elements a = parse.select("a");
+            for (Element element : a) {
+                if (!element.getElementsByAttribute("href").isEmpty()) {
+                    element.attr("target", "_blank");
+                }
+            }
+            body = parse.toString();
         }
 
         return new ResponseEntity<>(body, responseHeaders, HttpStatus.OK);
