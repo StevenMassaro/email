@@ -49,12 +49,6 @@ public class ImapService {
                 }
 
                 log.debug("Processing email {} of {} for {}", finalI + 1, messages.length, username);
-                /*
-                TODO: There is an issue with this implementation. Let's say that we are waiting a really long time for a
-                message. In that case, the response will be serialized back to the client, and adding the message to
-                the returnMessages list won't add it to the internal message db. We need to do something with messages
-                that we download after returning from this method.
-                 */
                 returnMessages.add(new Message(message, uid, messageAlreadyDownloaded));
                 return null; // this is useless, but is here to make this a callable, so that we can throw exceptions
             });
