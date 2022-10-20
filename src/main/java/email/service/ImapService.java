@@ -6,6 +6,7 @@ import email.model.Account;
 import email.model.Message;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.mail.*;
@@ -69,7 +70,9 @@ public class ImapService {
         }
     }
 
+    @Async
     public void setReadIndicator(long id, boolean readInd) throws Exception {
+        log.debug("Marking email {} as read ind {}", id, readInd);
         Message message = messageService.get(id);
         Store store = getStore(message);
 

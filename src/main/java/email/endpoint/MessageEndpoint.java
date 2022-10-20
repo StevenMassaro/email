@@ -34,11 +34,4 @@ public class MessageEndpoint {
         imapService.deleteMessage(id);
         messageService.delete(id);
     }
-
-    @PatchMapping("{id}/read")
-    public long setReadIndicator(@PathVariable("id") long id) throws Exception {
-        imapService.setReadIndicator(id, true);
-        messageService.setReadIndicator(id, true);
-        return id;
-    }
 }

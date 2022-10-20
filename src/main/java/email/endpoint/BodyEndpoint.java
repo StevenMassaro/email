@@ -6,15 +6,14 @@ import email.model.ContentTypeEnum;
 import email.model.Message;
 import email.service.ImapService;
 import email.service.MessageService;
+import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,24 +23,28 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.mail.MessagingException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @RestController
 @RequestMapping(value = "/body")
+@Log4j2
 public class BodyEndpoint {
 
     private final MessageService messageService;
+    private final ImapService imapService;
 
-    public BodyEndpoint(MessageService messageService) {
+    public BodyEndpoint(MessageService messageService, ImapService imapService) {
         this.messageService = messageService;
+        this.imapService = imapService;
     }
 
     @GetMapping()
-    public ResponseEntity<String> getBody(@RequestParam("id") long id) throws MessagingException {
+    public ResponseEntity<String> getBody(@RequestParam("id") long id) throws Exception {
+        log.debug("Loading email body for message {}", id);
         HttpHeaders responseHeaders = new HttpHeaders();
 
         Message message = messageService.get(id);
+        imapService.setReadIndicator(id, true);
+        messageService.setReadIndicator(id, true);
         List<BodyPart> bodyParts = message.getBodyParts();
 
         String body = "";
