@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import ReactTable from "react-table";
 import ReactModal from "react-modal";
 import "react-table/react-table.css";
-import {Button} from "semantic-ui-react";
+import {Button, Form, Grid} from "semantic-ui-react";
 import {isMobile} from "react-device-detect";
 import {toast, ToastContainer} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.min.css';
@@ -404,18 +404,17 @@ class TableComponent extends Component {
                     contentLabel={"EnterPassword"}
                     ariaHideApp={false}
                 >
-                    <div className={"modalContentWrapper"} style={{
-                        "display": "flex",
-                        "width": "100%",
-                        "height": "100%",
-                        "flexDirection": "column",
-                        "overflow": "hidden"
-                    }}>
-                        <form onSubmit={this.handlePasswordFormSubmit}>
-                            <label>Bitwarden Master Password: <input autoFocus type="password" value={this.state.password} onChange={this.handlePasswordFieldChange} /></label>
-                            <input type="submit" value="Submit" />
-                        </form>
-                    </div>
+                    <Grid centered>
+                        <Grid.Column width={4}>
+                            <Form>
+                                <Form.Field>
+                                    <label>Bitwarden Master Password</label>
+                                    <input autoFocus type="password" value={this.state.password} onChange={this.handlePasswordFieldChange} />
+                                </Form.Field>
+                                <Button type='submit' onClick={this.handlePasswordFormSubmit}>Submit</Button>
+                            </Form>
+                        </Grid.Column>
+                    </Grid>
                 </ReactModal>
                 {!this.state.showPasswordModal &&
                 <ReactTable
