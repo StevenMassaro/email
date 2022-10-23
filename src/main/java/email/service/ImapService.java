@@ -29,10 +29,11 @@ public class ImapService {
                 public void onRemoval(RemovalNotification<String, Store> notification) {
                     try {
                         if (notification.getValue() != null) {
+                            log.debug("Closing store for {}", notification.getKey());
                             notification.getValue().close();
                         }
                     } catch (MessagingException e) {
-                        log.debug("Closing store for {}", notification.getKey());
+                        log.warn("Failed to close expired store for {}", notification.getKey(), e);
                     }
                 }
             })
