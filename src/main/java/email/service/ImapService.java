@@ -1,5 +1,6 @@
 package email.service;
 
+import com.google.common.cache.*;
 import com.sun.mail.imap.IMAPFolder;
 import email.exception.SomeMessagesFailedToDownloadException;
 import email.model.Account;
@@ -21,6 +22,21 @@ public class ImapService {
 
     private final MessageService messageService;
     private final BitwardenService bitwardenService;
+    Cache<String, Store> storeCache = CacheBuilder.newBuilder()
+            .expireAfterWrite(2, TimeUnit.MINUTES)
+            .removalListener(new RemovalListener<String, Store>() {
+                @Override
+                public void onRemoval(RemovalNotification<String, Store> notification) {
+                    try {
+                        if (notification.getValue() != null) {
+                            notification.getValue().close();
+                        }
+                    } catch (MessagingException e) {
+                        log.debug("Closing store for {}", notification.getKey());
+                    }
+                }
+            })
+            .build();
 
     public ImapService(MessageService messageService, BitwardenService bitwardenService) {
         this.messageService = messageService;
@@ -30,43 +46,42 @@ public class ImapService {
     public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword, List<Message> existingMessages) throws Exception {
         Store store = getStore(hostname, port, username, decryptedPassword);
 
-        IMAPFolder inbox = openInbox(store, Folder.READ_ONLY);
+        try (IMAPFolder inbox = openInbox(store, Folder.READ_ONLY)) {
+            javax.mail.Message[] messages = inbox.getMessages();
+            List<Message> returnMessages = new ArrayList<>();
+            boolean allSuccess = true;
+            for (int i = 0; i < messages.length; i++) {
+                ExecutorService executor = Executors.newSingleThreadExecutor();
+                int finalI = i;
+                Future<Void> messageProcessingFuture = executor.submit(() -> {
+                    javax.mail.Message message = messages[finalI];
+                    long uid = inbox.getUID(message);
 
-        javax.mail.Message[] messages = inbox.getMessages();
-        List<Message> returnMessages = new ArrayList<>();
-        boolean allSuccess = true;
-        for (int i = 0; i < messages.length; i++) {
-            ExecutorService executor = Executors.newSingleThreadExecutor();
-            int finalI = i;
-            Future<Void> messageProcessingFuture = executor.submit(() -> {
-                javax.mail.Message message = messages[finalI];
-                long uid = inbox.getUID(message);
-
-                boolean messageAlreadyDownloaded = false;
-                for (Message existingMessage : existingMessages) {
-                    if (existingMessage.getUid() == uid) {
-                        messageAlreadyDownloaded = true;
+                    boolean messageAlreadyDownloaded = false;
+                    for (Message existingMessage : existingMessages) {
+                        if (existingMessage.getUid() == uid) {
+                            messageAlreadyDownloaded = true;
+                        }
                     }
+
+                    log.debug("Processing email {} of {} for {}", finalI + 1, messages.length, username);
+                    returnMessages.add(new Message(message, uid, messageAlreadyDownloaded));
+                    return null; // this is useless, but is here to make this a callable, so that we can throw exceptions
+                });
+
+                try {
+                    messageProcessingFuture.get(60, TimeUnit.SECONDS);
+                } catch (TimeoutException e) {
+                    log.warn("Ran out of time while processing message {} of {} for {}", finalI + 1, messages.length, username, e);
+                    messageProcessingFuture.cancel(true);
+                    allSuccess = false;
                 }
-
-                log.debug("Processing email {} of {} for {}", finalI + 1, messages.length, username);
-                returnMessages.add(new Message(message, uid, messageAlreadyDownloaded));
-                return null; // this is useless, but is here to make this a callable, so that we can throw exceptions
-            });
-
-            try {
-                messageProcessingFuture.get(60, TimeUnit.SECONDS);
-            } catch (TimeoutException e) {
-                log.warn("Ran out of time while processing message {} of {} for {}", finalI + 1, messages.length, username, e);
-                messageProcessingFuture.cancel(true);
-                allSuccess = false;
             }
-        }
-        store.close();
-        if (!allSuccess) {
-            throw new SomeMessagesFailedToDownloadException(returnMessages);
-        } else {
-            return returnMessages;
+            if (!allSuccess) {
+                throw new SomeMessagesFailedToDownloadException(returnMessages);
+            } else {
+                return returnMessages;
+            }
         }
     }
 
@@ -76,12 +91,10 @@ public class ImapService {
         Message message = messageService.get(id);
         Store store = getStore(message);
 
-        IMAPFolder imapFolder = openInbox(store, Folder.READ_WRITE);
-
-        javax.mail.Message readMessage = imapFolder.getMessageByUID(message.getUid());
-        imapFolder.setFlags(new javax.mail.Message[]{readMessage}, new Flags(Flags.Flag.SEEN), readInd);
-
-        store.close();
+        try (IMAPFolder imapFolder = openInbox(store, Folder.READ_WRITE)) {
+            javax.mail.Message readMessage = imapFolder.getMessageByUID(message.getUid());
+            imapFolder.setFlags(new javax.mail.Message[]{readMessage}, new Flags(Flags.Flag.SEEN), readInd);
+        }
     }
 
     public void deleteMessage(long id) throws Exception {
@@ -99,13 +112,11 @@ public class ImapService {
             throw new Exception("Unknown domain.");
         }
 
-        IMAPFolder inbox = openInbox(store, Folder.READ_WRITE);
-        IMAPFolder trash = openFolder(store, Folder.READ_WRITE, trashFolderName);
-
-        javax.mail.Message readMessage = inbox.getMessageByUID(message.getUid());
-        inbox.moveMessages(new javax.mail.Message[]{readMessage}, trash);
-
-        store.close();
+        try (IMAPFolder inbox = openInbox(store, Folder.READ_WRITE);
+             IMAPFolder trash = openFolder(store, Folder.READ_WRITE, trashFolderName)) {
+            javax.mail.Message readMessage = inbox.getMessageByUID(message.getUid());
+            inbox.moveMessages(new javax.mail.Message[]{readMessage}, trash);
+        }
     }
 
     private Store getStore(Message message) throws Exception {
@@ -116,6 +127,10 @@ public class ImapService {
 
     private Store getStore(String hostname, long port, String username, String decryptedPassword) throws MessagingException {
         log.debug("Getting store for {} {}", hostname, username);
+        Store cached = storeCache.getIfPresent(username);
+        if (cached != null && cached.isConnected()) {
+            return cached;
+        }
         int p = Integer.parseInt(Long.toString(port));
 
         Properties props = System.getProperties();
@@ -133,9 +148,11 @@ public class ImapService {
         if (StringUtils.containsIgnoreCase(hostname, "aol")) {
             props.setProperty("mail.imap.partialfetch", "false");
         }
+        props.setProperty("mail.imap.connectionpoolsize", "10");
         Session session = Session.getDefaultInstance(props, null);
         Store store = session.getStore("imaps");
         store.connect(hostname, p, username, decryptedPassword);
+        storeCache.put(username, store);
         log.debug("Connected to store for {} {}", hostname, username);
         return store;
     }
