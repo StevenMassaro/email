@@ -417,6 +417,7 @@ class TableComponent extends Component {
                         </form>
                     </div>
                 </ReactModal>
+                {!this.state.showPasswordModal &&
                 <ReactTable
                     data={emails}
                     columns={columns}
@@ -433,6 +434,7 @@ class TableComponent extends Component {
                     filterable={true}
                     defaultFilterMethod={this.filterRow}
                 />
+                }
             </div>);
     }
 }
