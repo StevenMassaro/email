@@ -15,7 +15,6 @@ class TableComponent extends Component {
     constructor() {
         super();
         this.state = {
-            loadedEmails: false,
             showReadModal: false,
             showPasswordModal: true,
             password: ''
@@ -41,25 +40,12 @@ class TableComponent extends Component {
     }
 
     listMessages = () => {
-        this.setState({
-            loadedEmails: false
-        });
         fetch("./message/listMessages")
             .then(res => res.json())
             .then(
                 (result) => {
                     this.setState({
-                        loadedEmails: true,
                         emails: result
-                    });
-                },
-                // Note: it's important to handle errors here
-                // instead of a catch() block so that we don't swallow
-                // exceptions from actual bugs in components.
-                (error) => {
-                    this.setState({
-                        loadedEmails: true,
-                        error
                     });
                 }
             );
@@ -290,7 +276,7 @@ class TableComponent extends Component {
     };
 
     render() {
-        const {error, loadedEmails, emails, currentEmail} = this.state;
+        const {emails, currentEmail} = this.state;
 
         let columns = [
             {
