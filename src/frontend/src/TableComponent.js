@@ -423,7 +423,6 @@ class TableComponent extends Component {
                     columns={columns}
                     defaultPageSize={100}
                     minRows={0}
-                    noDataText={loadedEmails ? (error ? error : "No emails in database.") : "Loading emails..."}
                     defaultSorted={[
                         {
                             id: "dateReceived",
