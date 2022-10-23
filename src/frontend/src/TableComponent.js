@@ -412,7 +412,7 @@ class TableComponent extends Component {
                         "overflow": "hidden"
                     }}>
                         <form onSubmit={this.handlePasswordFormSubmit}>
-                            <label>Bitwarden Master Password: <input type="password" value={this.state.password} onChange={this.handlePasswordFieldChange} /></label>
+                            <label>Bitwarden Master Password: <input autoFocus type="password" value={this.state.password} onChange={this.handlePasswordFieldChange} /></label>
                             <input type="submit" value="Submit" />
                         </form>
                     </div>
