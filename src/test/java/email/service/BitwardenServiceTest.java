@@ -2,12 +2,13 @@ package email.service;
 
 import email.model.bitwarden.Item;
 import org.apache.commons.io.IOUtils;
-import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.Resource;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -17,6 +18,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 
 @SpringBootTest
+@RunWith(SpringRunner.class)
 public class BitwardenServiceTest {
 
     @Autowired
@@ -41,7 +43,6 @@ public class BitwardenServiceTest {
     }
 
     @Test
-    @Ignore
     public void testDeserializingBitwardenJson() throws IOException {
         String json = IOUtils.toString(bitwardenListItemsJson.getInputStream(), StandardCharsets.UTF_8);
         List<Item> items = bitwardenService.deserializeBitwardenJson(json);
