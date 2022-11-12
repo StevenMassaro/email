@@ -5,6 +5,7 @@ import email.model.Account;
 import email.model.ExecStatusEnum;
 import email.model.Message;
 import email.model.SyncStatusResult;
+import email.model.bitwarden.Login;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -29,7 +30,7 @@ public class SyncService {
 
     @Async
     public Future<SyncStatusResult> sync(Account account, String bitwardenMasterPassword) {
-        log.debug("Sync started for {}", account.getUsername());
+        String username = null;
         boolean messageFailure = false;
         boolean accountFailure = false;
         long totalDeletedCount = 0;
@@ -37,11 +38,13 @@ public class SyncService {
         long totalChangedReadIndCount = 0;
 
         try {
-            String password = bitwardenService.getPassword(account.getBitwardenItemId(), bitwardenMasterPassword);
+            Login login = bitwardenService.getLogin(account.getBitwardenItemId(), bitwardenMasterPassword);
+            log.debug("Sync started for {}", login.getUsername());
+            username = login.getUsername();
             List<Message> dbMessages = messageService.list(account.getId());
             List<Message> imapMessages;
             try {
-                imapMessages = imapService.getInboxMessages(account.getHostname(), account.getPort(), account.getUsername(), password, dbMessages);
+                imapMessages = imapService.getInboxMessages(account.getHostname(), account.getPort(), login.getUsername(), login.getPassword(), dbMessages);
             } catch (SomeMessagesFailedToDownloadException e) {
                 imapMessages = e.getReturnMessages();
                 messageFailure = true;
@@ -57,7 +60,7 @@ public class SyncService {
                 }
             }
             log.debug("Deleted {} messages from local database while processing account {}.",
-                    deletedCount, account.getUsername());
+                    deletedCount, login.getUsername());
 
             // then add all messages that do exist on the imap server
             long insertedCount = 0;
@@ -72,7 +75,7 @@ public class SyncService {
                         insertedCount++;
                     } catch (Exception e) {
                         messageFailure = true;
-                        log.error("Failed to insert new message with UID {} while processing account {}.", imapMessage.getUid(), account.getUsername(), e);
+                        log.error("Failed to insert new message with UID {} while processing account {}.", imapMessage.getUid(), login.getUsername(), e);
                     }
                 } else {
                     // if the message has a different read indicator in the database than IMAP
@@ -84,14 +87,14 @@ public class SyncService {
                     }
                 }
             }
-            log.debug("Inserted {} messages into local database while processing account {}.", insertedCount, account.getUsername());
-            log.debug("Changed read indicator for {} messages while processing account {}.", changedReadIndCount, account.getUsername());
+            log.debug("Inserted {} messages into local database while processing account {}.", insertedCount, login.getUsername());
+            log.debug("Changed read indicator for {} messages while processing account {}.", changedReadIndCount, login.getUsername());
             totalChangedReadIndCount += changedReadIndCount;
             totalDeletedCount += deletedCount;
             totalInsertedCount += insertedCount;
         } catch (Exception e) {
             accountFailure = true;
-            log.error("Exception while processing account {}.", account.getUsername(), e);
+            log.error("Exception while processing account {} {}.", account.getId(), username, e);
         }
 
         ExecStatusEnum result;
@@ -102,7 +105,7 @@ public class SyncService {
         } else {
             result = ExecStatusEnum.RULE_END_ACCOUNT_FAILURE;
         }
-        log.debug("Sync finished for {}", account.getUsername());
-        return new AsyncResult<>(new SyncStatusResult(totalInsertedCount, totalDeletedCount, totalChangedReadIndCount, result, account.getUsername()));
+        log.debug("Sync finished for {} {}", account.getId(), username);
+        return new AsyncResult<>(new SyncStatusResult(totalInsertedCount, totalDeletedCount, totalChangedReadIndCount, result, username));
     }
 }

@@ -49,8 +49,10 @@ public class BitwardenServiceTest {
         Item one = items.get(0);
         assertEquals(UUID.fromString("d0f3b7f6-8fc5-41fa-9b4e-acd190ce21d1"), one.getId());
         assertEquals("crappypassword", one.getLogin().getPassword());
+        assertEquals("steveusername", one.getLogin().getUsername());
         Item two = items.get(1);
         assertEquals(UUID.fromString("8d607371-6e50-4802-845e-acd200ce21d1"), two.getId());
         assertEquals("mompassword", two.getLogin().getPassword());
+        assertEquals("momusername", two.getLogin().getUsername());
     }
 }

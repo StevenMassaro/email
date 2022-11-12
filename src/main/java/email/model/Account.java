@@ -12,7 +12,6 @@ public class Account {
     private long port;
     private String authentication;
     private String inboxName;
-    private String username;
     @JsonIgnore
     private UUID bitwardenItemId;
 }

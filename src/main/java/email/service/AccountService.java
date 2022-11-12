@@ -23,8 +23,7 @@ public class AccountService {
 
             Account account = new Account();
             account.setId(Long.parseLong(accountStringSplit[0]));
-            account.setUsername(accountStringSplit[2]);
-            account.setBitwardenItemId(UUID.fromString(accountStringSplit[3]));
+            account.setBitwardenItemId(UUID.fromString(accountStringSplit[2]));
             account.setAuthentication("SSL");
             account.setHostname(accountStringSplit[1]);
             account.setInboxName("Inbox");

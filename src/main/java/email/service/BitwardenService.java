@@ -6,6 +6,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import email.exception.DetailedExecuteException;
 import email.model.bitwarden.Item;
+import email.model.bitwarden.Login;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.exec.CommandLine;
 import org.apache.commons.exec.DefaultExecutor;
@@ -40,7 +41,7 @@ public class BitwardenService {
     @Value("${BW_CLIENTSECRET}")
     private String bitwardenApiKey;
 
-    private static final Cache<UUID, String> passwordCache = CacheBuilder
+    private static final Cache<UUID, Login> loginCache = CacheBuilder
             .newBuilder()
             .expireAfterWrite(7, TimeUnit.DAYS)
             .build();
@@ -49,8 +50,8 @@ public class BitwardenService {
         this.jacksonObjectMapper = jacksonObjectMapper;
     }
 
-    public synchronized String getPassword(UUID id, String bitwardenMasterPassword) throws InterruptedException, IOException, ExecutionException {
-        return passwordCache.get(id, () -> {
+    public synchronized Login getLogin(UUID id, String bitwardenMasterPassword) throws InterruptedException, IOException, ExecutionException {
+        return loginCache.get(id, () -> {
             try {
                 loginWithApiKey();
             } catch (DetailedExecuteException e) {
@@ -63,9 +64,9 @@ public class BitwardenService {
             List<Item> items = deserializeBitwardenJson(passwordListJson);
             // put all of the passwords into the cache
             for (Item item : items) {
-                passwordCache.put(item.getId(), item.getLogin().getPassword());
+                loginCache.put(item.getId(), item.getLogin());
             }
-            return passwordCache.getIfPresent(id);
+            return loginCache.getIfPresent(id);
         });
     }
 
@@ -73,8 +74,8 @@ public class BitwardenService {
         return jacksonObjectMapper.readValue(json, new TypeReference<List<Item>>(){});
     }
 
-    public String getPasswordFromCache(UUID id) {
-        return passwordCache.getIfPresent(id);
+    public Login getLoginFromCache(UUID id) {
+        return loginCache.getIfPresent(id);
     }
 
     private String unlock(String bitwardenMasterPassword) throws IOException {
@@ -107,7 +108,7 @@ public class BitwardenService {
     }
 
     public boolean isCacheEmpty() {
-        return passwordCache.size() == 0;
+        return loginCache.size() == 0;
     }
 
     private String listPasswordsFromCli(String sessionKey) throws IOException {

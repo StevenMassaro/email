@@ -5,6 +5,7 @@ import com.sun.mail.imap.IMAPFolder;
 import email.exception.SomeMessagesFailedToDownloadException;
 import email.model.Account;
 import email.model.Message;
+import email.model.bitwarden.Login;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.annotation.Async;
@@ -122,8 +123,8 @@ public class ImapService {
 
     private Store getStore(Message message) throws Exception {
         Account account = message.getAccount();
-        String password = bitwardenService.getPasswordFromCache(account.getBitwardenItemId());
-        return getStore(account.getHostname(), account.getPort(), account.getUsername(), password);
+        Login login = bitwardenService.getLoginFromCache(account.getBitwardenItemId());
+        return getStore(account.getHostname(), account.getPort(), login.getUsername(), login.getPassword());
     }
 
     private Store getStore(String hostname, long port, String username, String decryptedPassword) throws MessagingException {

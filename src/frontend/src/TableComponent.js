@@ -112,14 +112,14 @@ class TableComponent extends Component {
                         });
 
                         failedAccounts.forEach((account) => {
-                            toast.error("Failed to sync: " + account.username, {
+                            toast.error("Failed to sync: " + account.id, {
                                 position: toast.POSITION.TOP_RIGHT,
                                 autoClose: false
                             });
                         });
 
                         partiallyFailedAccounts.forEach((account) => {
-                            toast.warn("Partially failed to sync (some messages may be missing): " + account.username, {
+                            toast.warn("Partially failed to sync (some messages may be missing): " + account.id, {
                                 position: toast.POSITION.TOP_RIGHT,
                                 autoClose: false
                             })
@@ -238,7 +238,7 @@ class TableComponent extends Component {
             '<span style="all:unset">' +
             '<b>From: </b><span>' + (email.fromPersonal ? (email.fromPersonal + " ") : "") + '&#8249;' + email.fromAddress + '&#8250;</span><br>' +
             '<b>Sent: </b>' + formatDate(new Date(email.dateReceived)) + '<br>' +
-            '<b>To: </b>' + email.account.username + '<br>' +
+            '<b>To: </b>' + email.toAddress + '<br>' +
             '<b>Subject: </b>' + email.subject +
             '<hr/><br></span>'
         );
