@@ -283,7 +283,13 @@ class TableComponent extends Component {
                 Header: "Account",
                 id: "account",
                 maxWidth: 200,
-                accessor: a => a.account.username
+                Cell: row => {
+                    return (
+                        <span title={row.original.toAddress}>
+                            {row.original.account.username}
+                        </span>
+                    )
+                }
             },
             {
                 Header: "From",

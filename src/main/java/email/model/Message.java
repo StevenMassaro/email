@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.mail.util.MimeMessageParser;
@@ -38,6 +39,7 @@ public class Message {
     private List<Address> recipient;
     private String fromAddress;
     private String fromPersonal;
+    private String toAddress;
     @JsonIgnore
     private List<BodyPart> bodyParts = new ArrayList<>();
     private boolean readInd;
@@ -73,6 +75,10 @@ public class Message {
             InternetAddress sender = (InternetAddress) ((IMAPMessage) message).getSender();
             this.fromAddress = sender.getAddress();
             this.fromPersonal = sender.getPersonal();
+            javax.mail.Address[] recipients = message.getRecipients(javax.mail.Message.RecipientType.TO);
+            if (ArrayUtils.isNotEmpty(recipients)) {
+                this.toAddress = recipients[0].toString();
+            }
         }
 
         this.uid = uid;
