@@ -67,7 +67,7 @@ public class ImapService {
                     }
 
                     log.debug("Processing email {} of {} for {}", finalI + 1, messages.length, username);
-                    returnMessages.add(new Message(message, uid, messageAlreadyDownloaded));
+                    returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username));
                     return null; // this is useless, but is here to make this a callable, so that we can throw exceptions
                 });
 
