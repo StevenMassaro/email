@@ -238,7 +238,7 @@ class TableComponent extends Component {
             '<span style="all:unset">' +
             '<b>From: </b><span>' + (email.fromPersonal ? (email.fromPersonal + " ") : "") + '&#8249;' + email.fromAddress + '&#8250;</span><br>' +
             '<b>Sent: </b>' + formatDate(new Date(email.dateReceived)) + '<br>' +
-            '<b>To: </b>' + email.account.username + '<br>' +
+            '<b>To: </b>' + email.username + '<br>' +
             '<b>Subject: </b>' + email.subject +
             '<hr/><br></span>'
         );
@@ -286,7 +286,7 @@ class TableComponent extends Component {
                 Cell: row => {
                     return (
                         <span title={row.original.toAddress}>
-                            {row.original.account.username}
+                            {row.original.username}
                         </span>
                     )
                 }

@@ -39,7 +39,14 @@ public class Message {
     private List<Address> recipient;
     private String fromAddress;
     private String fromPersonal;
+    /**
+     * The first recipient, in the recipient list, as defined by the IMAP server.
+     */
     private String toAddress;
+    /**
+     * The username of the account that this message was sent to, obtained from Bitwarden.
+     */
+    private String username;
     @JsonIgnore
     private List<BodyPart> bodyParts = new ArrayList<>();
     private boolean readInd;
@@ -53,7 +60,7 @@ public class Message {
 
     }
 
-    public Message(javax.mail.Message message, long uid, boolean alreadyExists) throws Exception {
+    public Message(javax.mail.Message message, long uid, boolean alreadyExists, String username) throws Exception {
         // only care to parse out the parts of the email for emails that are not in the database already
         // parsing is an expensive IMAP operation
         if (!alreadyExists) {
@@ -79,6 +86,7 @@ public class Message {
             if (ArrayUtils.isNotEmpty(recipients)) {
                 this.toAddress = recipients[0].toString();
             }
+            this.username = username;
         }
 
         this.uid = uid;
