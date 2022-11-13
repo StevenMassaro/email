@@ -10,7 +10,7 @@ An email inbox aggregator, supporting listing emails via IMAP from Gmail and AOL
 
 Run the docker image with environment variables for:
 ```
-accounts={'id|imap_hostname|username|bitwardenId','...'}
+accounts={'id|imap_hostname|bitwardenId','...'}
 bitwardenEmailFolderId=<get from bitwarden CLI, bw list folders>
 bitwardenCliLocation=<path to bitwarden CLI>
 BW_CLIENTID=<get from bitwarden vault>
