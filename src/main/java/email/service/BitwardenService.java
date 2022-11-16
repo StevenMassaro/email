@@ -61,6 +61,7 @@ public class BitwardenService {
             }
             String sessionKey = unlock(bitwardenMasterPassword);
             String passwordListJson = listPasswordsFromCli(sessionKey);
+            logout();
             List<Item> items = deserializeBitwardenJson(passwordListJson);
             // put all of the passwords into the cache
             for (Item item : items) {
@@ -92,6 +93,10 @@ public class BitwardenService {
                 log.error("Failed to delete temporary password file");
             }
         }
+    }
+
+    private void logout() throws IOException {
+        runCommand(new String[]{bitwardenCliLocation, "logout"});
     }
 
     /**
