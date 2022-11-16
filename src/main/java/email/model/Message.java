@@ -6,7 +6,6 @@ import email.service.MessageService;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -22,8 +21,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-import static email.model.ProviderEnum.AOL;
-
 @Getter
 @Setter
 @Log4j2
@@ -31,7 +28,11 @@ public class Message {
 
     private long id;
     private long uid;
-    private Account account;
+    /**
+     * The Bitwarden ID of the credentials for the account for this message.
+     */
+    @JsonIgnore
+    private UUID accountBitwardenId;
     private String subject;
     private String originalDateReceived;
     private long dateReceived;
@@ -146,12 +147,7 @@ public class Message {
         }
 
         Message message1 = (Message) message;
-        boolean matches = this.uid == message1.getUid();
-        if (this.account != null && message1.account != null) {
-            return matches && this.account.equals(message1.account);
-        } else {
-            return matches;
-        }
+        return this.uid == message1.getUid() && this.accountBitwardenId.equals(message1.accountBitwardenId);
     }
 
     public void setBodyParts(javax.mail.Message message) throws IOException, MessagingException {

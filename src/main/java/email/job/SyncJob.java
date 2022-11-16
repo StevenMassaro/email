@@ -1,6 +1,5 @@
 package email.job;
 
-import email.model.Account;
 import email.model.SyncStatusResult;
 import email.service.AccountService;
 import email.service.SyncService;
@@ -9,6 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -31,13 +31,13 @@ public class SyncJob {
         inProgress.set(true);
         results.clear();
         new Thread(() -> {
-            List<Account> accounts = accountService.list();
+            List<UUID> accounts = accountService.list();
             numberOfAccounts = accounts.size();
 
             List<Future<SyncStatusResult>> syncFutures = new ArrayList<>();
-            for (Account account : accounts) {
-                log.debug("Submitting task for account {}", account.getId());
-                syncFutures.add(syncService.sync(account, bitwardenMasterPassword));
+            for (UUID accountBitwardenId : accounts) {
+                log.debug("Submitting task for account {}", accountBitwardenId);
+                syncFutures.add(syncService.sync(accountBitwardenId, bitwardenMasterPassword));
             }
 
             while(!syncFutures.isEmpty()) {

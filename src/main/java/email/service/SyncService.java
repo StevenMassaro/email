@@ -1,7 +1,6 @@
 package email.service;
 
 import email.exception.SomeMessagesFailedToDownloadException;
-import email.model.Account;
 import email.model.ExecStatusEnum;
 import email.model.Message;
 import email.model.SyncStatusResult;
@@ -12,6 +11,7 @@ import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Future;
 
 @Service
@@ -29,7 +29,7 @@ public class SyncService {
     }
 
     @Async
-    public Future<SyncStatusResult> sync(Account account, String bitwardenMasterPassword) {
+    public Future<SyncStatusResult> sync(UUID account, String bitwardenMasterPassword) {
         String username = null;
         boolean messageFailure = false;
         boolean accountFailure = false;
@@ -38,13 +38,13 @@ public class SyncService {
         long totalChangedReadIndCount = 0;
 
         try {
-            Login login = bitwardenService.getLogin(account.getBitwardenItemId(), bitwardenMasterPassword);
+            Login login = bitwardenService.getLogin(account, bitwardenMasterPassword);
             log.debug("Sync started for {}", login.getUsername());
             username = login.getUsername();
-            List<Message> dbMessages = messageService.list(account.getId());
+            List<Message> dbMessages = messageService.list(account);
             List<Message> imapMessages;
             try {
-                imapMessages = imapService.getInboxMessages(account.getHostname(), account.getPort(), login.getUsername(), login.getPassword(), dbMessages);
+                imapMessages = imapService.getInboxMessages(login.getHostname(), login.getPort(), login.getUsername(), login.getPassword(), dbMessages);
             } catch (SomeMessagesFailedToDownloadException e) {
                 imapMessages = e.getReturnMessages();
                 messageFailure = true;
@@ -70,7 +70,7 @@ public class SyncService {
 
                 if (match == null) {
                     try {
-                        imapMessage.setAccount(account);
+                        imapMessage.setAccountBitwardenId(account);
                         messageService.insertMessage(imapMessage);
                         insertedCount++;
                     } catch (Exception e) {
@@ -94,7 +94,7 @@ public class SyncService {
             totalInsertedCount += insertedCount;
         } catch (Exception e) {
             accountFailure = true;
-            log.error("Exception while processing account {} {}.", account.getId(), username, e);
+            log.error("Exception while processing account {} {}.", account, username, e);
         }
 
         ExecStatusEnum result;
@@ -105,7 +105,7 @@ public class SyncService {
         } else {
             result = ExecStatusEnum.RULE_END_ACCOUNT_FAILURE;
         }
-        log.debug("Sync finished for {} {}", account.getId(), username);
+        log.debug("Sync finished for {} {}", account, username);
         return new AsyncResult<>(new SyncStatusResult(totalInsertedCount, totalDeletedCount, totalChangedReadIndCount, result, username));
     }
 }

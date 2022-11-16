@@ -33,8 +33,8 @@ public class MessageService {
         return Collections.unmodifiableSet(messageList);
     }
 
-    public List<Message> list(long accountId) {
-        return Collections.unmodifiableList(messageList.stream().filter(m -> m.getAccount().getId() == accountId).collect(Collectors.toList()));
+    public List<Message> list(UUID accountBitwardenId) {
+        return Collections.unmodifiableList(messageList.stream().filter(m -> m.getAccountBitwardenId() == accountBitwardenId).collect(Collectors.toList()));
     }
 
     public void delete(long id) {

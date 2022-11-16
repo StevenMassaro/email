@@ -3,7 +3,6 @@ package email.service;
 import com.google.common.cache.*;
 import com.sun.mail.imap.IMAPFolder;
 import email.exception.SomeMessagesFailedToDownloadException;
-import email.model.Account;
 import email.model.Message;
 import email.model.bitwarden.Login;
 import lombok.extern.log4j.Log4j2;
@@ -101,9 +100,10 @@ public class ImapService {
 
     public void deleteMessage(long id) throws Exception {
         Message message = messageService.get(id);
-        Store store = getStore(message);
+        Login login = bitwardenService.getLoginFromCache(message.getAccountBitwardenId());
+        Store store = getStore(login);
 
-        String hostname = message.getAccount().getHostname();
+        String hostname = login.getHostname();
 
         String trashFolderName;
         if (hostname.contains("gmail")) {
@@ -122,9 +122,12 @@ public class ImapService {
     }
 
     private Store getStore(Message message) throws Exception {
-        Account account = message.getAccount();
-        Login login = bitwardenService.getLoginFromCache(account.getBitwardenItemId());
-        return getStore(account.getHostname(), account.getPort(), login.getUsername(), login.getPassword());
+        Login login = bitwardenService.getLoginFromCache(message.getAccountBitwardenId());
+        return getStore(login);
+    }
+
+    private Store getStore(Login login) throws Exception {
+        return getStore(login.getHostname(), login.getPort(), login.getUsername(), login.getPassword());
     }
 
     private Store getStore(String hostname, long port, String username, String decryptedPassword) throws MessagingException {
