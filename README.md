@@ -10,16 +10,16 @@ An email inbox aggregator, supporting listing emails via IMAP from Gmail and AOL
 
 Run the docker image with environment variables for:
 ```
-accounts=<comma separated list of bitwarden IDs>
-bitwardenEmailFolderId=<get from bitwarden CLI, bw list folders>
-bitwardenCliLocation=<path to bitwarden CLI>
-BW_CLIENTID=<get from bitwarden vault>
-BW_CLIENTSECRET=<get from bitwarden vault>
+accounts=<comma separated list of Bitwarden IDs>
+bitwardenEmailFolderId=<get from Bitwarden CLI, bw list folders>
+bitwardenCliLocation=<path to Bitwarden CLI>
+BW_CLIENTID=<get from Bitwarden vault>
+BW_CLIENTSECRET=<get from Bitwarden vault>
 ```
 
-## Steps to get bitwarden IDs
+## Steps to get Bitwarden IDs
 
-You must have the [BitWarden CLI](https://github.com/bitwarden/clients) installed.
+You must have the [Bitwarden CLI](https://github.com/bitwarden/clients) installed.
 
 - login `bw login <email>`
 - unlock `bw unlock`
