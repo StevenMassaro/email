@@ -289,7 +289,8 @@ class TableComponent extends Component {
                             {row.original.username}
                         </span>
                     )
-                }
+                },
+                accessor: "username"
             },
             {
                 Header: "From",
