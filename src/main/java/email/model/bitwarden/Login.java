@@ -12,17 +12,6 @@ public class Login {
     private String username;
 
     @JsonIgnore
-    public String getHostname() throws Exception {
-        if (StringUtils.containsIgnoreCase(username, "@gmail.com")) {
-            return "imap.gmail.com";
-        } else if (StringUtils.containsIgnoreCase(username, "@aol.com")) {
-            return "imap.aol.com";
-        } else {
-            throw new Exception("Unsupported email host: " + username);
-        }
-    }
-
-    @JsonIgnore
     public int getPort() {
         return 993;
     }

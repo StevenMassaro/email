@@ -4,7 +4,7 @@ import com.google.common.cache.*;
 import com.sun.mail.imap.IMAPFolder;
 import email.exception.SomeMessagesFailedToDownloadException;
 import email.model.Message;
-import email.model.bitwarden.Login;
+import email.model.bitwarden.Item;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.scheduling.annotation.Async;
@@ -100,10 +100,10 @@ public class ImapService {
 
     public void deleteMessage(long id) throws Exception {
         Message message = messageService.get(id);
-        Login login = bitwardenService.getLoginFromCache(message.getAccountBitwardenId());
-        Store store = getStore(login);
+        Item item = bitwardenService.getLoginFromCache(message.getAccountBitwardenId());
+        Store store = getStore(item);
 
-        String hostname = login.getHostname();
+        String hostname = item.getHostname();
 
         String trashFolderName;
         if (hostname.contains("gmail")) {
@@ -122,12 +122,12 @@ public class ImapService {
     }
 
     private Store getStore(Message message) throws Exception {
-        Login login = bitwardenService.getLoginFromCache(message.getAccountBitwardenId());
-        return getStore(login);
+        Item item = bitwardenService.getLoginFromCache(message.getAccountBitwardenId());
+        return getStore(item);
     }
 
-    private Store getStore(Login login) throws Exception {
-        return getStore(login.getHostname(), login.getPort(), login.getUsername(), login.getPassword());
+    private Store getStore(Item item) throws Exception {
+        return getStore(item.getHostname(), item.getLogin().getPort(), item.getLogin().getUsername(), item.getLogin().getPassword());
     }
 
     private Store getStore(String hostname, long port, String username, String decryptedPassword) throws MessagingException {

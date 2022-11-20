@@ -34,6 +34,14 @@
     "name": "Aol",
     "notes": "notes here",
     "favorite": false,
+    "fields": [
+      {
+        "name": "hostname",
+        "value": "imap.gmail.com",
+        "type": 0,
+        "linkedId": null
+      }
+    ],
     "login": {
       "uris": [
         {

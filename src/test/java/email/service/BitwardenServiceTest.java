@@ -54,5 +54,8 @@ public class BitwardenServiceTest {
         assertEquals(UUID.fromString("8d607371-6e50-4802-845e-acd200ce21d1"), two.getId());
         assertEquals("mompassword", two.getLogin().getPassword());
         assertEquals("momusername", two.getLogin().getUsername());
+        assertEquals(1, two.getFields().size());
+        assertEquals("hostname", two.getFields().get(0).getName());
+        assertEquals("imap.gmail.com", two.getFields().get(0).getValue());
     }
 }

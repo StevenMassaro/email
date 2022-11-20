@@ -4,7 +4,7 @@ import email.exception.SomeMessagesFailedToDownloadException;
 import email.model.ExecStatusEnum;
 import email.model.Message;
 import email.model.SyncStatusResult;
-import email.model.bitwarden.Login;
+import email.model.bitwarden.Item;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -38,13 +38,13 @@ public class SyncService {
         long totalChangedReadIndCount = 0;
 
         try {
-            Login login = bitwardenService.getLogin(account, bitwardenMasterPassword);
-            log.debug("Sync started for {}", login.getUsername());
-            username = login.getUsername();
+            Item item = bitwardenService.getLogin(account, bitwardenMasterPassword);
+            log.debug("Sync started for {}", item.getLogin().getUsername());
+            username = item.getLogin().getUsername();
             List<Message> dbMessages = messageService.list(account);
             List<Message> imapMessages;
             try {
-                imapMessages = imapService.getInboxMessages(login.getHostname(), login.getPort(), login.getUsername(), login.getPassword(), dbMessages);
+                imapMessages = imapService.getInboxMessages(item.getHostname(), item.getLogin().getPort(), item.getLogin().getUsername(), item.getLogin().getPassword(), dbMessages);
             } catch (SomeMessagesFailedToDownloadException e) {
                 imapMessages = e.getReturnMessages();
                 messageFailure = true;
@@ -60,7 +60,7 @@ public class SyncService {
                 }
             }
             log.debug("Deleted {} messages from local database while processing account {}.",
-                    deletedCount, login.getUsername());
+                    deletedCount, item.getLogin().getUsername());
 
             // then add all messages that do exist on the imap server
             long insertedCount = 0;
@@ -75,7 +75,7 @@ public class SyncService {
                         insertedCount++;
                     } catch (Exception e) {
                         messageFailure = true;
-                        log.error("Failed to insert new message with UID {} while processing account {}.", imapMessage.getUid(), login.getUsername(), e);
+                        log.error("Failed to insert new message with UID {} while processing account {}.", imapMessage.getUid(), item.getLogin().getUsername(), e);
                     }
                 } else {
                     // if the message has a different read indicator in the database than IMAP
@@ -87,8 +87,8 @@ public class SyncService {
                     }
                 }
             }
-            log.debug("Inserted {} messages into local database while processing account {}.", insertedCount, login.getUsername());
-            log.debug("Changed read indicator for {} messages while processing account {}.", changedReadIndCount, login.getUsername());
+            log.debug("Inserted {} messages into local database while processing account {}.", insertedCount, item.getLogin().getUsername());
+            log.debug("Changed read indicator for {} messages while processing account {}.", changedReadIndCount, item.getLogin().getUsername());
             totalChangedReadIndCount += changedReadIndCount;
             totalDeletedCount += deletedCount;
             totalInsertedCount += insertedCount;

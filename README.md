@@ -16,6 +16,7 @@ bitwardenCliLocation=<path to Bitwarden CLI>
 BW_CLIENTID=<get from Bitwarden vault>
 BW_CLIENTSECRET=<get from Bitwarden vault>
 ```
+Note that if the account you have specified in Bitwarden does not end in "gmail.com" or "aol.com", but is actually one of those accounts, you can add a custom field called "hostname" and specify the IMAP server address, like "imap.gmail.com". This is useful for custom domains that are hosted using GSuite.
 
 ## Steps to get Bitwarden IDs
 

@@ -41,7 +41,7 @@ public class BitwardenService {
     @Value("${BW_CLIENTSECRET}")
     private String bitwardenApiKey;
 
-    private static final Cache<UUID, Login> loginCache = CacheBuilder
+    private static final Cache<UUID, Item> loginCache = CacheBuilder
             .newBuilder()
             .expireAfterWrite(7, TimeUnit.DAYS)
             .build();
@@ -50,7 +50,7 @@ public class BitwardenService {
         this.jacksonObjectMapper = jacksonObjectMapper;
     }
 
-    public synchronized Login getLogin(UUID id, String bitwardenMasterPassword) throws InterruptedException, IOException, ExecutionException {
+    public synchronized Item getLogin(UUID id, String bitwardenMasterPassword) throws InterruptedException, IOException, ExecutionException {
         return loginCache.get(id, () -> {
             try {
                 loginWithApiKey();
@@ -65,7 +65,7 @@ public class BitwardenService {
             List<Item> items = deserializeBitwardenJson(passwordListJson);
             // put all of the passwords into the cache
             for (Item item : items) {
-                loginCache.put(item.getId(), item.getLogin());
+                loginCache.put(item.getId(), item);
             }
             return loginCache.getIfPresent(id);
         });
@@ -75,7 +75,7 @@ public class BitwardenService {
         return jacksonObjectMapper.readValue(json, new TypeReference<List<Item>>(){});
     }
 
-    public Login getLoginFromCache(UUID id) {
+    public Item getLoginFromCache(UUID id) {
         return loginCache.getIfPresent(id);
     }
 
