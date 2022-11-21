@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import './App.css';
-import TableComponent from './TableComponent.js';
+import TableComponent from './TableComponent.tsx';
 
 class App extends Component {
     render() {

@@ -1,4 +1,5 @@
-import React, {Component} from 'react';
+import {Component} from "react";
+import * as React from 'react';
 import ReactTable from "react-table";
 import ReactModal from "react-modal";
 import "react-table/react-table.css";
@@ -9,15 +10,29 @@ import 'react-toastify/dist/ReactToastify.min.css';
 import './TableComponent.css';
 import ModalHeaderComponent from "./ModalHeaderComponent";
 import {formatDate} from "./Utils";
+import {Email} from "./model/Email";
 
+type props = {
 
-class TableComponent extends Component {
-    constructor() {
-        super();
+}
+
+type state = {
+    showReadModal: boolean,
+    showPasswordModal: boolean,
+    password: string,
+    currentEmail: Email
+    emails: Email[]
+}
+
+class TableComponent extends Component<props, state> {
+    constructor(props: props | Readonly<props>) {
+        super(props);
         this.state = {
             showReadModal: false,
             showPasswordModal: true,
-            password: ''
+            password: '',
+            currentEmail: undefined,
+            emails: []
         };
     }
 
@@ -138,7 +153,7 @@ class TableComponent extends Component {
             )
     }
 
-    getBodyUrl = (id) => {
+    getBodyUrl = (id: number) => {
         let host = window.location.host;
         let url = "";
         if (host.includes("localhost:3000")) {
@@ -151,7 +166,7 @@ class TableComponent extends Component {
         return url;
     };
 
-    closeReadModal = (currentEmail) => {
+    closeReadModal = (currentEmail: Email) => {
         this.markMessageReadIndInState(currentEmail.id, true);
         this.setState({
             showReadModal: false
@@ -164,7 +179,7 @@ class TableComponent extends Component {
         })
     }
 
-    deleteMessage = (currentEmail) => {
+    deleteMessage = (currentEmail: Email) => {
         this.closeReadModal(currentEmail);
         this.removeMessageFromState(currentEmail.id);
         fetch("./message?id=" + currentEmail.id, {method: "DELETE"})
@@ -201,7 +216,7 @@ class TableComponent extends Component {
             )
     };
 
-    removeMessageFromState = (id) => {
+    removeMessageFromState = (id: number) => {
         let emails = Object.assign([], this.state.emails);
         emails = emails.filter(function (email) {
             return email.id !== id;
@@ -211,7 +226,7 @@ class TableComponent extends Component {
         });
     };
 
-    markMessageReadIndInState = (id, readInd) => {
+    markMessageReadIndInState = (id: number, readInd: boolean) => {
         let emails = Object.assign([], this.state.emails);
         let adjustedEmails = emails.map(function (email) {
             if (email.id === id) {
@@ -224,7 +239,7 @@ class TableComponent extends Component {
         });
     };
 
-    addMessageToState = (message) => {
+    addMessageToState = (message: Email) => {
         let emails = Object.assign([], this.state.emails);
         emails.push(message);
         this.setState({
@@ -232,7 +247,7 @@ class TableComponent extends Component {
         });
     };
 
-    print = (email) => {
+    print = (email: Email) => {
         let w = window.open();
         w.document.write(
             '<span style="all:unset">' +
@@ -242,6 +257,7 @@ class TableComponent extends Component {
             '<b>Subject: </b>' + email.subject +
             '<hr/><br></span>'
         );
+        // @ts-ignore
         w.document.write(document.getElementById('emailContent').contentWindow.document.body.innerHTML);
         w.print();
         w.close();
@@ -358,6 +374,7 @@ class TableComponent extends Component {
             columns.unshift({
                 Header: "Date received",
                 accessor: "dateReceived",
+                id: "dateReceived",
                 Cell: row => {
                     const date = new Date(row.value);
                     // fr-CA is yyyy-MM-dd, see https://stackoverflow.com/questions/27939773/tolocaledatestring-short-format for more info
