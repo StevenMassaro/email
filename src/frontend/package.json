@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@types/react-modal": "^3.13.1",
     "downloadjs": "1.4.7",
+    "lodash": "4.17.21",
     "react": "^16.14.0",
     "react-device-detect": "^2.2.2",
     "react-dom": "^16.14.0",

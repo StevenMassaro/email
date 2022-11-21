@@ -1,6 +1,7 @@
 import {Component} from "react";
 import * as React from 'react';
 import ReactTable from "react-table";
+import selectTableHOC from "react-table/lib/hoc/selectTable";
 import ReactModal from "react-modal";
 import "react-table/react-table.css";
 import {Button, Form, Grid} from "semantic-ui-react";
@@ -11,6 +12,9 @@ import './TableComponent.css';
 import ModalHeaderComponent from "./ModalHeaderComponent";
 import {formatDate} from "./Utils";
 import {Email} from "./model/Email";
+import * as lodash from "lodash";
+
+const SelectTable = selectTableHOC(ReactTable);
 
 type props = {
 
@@ -21,7 +25,9 @@ type state = {
     showPasswordModal: boolean,
     password: string,
     currentEmail: Email
-    emails: Email[]
+    emails: Email[],
+    selectedEmails: Email[],
+    selectAll: boolean
 }
 
 class TableComponent extends Component<props, state> {
@@ -32,7 +38,9 @@ class TableComponent extends Component<props, state> {
             showPasswordModal: true,
             password: '',
             currentEmail: undefined,
-            emails: []
+            emails: [],
+            selectedEmails: [],
+            selectAll: false
         };
     }
 
@@ -302,7 +310,71 @@ class TableComponent extends Component<props, state> {
                 this.closeReadModal(this.state.currentEmail);
             }
         }
+        if (!lodash.isEmpty(this.state.selectedEmails) || this.state.selectAll) {
+            if (e.keyCode === deleteKeyCode) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.state.selectedEmails.forEach(selectedEmail => {
+                    this.deleteMessage(selectedEmail);
+                })
+            }
+        }
     };
+
+
+    /**
+     * returns true if the key passed is selected otherwise it should return false
+     */
+    isSelected = (key: string) => {
+        return !lodash.isUndefined(this.state.selectedEmails.find((email) => {
+            return !lodash.isUndefined(email) && email.id === lodash.toInteger(key);
+        }))
+    };
+
+    /**
+     * called when the user clicks the selectAll checkbox/radio
+     */
+    toggleAll = () => {
+        let {selectedEmails, emails} = this.state;
+        if (lodash.isEmpty(selectedEmails)) {
+            this.setState({
+                selectedEmails: emails
+            });
+        } else if(lodash.isEqual(selectedEmails, emails)) {
+            this.setState({
+                selectedEmails: []
+            });
+        } else {
+            this.setState({
+                selectedEmails: emails
+            });
+        }
+        this.setState({
+            selectAll: !this.state.selectAll
+        });
+    };
+
+    /**
+     * called when the use clicks a specific checkbox/radio in a row
+     */
+    toggleSelection = (key: string) => {
+        const splits = key.split("-");
+        const id = lodash.toInteger(splits[1]);
+        if (this.isSelected(id.toString())) { // todo the key is coming in with some additional data, so we need to split it here or something
+            this.setState((state) => ({
+                selectedEmails: state.selectedEmails.filter((email) => {
+                    return email.id !== id;
+                })
+            }));
+        } else {
+            this.setState((state) => ({
+                selectedEmails: [...state.selectedEmails, state.emails.find((email) => {
+                    return email.id === id
+                })]
+            }));
+        }
+    };
+
 
     render() {
         const {emails, currentEmail} = this.state;
@@ -440,7 +512,14 @@ class TableComponent extends Component<props, state> {
                     </Grid>
                 </ReactModal>
                 {!this.state.showPasswordModal &&
-                <ReactTable
+                <SelectTable
+                    keyField="id"
+                    // for some reason we need to define this method this way or it won't see the state
+                    isSelected={(key => this.isSelected(key))}
+                    selectAll={this.state.selectAll}
+                    toggleAll={this.toggleAll}
+                    toggleSelection={this.toggleSelection}
+                    selectType={"checkbox"}
                     data={emails}
                     columns={columns}
                     defaultPageSize={100}
