@@ -274,10 +274,17 @@ class TableComponent extends Component {
             this.performSync();
         }
         const deleteKeyCode = 46;
-        if (e.keyCode === deleteKeyCode && this.state.currentEmail && this.state.showReadModal) {
-            e.preventDefault();
-            e.stopPropagation();
-            this.deleteMessage(this.state.currentEmail);
+        const escapeKeyCode = 27;
+        if (this.state.currentEmail && this.state.showReadModal) {
+            if (e.keyCode === deleteKeyCode) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.deleteMessage(this.state.currentEmail);
+            } else if (e.keyCode === escapeKeyCode) {
+                e.preventDefault();
+                e.stopPropagation();
+                this.closeReadModal(this.state.currentEmail);
+            }
         }
     };
 
