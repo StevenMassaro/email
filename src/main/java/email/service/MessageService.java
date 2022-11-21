@@ -34,7 +34,7 @@ public class MessageService {
     }
 
     public List<Message> list(UUID accountBitwardenId) {
-        return Collections.unmodifiableList(messageList.stream().filter(m -> m.getAccountBitwardenId() == accountBitwardenId).collect(Collectors.toList()));
+        return Collections.unmodifiableList(messageList.stream().filter(m -> m.getAccountBitwardenId().equals(accountBitwardenId)).collect(Collectors.toList()));
     }
 
     public void delete(long id) {

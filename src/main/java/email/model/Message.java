@@ -61,7 +61,7 @@ public class Message {
 
     }
 
-    public Message(javax.mail.Message message, long uid, boolean alreadyExists, String username) throws Exception {
+    public Message(javax.mail.Message message, long uid, boolean alreadyExists, String username, UUID accountBitwardenId) throws Exception {
         // only care to parse out the parts of the email for emails that are not in the database already
         // parsing is an expensive IMAP operation
         if (!alreadyExists) {
@@ -90,6 +90,7 @@ public class Message {
             this.username = username;
         }
 
+        this.accountBitwardenId = accountBitwardenId;
         this.uid = uid;
         this.readInd = determineReadInd(message);
     }

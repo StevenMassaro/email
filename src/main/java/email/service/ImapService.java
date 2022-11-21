@@ -14,6 +14,7 @@ import javax.mail.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.*;
 
 @Service
@@ -44,7 +45,7 @@ public class ImapService {
         this.bitwardenService = bitwardenService;
     }
 
-    public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword, List<Message> existingMessages) throws Exception {
+    public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword, List<Message> existingMessages, UUID accountBitwardenId) throws Exception {
         Store store = getStore(hostname, port, username, decryptedPassword);
 
         try (IMAPFolder inbox = openInbox(store, Folder.READ_ONLY)) {
@@ -66,7 +67,7 @@ public class ImapService {
                     }
 
                     log.debug("Processing email {} of {} for {}", finalI + 1, messages.length, username);
-                    returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username));
+                    returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username, accountBitwardenId));
                     return null; // this is useless, but is here to make this a callable, so that we can throw exceptions
                 });
 

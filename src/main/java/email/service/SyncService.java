@@ -44,7 +44,7 @@ public class SyncService {
             List<Message> dbMessages = messageService.list(account);
             List<Message> imapMessages;
             try {
-                imapMessages = imapService.getInboxMessages(item.getHostname(), item.getLogin().getPort(), item.getLogin().getUsername(), item.getLogin().getPassword(), dbMessages);
+                imapMessages = imapService.getInboxMessages(item.getHostname(), item.getLogin().getPort(), item.getLogin().getUsername(), item.getLogin().getPassword(), dbMessages, account);
             } catch (SomeMessagesFailedToDownloadException e) {
                 imapMessages = e.getReturnMessages();
                 messageFailure = true;
@@ -70,7 +70,6 @@ public class SyncService {
 
                 if (match == null) {
                     try {
-                        imapMessage.setAccountBitwardenId(account);
                         messageService.insertMessage(imapMessage);
                         insertedCount++;
                     } catch (Exception e) {
