@@ -317,6 +317,10 @@ class TableComponent extends Component<props, state> {
                 this.state.selectedEmails.forEach(selectedEmail => {
                     this.deleteMessage(selectedEmail);
                 })
+                this.setState({
+                    selectedEmails: [],
+                    selectAll: false
+                })
             }
         }
     };
