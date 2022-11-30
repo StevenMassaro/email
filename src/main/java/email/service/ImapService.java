@@ -46,7 +46,7 @@ public class ImapService {
     }
 
     public List<Message> getInboxMessages(String hostname, int port, String username, String decryptedPassword, List<Message> existingMessages, UUID accountBitwardenId) throws Exception {
-        Store store = getStore(hostname, port, username, decryptedPassword);
+        Store store = getStore(hostname, port, username, decryptedPassword, false);
 
         try (IMAPFolder inbox = openInbox(store, Folder.READ_ONLY)) {
             javax.mail.Message[] messages = inbox.getMessages();
@@ -128,38 +128,44 @@ public class ImapService {
     }
 
     private Store getStore(Item item) throws Exception {
-        return getStore(item.getHostname(), item.getLogin().getPort(), item.getLogin().getUsername(), item.getLogin().getPassword());
+        return getStore(item.getHostname(), item.getLogin().getPort(), item.getLogin().getUsername(), item.getLogin().getPassword(), false);
     }
 
-    private Store getStore(String hostname, int port, String username, String decryptedPassword) throws MessagingException {
+    private Store getStore(String hostname, int port, String username, String decryptedPassword, boolean isRetry) throws Exception {
         log.debug("Getting store for {} {}", hostname, username);
-        Store cached = storeCache.getIfPresent(username);
-        if (cached != null && cached.isConnected()) {
+        Store cached = storeCache.get(username, () -> {
+            Properties props = System.getProperties();
+            props.setProperty("mail.store.protocol", "imaps");
+            /*
+            Partial fetch is disabled because I was sometimes getting the following exception when attempting to download
+            large/corrupted email attachments from AOL:
+
+            com.sun.mail.util.DecodingException: BASE64Decoder: Error in encoded stream: needed 4 valid base64 characters but only got 2 before EOF
+
+            This stackoverflow page suggested I disable this: https://stackoverflow.com/questions/1755414/javamail-baseencode64-error
+
+            It seems to have had no effect.
+             */
+            if (StringUtils.containsIgnoreCase(hostname, "aol")) {
+                props.setProperty("mail.imap.partialfetch", "false");
+            }
+            props.setProperty("mail.imap.connectionpoolsize", "10");
+            Session session = Session.getDefaultInstance(props, null);
+            Store store = session.getStore("imaps");
+            store.connect(hostname, port, username, decryptedPassword);
+            log.debug("Connected to store for {} {}", hostname, username);
+            return store;
+        });
+        if (cached.isConnected()) {
             return cached;
+        } else {
+            storeCache.invalidate(username);
+            if (!isRetry) {
+                return getStore(hostname, port, username, decryptedPassword, true);
+            } else {
+                throw new Exception("The store obtained from the cache was not connected, so that entry was invalidated and an attempt was made to obtain another store. However, this second attempt created a store that was not connected. This is an extremely unlikely scenario.");
+            }
         }
-
-        Properties props = System.getProperties();
-        props.setProperty("mail.store.protocol", "imaps");
-        /*
-        Partial fetch is disabled because I was sometimes getting the following exception when attempting to download
-        large/corrupted email attachments from AOL:
-
-        com.sun.mail.util.DecodingException: BASE64Decoder: Error in encoded stream: needed 4 valid base64 characters but only got 2 before EOF
-
-        This stackoverflow page suggested I disable this: https://stackoverflow.com/questions/1755414/javamail-baseencode64-error
-
-        It seems to have had no effect.
-         */
-        if (StringUtils.containsIgnoreCase(hostname, "aol")) {
-            props.setProperty("mail.imap.partialfetch", "false");
-        }
-        props.setProperty("mail.imap.connectionpoolsize", "10");
-        Session session = Session.getDefaultInstance(props, null);
-        Store store = session.getStore("imaps");
-        store.connect(hostname, port, username, decryptedPassword);
-        storeCache.put(username, store);
-        log.debug("Connected to store for {} {}", hostname, username);
-        return store;
     }
 
     private IMAPFolder openFolder(Store store, int mode, String folder) throws MessagingException {
