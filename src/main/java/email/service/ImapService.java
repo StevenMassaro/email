@@ -45,7 +45,7 @@ public class ImapService {
         this.bitwardenService = bitwardenService;
     }
 
-    public List<Message> getInboxMessages(String hostname, long port, String username, String decryptedPassword, List<Message> existingMessages, UUID accountBitwardenId) throws Exception {
+    public List<Message> getInboxMessages(String hostname, int port, String username, String decryptedPassword, List<Message> existingMessages, UUID accountBitwardenId) throws Exception {
         Store store = getStore(hostname, port, username, decryptedPassword);
 
         try (IMAPFolder inbox = openInbox(store, Folder.READ_ONLY)) {
@@ -131,13 +131,12 @@ public class ImapService {
         return getStore(item.getHostname(), item.getLogin().getPort(), item.getLogin().getUsername(), item.getLogin().getPassword());
     }
 
-    private Store getStore(String hostname, long port, String username, String decryptedPassword) throws MessagingException {
+    private Store getStore(String hostname, int port, String username, String decryptedPassword) throws MessagingException {
         log.debug("Getting store for {} {}", hostname, username);
         Store cached = storeCache.getIfPresent(username);
         if (cached != null && cached.isConnected()) {
             return cached;
         }
-        int p = Integer.parseInt(Long.toString(port));
 
         Properties props = System.getProperties();
         props.setProperty("mail.store.protocol", "imaps");
@@ -157,7 +156,7 @@ public class ImapService {
         props.setProperty("mail.imap.connectionpoolsize", "10");
         Session session = Session.getDefaultInstance(props, null);
         Store store = session.getStore("imaps");
-        store.connect(hostname, p, username, decryptedPassword);
+        store.connect(hostname, port, username, decryptedPassword);
         storeCache.put(username, store);
         log.debug("Connected to store for {} {}", hostname, username);
         return store;
