@@ -20,13 +20,6 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
           cache: maven
-      - name: Build with Maven
-        run: mvn --batch-mode --update-snapshots clean install --activate-profiles ui
-      - run: mkdir staging && cp target/*.jar staging
-      - uses: actions/upload-artifact@v3
-        with:
-          name: Package
-          path: staging
       # From https://stackoverflow.com/a/65740844
       - name: Extract Maven project version
         run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
@@ -47,7 +40,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Run Docker tests
+      - name: Build and test Docker image
         uses: docker/build-push-action@v3
         with:
           platforms: linux/arm64,linux/amd64 #,linux/arm/v8
