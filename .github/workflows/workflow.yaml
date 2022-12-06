@@ -47,6 +47,13 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Run Docker tests
+        uses: docker/build-push-action@v3
+        with:
+          platforms: linux/arm64,linux/amd64 #,linux/arm/v8
+          target: test
+          # relative path to the place where source code with Dockerfile is located
+          context: .
       - name: Build image and push to Docker Hub
         uses: docker/build-push-action@v3
         with:
