@@ -68,5 +68,6 @@ jobs:
       - name: Test docker image
         run: |
           wget https://github.com/dgroup/docker-unittests/releases/download/s1.1.1/docker-unittests-app-1.1.1.jar --quiet
+          java -version
           java -jar docker-unittests-app-1.1.1.jar -f docker-tests.yml -i stevenmassaro/email:latest
 
