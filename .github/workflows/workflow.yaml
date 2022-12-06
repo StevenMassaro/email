@@ -60,14 +60,3 @@ jobs:
           push: ${{ github.ref == 'refs/heads/master' }}
       - name: Image digest
         run: echo ${{ steps.docker_build.outputs.digest }}
-      - name: Set up JDK 11
-        uses: actions/setup-java@v3
-        with:
-          java-version: '8'
-          distribution: 'adopt'
-      - name: Test docker image
-        run: |
-          wget https://github.com/dgroup/docker-unittests/releases/download/s1.1.1/docker-unittests-app-1.1.1.jar --quiet
-          java -version
-          java -jar docker-unittests-app-1.1.1.jar -f docker-tests.yml -i stevenmassaro/email:latest
-
