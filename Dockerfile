@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jre as base
+FROM ubuntu as base
 RUN apt-get update && apt-get install npm -y && \
     npm install -g @bitwarden/cli
 
@@ -15,4 +15,5 @@ RUN apt-get install openjdk-17-jdk -y && \
 FROM base as production
 EXPOSE 8080
 ADD /target/Email.jar Email.jar
+RUN apt-get install openjdk-17-jre -y
 ENTRYPOINT ["java","-jar","Email.jar"]
