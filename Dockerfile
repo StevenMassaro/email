@@ -3,6 +3,7 @@ RUN apt-get update && apt-get install npm -y && \
     npm install -g @bitwarden/cli
 
 FROM base as test-base
+RUN apt-get install openjdk-17-jdk -y
 WORKDIR /app
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
