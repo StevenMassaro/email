@@ -9,7 +9,6 @@ COPY mvnw pom.xml ./
 COPY src ./src
 RUN apt-get install openjdk-17-jdk -y && \
     chmod +x mvnw && \
-    ./mvnw dependency:resolve && \
     ./mvnw --batch-mode --update-snapshots clean install --activate-profiles ui
 
 FROM base as production
