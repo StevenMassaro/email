@@ -12,6 +12,8 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    outputs:
+      version: ${{ steps.project.outputs.version }}
     steps:
       - uses: actions/checkout@v3
       - name: Set up JDK
@@ -29,7 +31,7 @@ jobs:
           path: staging
       # From https://stackoverflow.com/a/65740844
       - name: Extract Maven project version
-        run: echo ::set-output name=version::$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)
+        run: echo "version=$(mvn -q -Dexec.executable=echo -Dexec.args='${project.version}' --non-recursive exec:exec)" >> $GITHUB_OUTPUT
         id: project
       - name: Show extracted Maven project version
         run: echo ${{ steps.project.outputs.version }}
