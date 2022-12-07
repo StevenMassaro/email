@@ -13,6 +13,6 @@ RUN apt-get install openjdk-17-jdk -y && \
 
 FROM base as production
 EXPOSE 8080
-COPY --from=build /app/target/Email.jar Email.jar
 RUN apt-get install openjdk-17-jre -y
+COPY --from=build /app/target/Email.jar Email.jar
 ENTRYPOINT ["java","-jar","Email.jar"]
