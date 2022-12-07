@@ -2,7 +2,7 @@ FROM ubuntu as base
 RUN apt-get update && apt-get install npm -y && \
     npm install -g @bitwarden/cli@2022.10.0
 
-FROM base as build
+FROM base as test
 WORKDIR /app
 RUN apt-get install openjdk-17-jdk -y
 COPY .mvn/ .mvn
