@@ -33,20 +33,6 @@ jobs:
         id: project
       - name: Show extracted Maven project version
         run: echo ${{ steps.project.outputs.version }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-        with:
-          image: tonistiigi/binfmt:latest
-          platforms: arm64,arm
-      - name: Set up Docker Buildx
-        id: buildx
-        uses: docker/setup-buildx-action@v2
-      - name: Login to DockerHub
-        if: ${{ github.ref == 'refs/heads/master' }}
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
   docker-test:
     runs-on: ubuntu-latest
 
@@ -60,18 +46,32 @@ jobs:
           context: .
           target: test
 
-#  docker-push:
-#    runs-on: ubuntu-latest
-#
-#    steps:
-#      - name: Build image and push to Docker Hub
-#          uses: docker/build-push-action@v3
-#          with:
-#            platforms: linux/arm64,linux/amd64 #,linux/arm/v8
-#            # relative path to the place where source code with Dockerfile is located
-#            context: .
-#            tags: |
-#              stevenmassaro/email:latest
-#              stevenmassaro/email:${{ steps.project.outputs.version }}
-#            # build on feature branches, push only on main branch
-#            push: ${{ github.ref == 'refs/heads/master' }}
+  docker-push:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
+      - name: Login to DockerHub
+        if: ${{ github.ref == 'refs/heads/master' }}
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          image: tonistiigi/binfmt:latest
+          platforms: arm64,arm
+      - name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+      - name: Build image and push to Docker Hub
+        uses: docker/build-push-action@v3
+        with:
+          platforms: linux/arm64,linux/amd64 #,linux/arm/v8
+          # relative path to the place where source code with Dockerfile is located
+          context: .
+          tags: |
+            stevenmassaro/email:latest
+            stevenmassaro/email:${{ steps.project.outputs.version }}
+          # build on feature branches, push only on main branch
+          push: ${{ github.ref == 'refs/heads/master' }}
