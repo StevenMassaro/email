@@ -80,6 +80,6 @@ jobs:
           context: .
           tags: |
             stevenmassaro/email:latest
-            stevenmassaro/email:${{ steps.project.outputs.version }}
+            stevenmassaro/email:${{ needs.build.outputs.version }}
           # build on feature branches, push only on main branch
           push: ${{ github.ref == 'refs/heads/master' }}
