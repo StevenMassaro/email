@@ -1,6 +1,6 @@
 FROM ubuntu as base
 RUN apt-get update && apt-get install npm -y && \
-    npm install -g @bitwarden/cli
+    npm install -g @bitwarden/cli@2022.10.0
 
 FROM base as build
 WORKDIR /app
