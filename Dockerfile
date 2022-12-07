@@ -4,11 +4,11 @@ RUN apt-get update && apt-get install npm -y && \
 
 FROM base as build
 WORKDIR /app
+RUN apt-get install openjdk-17-jdk -y
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 COPY src ./src
-RUN apt-get install openjdk-17-jdk -y && \
-    chmod +x mvnw && \
+RUN chmod +x mvnw && \
     ./mvnw --batch-mode --update-snapshots clean install --activate-profiles ui
 
 FROM base as production
