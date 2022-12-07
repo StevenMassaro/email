@@ -1,0 +1,6 @@
+*
+!/target/Email.jar
+!/src/*
+!/pom.xml
+!/.mvn/*
+!/mvnw
