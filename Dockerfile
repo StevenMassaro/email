@@ -9,7 +9,7 @@ COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 COPY src ./src
 RUN chmod +x mvnw && \
-    ./mvnw --batch-mode test
+    ./mvnw -Dfile.encoding=UTF8 --batch-mode test
 
 FROM base as production
 EXPOSE 8080
