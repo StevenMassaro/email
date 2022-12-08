@@ -12,7 +12,7 @@ RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
 
 FROM base as test
 WORKDIR /app
-RUN apt-get install openjdk-17-jdk -y
+RUN apt-get install openjdk-17-jdk --yes --no-install-recommends
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 COPY src ./src
@@ -21,6 +21,6 @@ RUN chmod +x mvnw && \
 
 FROM base as production
 EXPOSE 8080
-RUN apt-get install openjdk-17-jre -y
+RUN apt-get install openjdk-17-jre --yes --no-install-recommends
 ADD /target/Email.jar Email.jar
 ENTRYPOINT ["java","-jar","Email.jar"]
