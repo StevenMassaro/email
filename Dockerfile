@@ -1,6 +1,6 @@
 FROM ubuntu as base
 RUN apt-get update && \
-    apt-get install npm locales -y && \
+    apt-get install npm locales --yes --no-install-recommends && \
     npm install -g @bitwarden/cli@2022.10.0
 
 # Default to UTF-8 file.encoding
