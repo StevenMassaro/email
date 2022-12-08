@@ -8,6 +8,6 @@ public class FileEncodingTest {
 
     @Test
     public void testFileEncodingUtf8() {
-        assertEquals("UTF-8", System.getProperty("file.encoding"));
+        assertEquals("UTF8", System.getProperty("file.encoding"));
     }
 }
