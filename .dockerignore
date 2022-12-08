@@ -1,6 +1,7 @@
 *
 !/target/Email.jar
 !/src/*
+*node_modules*
 !/pom.xml
 !/.mvn/*
 !/mvnw
