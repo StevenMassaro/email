@@ -1,18 +1,16 @@
-FROM ubuntu as base
+FROM eclipse-temurin:17-jdk as base
 RUN apt-get update && apt-get install npm -y && \
     npm install -g @bitwarden/cli@2022.10.0
 
 FROM base as test
 WORKDIR /app
-RUN apt-get install openjdk-17-jdk -y
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 COPY src ./src
 RUN chmod +x mvnw && \
-    ./mvnw -Dfile.encoding=UTF8 --batch-mode test
+    ./mvnw --batch-mode test
 
 FROM base as production
 EXPOSE 8080
-RUN apt-get install openjdk-17-jre -y
 ADD /target/Email.jar Email.jar
-ENTRYPOINT ["java","-jar","Email.jar","-Dfile.encoding=UTF8"]
+ENTRYPOINT ["java","-jar","Email.jar"]
