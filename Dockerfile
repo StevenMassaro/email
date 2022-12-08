@@ -11,6 +11,16 @@ RUN echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen \
     && locale-gen en_US.UTF-8
 
 FROM base as test
+ARG bitwardenEmailFolderId
+ENV bitwardenEmailFolderId ${bitwardenEmailFolderId}
+ARG BW_CLIENTID
+ENV BW_CLIENTID ${BW_CLIENTID}
+ARG BW_CLIENTSECRET
+ENV BW_CLIENTSECRET ${BW_CLIENTSECRET}
+ARG testItemId
+ENV testItemId ${testItemId}
+ARG testMasterPassword
+ENV testMasterPassword ${testMasterPassword}
 WORKDIR /app
 RUN apt-get install openjdk-17-jdk --yes --no-install-recommends
 COPY .mvn/ .mvn
