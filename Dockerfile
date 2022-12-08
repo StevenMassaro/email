@@ -1,4 +1,4 @@
-FROM eclipse-temurin:17-jre as base
+FROM eclipse-temurin:17-jdk as base
 RUN apt-get update && apt-get install npm -y && \
     npm install -g @bitwarden/cli@2022.10.0
 
