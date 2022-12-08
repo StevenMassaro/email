@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 
@@ -26,6 +27,12 @@ public class BitwardenServiceTest {
 
     @Value("classpath:BitwardenListItems.json")
     private Resource bitwardenListItemsJson;
+
+    @Value("${testItemId}")
+    private UUID testItemId;
+
+    @Value("${testMasterPassword}")
+    private String testMasterPassword;
 
     @Test
     public void parseSessionKeyFromUnlockOutput() {
@@ -40,6 +47,17 @@ public class BitwardenServiceTest {
 
         String sessionKey = BitwardenService.parseSessionKeyFromUnlockOutput(unlockConsoleOutput);
         assertEquals("cAQ0Wyv6WGURtRg0MgQl5mDWUAGFXKowuNUePMUITkM+HcKfIaz6OVvfV9/XBZ8qzG7a5PTqT4BqNxrqBfzumQ==", sessionKey);
+    }
+
+    @Test
+    public void testLoadingSampleLoginFromVault() throws InterruptedException, ExecutionException, IOException {
+        Item login = bitwardenService.getLogin(testItemId, testMasterPassword.trim());
+        assertEquals(testItemId, login.getId());
+        assertEquals("testuser", login.getLogin().getUsername());
+        assertEquals("testpw", login.getLogin().getPassword());
+        assertEquals(1, login.getFields().size());
+        assertEquals("testfield", login.getFields().get(0).getName());
+        assertEquals("testfieldvalue", login.getFields().get(0).getValue());
     }
 
     @Test

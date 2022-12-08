@@ -50,6 +50,12 @@ jobs:
           # relative path to the place where source code with Dockerfile is located
           context: .
           target: test
+          build-args: |
+            bitwardenEmailFolderId=${{ secrets.BITWARDENEMAILFOLDERID }}
+            BW_CLIENTID=${{ secrets.BW_CLIENTID }}
+            BW_CLIENTSECRET=${{ secrets.BW_CLIENTSECRET }}
+            testItemId=${{ secrets.TESTITEMID }}
+            testMasterPassword=${{ secrets.TESTMASTERPASSWORD }}
       - name: Login to DockerHub
         if: ${{ github.ref == 'refs/heads/master' }}
         uses: docker/login-action@v2
