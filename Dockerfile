@@ -15,4 +15,4 @@ FROM base as production
 EXPOSE 8080
 RUN apt-get install openjdk-17-jre -y
 ADD /target/Email.jar Email.jar
-ENTRYPOINT ["java","-jar","Email.jar"]
+ENTRYPOINT ["java","-jar","Email.jar","-Dfile.encoding=UTF8"]
