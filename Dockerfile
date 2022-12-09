@@ -1,4 +1,4 @@
-FROM alpine as base
+FROM alpine:3.17 as base
 RUN apk add --update npm && \
     npm install -g @bitwarden/cli@2022.10.0
 
