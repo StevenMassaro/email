@@ -27,7 +27,8 @@ type state = {
     currentEmail: Email
     emails: Email[],
     selectedEmails: Email[],
-    selectAll: boolean
+    selectAll: boolean,
+    currentEmailHtml: string
 }
 
 class TableComponent extends Component<props, state> {
@@ -40,12 +41,14 @@ class TableComponent extends Component<props, state> {
             currentEmail: undefined,
             emails: [],
             selectedEmails: [],
-            selectAll: false
+            selectAll: false,
+            currentEmailHtml: ''
         };
     }
 
     onSubjectClick = (e, row) => {
         e.preventDefault();
+        this.loadBodyHtml(row.id)
         this.setState({
             currentEmail: row,
             showReadModal: true
@@ -161,23 +164,25 @@ class TableComponent extends Component<props, state> {
             )
     }
 
-    getBodyUrl = (id: number) => {
-        let host = window.location.host;
-        let url = "";
-        if (host.includes("localhost:3000")) {
-            url = 'http://localhost:8080'
-        } else {
-            url += '.';
-        }
-        url += "/body?id=";
-        url += id;
-        return url;
-    };
+    loadBodyHtml = (id: number) => {
+        fetch("./body?id=" + id)
+            .then((response) => {
+                    if (response.ok) {
+                        response.text().then((text) => {
+                            this.setState({
+                                currentEmailHtml: text
+                            })
+                        });
+                    }
+                }
+            )
+    }
 
     closeReadModal = (currentEmail: Email) => {
         this.markMessageReadIndInState(currentEmail.id, true);
         this.setState({
-            showReadModal: false
+            showReadModal: false,
+            currentEmailHtml: ''
         });
     };
 
@@ -253,22 +258,6 @@ class TableComponent extends Component<props, state> {
         this.setState({
             emails: emails
         });
-    };
-
-    print = (email: Email) => {
-        let w = window.open();
-        w.document.write(
-            '<span style="all:unset">' +
-            '<b>From: </b><span>' + (email.fromPersonal ? (email.fromPersonal + " ") : "") + '&#8249;' + email.fromAddress + '&#8250;</span><br>' +
-            '<b>Sent: </b>' + formatDate(new Date(email.dateReceived)) + '<br>' +
-            '<b>To: </b>' + email.username + '<br>' +
-            '<b>Subject: </b>' + email.subject +
-            '<hr/><br></span>'
-        );
-        // @ts-ignore
-        w.document.write(document.getElementById('emailContent').contentWindow.document.body.innerHTML);
-        w.print();
-        w.close();
     };
 
     filterRow = (filter, row) => {
@@ -474,27 +463,18 @@ class TableComponent extends Component<props, state> {
                         "width": "100%",
                         "height": "100%",
                         "flexDirection": "column",
-                        "overflow": "hidden"
+                        "overflow": "auto"
                     }}>
 
                         <ModalHeaderComponent
                             email={currentEmail}
+                            closeReadModal={this.closeReadModal}
+                            deleteMessage={this.deleteMessage}
                         />
 
-                        <iframe src={this.getBodyUrl(currentEmail.id)}
-                                style={{"flexGrow": "1"}}
-                                id="emailContent"
-                                title="email contents"
-                        />
-                        <div style={{"width": "100%"}}>
-                            <div style={{"float": "left", "width": "50%"}}>
-                                <Button onClick={() => this.closeReadModal(currentEmail)}>Close</Button>
-                                <Button onClick={() => this.print(currentEmail)}>Print</Button>
-                            </div>
-                            <div style={{"float": "right", "width": "50%", "textAlign": "right"}}>
-                                <Button negative onClick={() => this.deleteMessage(currentEmail)}>Delete</Button>
-                            </div>
-                        </div>
+                        <span
+                            id='emailContent'
+                            dangerouslySetInnerHTML={{__html: this.state.currentEmailHtml}} />
                     </div>
                 </ReactModal>
                 }
