@@ -27,8 +27,10 @@ public class SyncJob {
         this.syncService = syncService;
     }
 
-    public synchronized void startSync(String bitwardenMasterPassword) throws ExecutionException, InterruptedException {
-        inProgress.set(true);
+    public synchronized void startSync(String bitwardenMasterPassword) throws Exception {
+        if (inProgress.getAndSet(true)) {
+            throw new Exception("Sync is already in progress and cannot be started again.");
+        }
         results.clear();
         new Thread(() -> {
             List<UUID> accounts = accountService.list();

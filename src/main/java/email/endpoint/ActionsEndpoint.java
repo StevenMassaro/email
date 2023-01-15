@@ -25,7 +25,7 @@ public class ActionsEndpoint {
     }
 
     @PostMapping("/sync")
-    public synchronized void performSync(@RequestBody(required = false) String bitwardenMasterPassword) throws ExecutionException, InterruptedException {
+    public synchronized void performSync(@RequestBody(required = false) String bitwardenMasterPassword) throws Exception {
         syncJob.startSync(bitwardenMasterPassword);
     }
 
