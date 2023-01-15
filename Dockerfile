@@ -1,6 +1,6 @@
 FROM alpine:3.17 as base
 RUN apk add --update npm && \
-    npm install -g @bitwarden/cli@2022.10.0
+    npm install -g @bitwarden/cli
 
 # Default to UTF-8 file.encoding
 # From https://github.com/adoptium/containers/blob/d3c9617e83eb706aff74c095fd531fe31e359674/17/jre/ubuntu/jammy/Dockerfile.releases.full
