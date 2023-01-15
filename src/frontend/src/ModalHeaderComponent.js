@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
-import './ModalHeaderComponent.css';
 import download from 'downloadjs';
 import {formatDate} from "./Utils";
-import {Button} from "semantic-ui-react";
+import {Dropdown, Menu} from "semantic-ui-react";
+import * as lodash from "lodash";
 
 class ModalHeaderComponent extends Component {
 
@@ -36,29 +36,20 @@ class ModalHeaderComponent extends Component {
         const attachments = currentEmail.attachments;
 
         return <div>
-            <div className="flex-container">
-                <Button onClick={() => this.props.closeReadModal(currentEmail)}>Close</Button>
-                <Button onClick={() => this.print(currentEmail)}>Print</Button>
-                <div className="subject bold">{currentEmail.subject}</div>
-                <div className="dateReceived">{formatDate(new Date(currentEmail.dateReceived))}</div>
-                <Button negative onClick={() => this.props.deleteMessage(currentEmail)}>Delete</Button>
-            </div>
-            {attachments &&
-            <div className="flex-container attachments">
-                {attachments.map((attachment) => {
-                    return <div key={attachment.id}>
-                        <button
-                            type="button"
-                            className="link-button"
-                            onClick={() => this.fetchAttachment(attachment)}
-                        >
-                            {attachment.name}
-                        </button>
-                    </div>;
-                })
-                }
-            </div>
-            }
+            <Menu>
+                <Menu.Item onClick={() => this.props.closeReadModal(currentEmail)}>Close</Menu.Item>
+                <Menu.Item onClick={() => this.print(currentEmail)}>Print</Menu.Item>
+                {!lodash.isEmpty(attachments) && <Dropdown item text='Attachments'>
+                    <Dropdown.Menu>
+                        {attachments.map((attachment) => {
+                            return <Dropdown.Item onClick={() => this.fetchAttachment(attachment)}>{attachment.name}</Dropdown.Item>
+                        })}
+                    </Dropdown.Menu>
+                </Dropdown>}
+                <Menu.Item><p><b>{currentEmail.subject}</b></p></Menu.Item>
+                <Menu.Item><b>{formatDate(new Date(currentEmail.dateReceived))}</b></Menu.Item>
+                <Menu.Item position={"right"} color={"red"} onClick={() => this.props.deleteMessage(currentEmail)}>Delete</Menu.Item>
+            </Menu>
         </div>
     }
 }
