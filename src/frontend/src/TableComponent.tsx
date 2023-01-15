@@ -463,7 +463,7 @@ class TableComponent extends Component<props, state> {
                         "width": "100%",
                         "height": "100%",
                         "flexDirection": "column",
-                        "overflow": "auto"
+                        "overflow": "hidden"
                     }}>
 
                         <ModalHeaderComponent
@@ -472,7 +472,9 @@ class TableComponent extends Component<props, state> {
                             deleteMessage={this.deleteMessage}
                         />
 
-                        <span
+                        <span style={{
+                            overflow: "auto"
+                        }}
                             id='emailContent'
                             dangerouslySetInnerHTML={{__html: this.state.currentEmailHtml}} />
                     </div>
