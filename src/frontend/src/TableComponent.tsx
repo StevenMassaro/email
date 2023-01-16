@@ -56,6 +56,12 @@ class TableComponent extends Component<props, state> {
         this.hidePasswordModalIfPasswordNotNeeded();
         this.listMessages();
         document.addEventListener('keydown', this.keydownHandler);
+        // Automatically reset focus back to parent periodically so that toasts and keydowns will still work.
+        setInterval(_ => {
+            if (document.activeElement.tagName == "IFRAME") {
+                document.activeElement.blur();
+            }
+        }, 250);
     }
 
     componentWillUnmount(){
