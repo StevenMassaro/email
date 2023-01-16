@@ -27,8 +27,7 @@ type state = {
     currentEmail: Email
     emails: Email[],
     selectedEmails: Email[],
-    selectAll: boolean,
-    currentEmailHtml: string
+    selectAll: boolean
 }
 
 class TableComponent extends Component<props, state> {
@@ -41,14 +40,12 @@ class TableComponent extends Component<props, state> {
             currentEmail: undefined,
             emails: [],
             selectedEmails: [],
-            selectAll: false,
-            currentEmailHtml: ''
+            selectAll: false
         };
     }
 
     onSubjectClick = (e, row) => {
         e.preventDefault();
-        this.loadBodyHtml(row.id)
         this.setState({
             currentEmail: row,
             showReadModal: true
@@ -164,25 +161,23 @@ class TableComponent extends Component<props, state> {
             )
     }
 
-    loadBodyHtml = (id: number) => {
-        fetch("./body?id=" + id)
-            .then((response) => {
-                    if (response.ok) {
-                        response.text().then((text) => {
-                            this.setState({
-                                currentEmailHtml: text
-                            })
-                        });
-                    }
-                }
-            )
-    }
+    getBodyUrl = (id: number) => {
+        let host = window.location.host;
+        let url = "";
+        if (host.includes("localhost:3000")) {
+            url = 'http://localhost:8080'
+        } else {
+            url += '.';
+        }
+        url += "/body?id=";
+        url += id;
+        return url;
+    };
 
     closeReadModal = (currentEmail: Email) => {
         this.markMessageReadIndInState(currentEmail.id, true);
         this.setState({
-            showReadModal: false,
-            currentEmailHtml: ''
+            showReadModal: false
         });
     };
 
@@ -472,11 +467,11 @@ class TableComponent extends Component<props, state> {
                             deleteMessage={this.deleteMessage}
                         />
 
-                        <span style={{
-                            overflow: "auto"
-                        }}
-                            id='emailContent'
-                            dangerouslySetInnerHTML={{__html: this.state.currentEmailHtml}} />
+                        <iframe src={this.getBodyUrl(currentEmail.id)}
+                                style={{"flexGrow": "1"}}
+                                id="emailContent"
+                                title="email contents"
+                        />
                     </div>
                 </ReactModal>
                 }
