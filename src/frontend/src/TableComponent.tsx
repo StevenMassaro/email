@@ -58,7 +58,7 @@ class TableComponent extends Component<props, state> {
         document.addEventListener('keydown', this.keydownHandler);
         // Automatically reset focus back to parent periodically so that toasts and keydowns will still work.
         setInterval(_ => {
-            if (document.activeElement.tagName === "IFRAME") {
+            if (document.activeElement.tagName === "IFRAME" && this.state.showReadModal) {
                 document.activeElement.blur();
             }
         }, 1000);
