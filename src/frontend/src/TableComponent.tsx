@@ -82,7 +82,6 @@ class TableComponent extends Component<props, state> {
 
     performSync = () => {
         const syncToastId = toast.info(this.buildSyncStatusToastMessage(0, null), {
-            position: toast.POSITION.TOP_RIGHT,
             autoClose: false
         })
         fetch("./actions/sync", {
@@ -136,20 +135,16 @@ class TableComponent extends Component<props, state> {
                         toast.info("Sync results: "
                             + insertedCount + " inserted; "
                             + deletedCount + " deleted; "
-                            + changedReadIndCount + " changed read indicator.", {
-                            position: toast.POSITION.TOP_RIGHT
-                        });
+                            + changedReadIndCount + " changed read indicator.");
 
                         failedAccounts.forEach((account) => {
                             toast.error("Failed to sync: " + account.username, {
-                                position: toast.POSITION.TOP_RIGHT,
                                 autoClose: false
                             });
                         });
 
                         partiallyFailedAccounts.forEach((account) => {
                             toast.warn("Partially failed to sync (some messages may be missing): " + account.username, {
-                                position: toast.POSITION.TOP_RIGHT,
                                 autoClose: false
                             })
                         })
@@ -199,15 +194,11 @@ class TableComponent extends Component<props, state> {
         fetch("./message?id=" + currentEmail.id, {method: "DELETE"})
             .then((response) => {
                     if (!response.ok) {
-                        toast.error("Failed to delete '" + currentEmail.subject + "' with error '" + response.statusText + "', readding to list.", {
-                            position: toast.POSITION.TOP_RIGHT
-                        });
+                        toast.error("Failed to delete '" + currentEmail.subject + "' with error '" + response.statusText + "', readding to list.");
                         this.addMessageToState(currentEmail);
                         console.warn(response);
                     } else {
-                        toast.success("Message '" + currentEmail.subject + "' successfully deleted.", {
-                            position: toast.POSITION.TOP_RIGHT
-                        });
+                        toast.success("Message '" + currentEmail.subject + "' successfully deleted.");
                     }
                     return response;
                 }
@@ -452,7 +443,9 @@ class TableComponent extends Component<props, state> {
 
         return (
             <div>
-                <ToastContainer/>
+                <ToastContainer
+                    position="bottom-right"
+                />
                 {currentEmail &&
                 <ReactModal
                     isOpen={this.state.showReadModal}
