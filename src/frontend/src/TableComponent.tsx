@@ -61,7 +61,7 @@ class TableComponent extends Component<props, state> {
             if (document.activeElement.tagName === "IFRAME" && this.state.showReadModal) {
                 document.activeElement.blur();
             }
-        }, 1000);
+        }, 2000);
     }
 
     componentWillUnmount(){
