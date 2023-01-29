@@ -26,7 +26,7 @@ class ModalHeaderComponent extends Component {
             '<hr/><br></span>'
         );
         // @ts-ignore
-        w.document.write(document.getElementById('emailContent').innerHTML);
+        w.document.write(document.getElementById('emailContent').contentWindow.document.body.innerHTML);
         w.print();
         w.close();
     };
