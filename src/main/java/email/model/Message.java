@@ -81,8 +81,10 @@ public class Message {
             this.dateReceived = getReceivedDate(message).getTime();
             this.originalDateReceived = getOriginalDateReceived(message);
             InternetAddress sender = (InternetAddress) ((IMAPMessage) message).getSender();
-            this.fromAddress = sender.getAddress();
-            this.fromPersonal = sender.getPersonal();
+            if (sender != null) {
+                this.fromAddress = sender.getAddress();
+                this.fromPersonal = sender.getPersonal();
+            }
             javax.mail.Address[] recipients = message.getRecipients(javax.mail.Message.RecipientType.TO);
             if (ArrayUtils.isNotEmpty(recipients)) {
                 this.toAddress = recipients[0].toString();
