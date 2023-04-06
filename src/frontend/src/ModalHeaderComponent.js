@@ -48,7 +48,10 @@ class ModalHeaderComponent extends Component {
                 </Dropdown>}
                 <Menu.Item><p><b>{currentEmail.subject}</b></p></Menu.Item>
                 <Menu.Item><b>{formatDate(new Date(currentEmail.dateReceived))}</b></Menu.Item>
-                <Menu.Item position={"right"} color={"red"} onClick={() => this.props.deleteMessage(currentEmail)}>Delete</Menu.Item>
+                <Menu.Menu position={"right"}>
+                    <Menu.Item onClick={() => this.props.toggleAutoBlur()}>{this.props.autoBlur ? "Disable" : "Enable"} auto-blur</Menu.Item>
+                    <Menu.Item color={"red"} onClick={() => this.props.deleteMessage(currentEmail)}>Delete</Menu.Item>
+                </Menu.Menu>
             </Menu>
         </div>
     }

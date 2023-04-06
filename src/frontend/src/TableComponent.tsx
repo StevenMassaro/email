@@ -27,7 +27,8 @@ type state = {
     currentEmail: Email
     emails: Email[],
     selectedEmails: Email[],
-    selectAll: boolean
+    selectAll: boolean,
+    autoBlur: boolean,
 }
 
 class TableComponent extends Component<props, state> {
@@ -40,7 +41,8 @@ class TableComponent extends Component<props, state> {
             currentEmail: undefined,
             emails: [],
             selectedEmails: [],
-            selectAll: false
+            selectAll: false,
+            autoBlur: true
         };
     }
 
@@ -56,9 +58,15 @@ class TableComponent extends Component<props, state> {
         this.hidePasswordModalIfPasswordNotNeeded();
         this.listMessages();
         document.addEventListener('keydown', this.keydownHandler);
-        // Automatically reset focus back to parent periodically so that toasts and keydowns will still work.
+        this.runAutoBlur()
+    }
+
+    /**
+     * Automatically reset focus back to parent periodically so that toasts and keydowns will still work.
+     */
+    runAutoBlur = () => {
         setInterval(_ => {
-            if (document.activeElement.tagName === "IFRAME" && this.state.showReadModal) {
+            if (document.activeElement.tagName === "IFRAME" && this.state.showReadModal && this.state.autoBlur) {
                 document.activeElement.blur();
             }
         }, 2000);
@@ -464,6 +472,12 @@ class TableComponent extends Component<props, state> {
                             email={currentEmail}
                             closeReadModal={this.closeReadModal}
                             deleteMessage={this.deleteMessage}
+                            toggleAutoBlur={() => {
+                                this.setState((state) => ({
+                                    autoBlur: !state.autoBlur
+                                }));
+                            }}
+                            autoBlur={this.state.autoBlur}
                         />
 
                         <iframe src={this.getBodyUrl(currentEmail.id)}
