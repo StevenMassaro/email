@@ -89,6 +89,14 @@ class TableComponent extends Component<props, state> {
     };
 
     performSync = () => {
+        if (process.env.NODE_ENV === "development") {
+            this._confirmationCallback(() => this._performSync())
+        } else {
+            this._performSync()
+        }
+    };
+
+    _performSync = () => {
         const syncToastId = toast.info(this.buildSyncStatusToastMessage(0, null), {
             autoClose: false
         })
@@ -98,7 +106,13 @@ class TableComponent extends Component<props, state> {
         }).then(() => {
             this.syncPollStatus(syncToastId)
         });
-    };
+    }
+
+    _confirmationCallback = (callback: () => void, action: string = "sync") => {
+        if (window.confirm(`Are you sure you want to ${action}?`)) {
+            callback();
+        }
+    }
 
     buildSyncStatusToastMessage(completedAccountCount, totalAccountCount) {
         const innerMessage = totalAccountCount ? `/${totalAccountCount}` : ""
