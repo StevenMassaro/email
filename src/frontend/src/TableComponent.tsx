@@ -212,7 +212,7 @@ class TableComponent extends Component<props, state> {
     deleteMessage = (currentEmail: Email) => {
         this.closeReadModal(currentEmail);
         this.removeMessageFromState(currentEmail.id);
-        fetch("./message?id=" + currentEmail.id, {method: "DELETE"})
+        return fetch("./message?id=" + currentEmail.id, {method: "DELETE"})
             .then((response) => {
                     if (!response.ok) {
                         toast.error("Failed to delete '" + currentEmail.subject + "' with error '" + response.statusText + "', readding to list.");
@@ -293,7 +293,7 @@ class TableComponent extends Component<props, state> {
         event.preventDefault();
     };
 
-    keydownHandler = e => {
+    keydownHandler = async e => {
         if (e.key === 's' && e.ctrlKey) {
             e.preventDefault();
             e.stopPropagation();
@@ -316,9 +316,11 @@ class TableComponent extends Component<props, state> {
             if (e.keyCode === deleteKeyCode) {
                 e.preventDefault();
                 e.stopPropagation();
-                this.state.selectedEmails.forEach(selectedEmail => {
-                    this.deleteMessage(selectedEmail);
-                })
+                for (const selectedEmail of this.state.selectedEmails) {
+                    console.log("deleting " + selectedEmail.id)
+                    await this.deleteMessage(selectedEmail);
+                    console.log("deleted " + selectedEmail.id)
+                }
                 this.setState({
                     selectedEmails: [],
                 })
