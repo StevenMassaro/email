@@ -65,6 +65,7 @@ class TableComponent extends Component<props, state> {
     runAutoBlur = () => {
         setInterval(_ => {
             if (document.activeElement.tagName === "IFRAME" && this.state.showReadModal && this.state.autoBlur) {
+                // @ts-ignore
                 document.activeElement.blur();
             }
         }, 2000);
