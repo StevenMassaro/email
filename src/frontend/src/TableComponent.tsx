@@ -27,7 +27,6 @@ type state = {
     currentEmail: Email
     emails: Email[],
     selectedEmails: Email[],
-    selectAll: boolean,
     autoBlur: boolean,
 }
 
@@ -41,7 +40,6 @@ class TableComponent extends Component<props, state> {
             currentEmail: undefined,
             emails: [],
             selectedEmails: [],
-            selectAll: false,
             autoBlur: true
         };
     }
@@ -313,7 +311,7 @@ class TableComponent extends Component<props, state> {
                 this.closeReadModal(this.state.currentEmail);
             }
         }
-        if (!lodash.isEmpty(this.state.selectedEmails) || this.state.selectAll) {
+        if (!lodash.isEmpty(this.state.selectedEmails)) {
             if (e.keyCode === deleteKeyCode) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -322,7 +320,6 @@ class TableComponent extends Component<props, state> {
                 })
                 this.setState({
                     selectedEmails: [],
-                    selectAll: false
                 })
             }
         }
@@ -336,29 +333,6 @@ class TableComponent extends Component<props, state> {
         return !lodash.isUndefined(this.state.selectedEmails.find((email) => {
             return !lodash.isUndefined(email) && email.id === lodash.toInteger(key);
         }))
-    };
-
-    /**
-     * called when the user clicks the selectAll checkbox/radio
-     */
-    toggleAll = () => {
-        let {selectedEmails, emails} = this.state;
-        if (lodash.isEmpty(selectedEmails)) {
-            this.setState({
-                selectedEmails: emails
-            });
-        } else if(lodash.isEqual(selectedEmails, emails)) {
-            this.setState({
-                selectedEmails: []
-            });
-        } else {
-            this.setState({
-                selectedEmails: emails
-            });
-        }
-        this.setState({
-            selectAll: !this.state.selectAll
-        });
     };
 
     /**
@@ -524,8 +498,6 @@ class TableComponent extends Component<props, state> {
                     keyField="id"
                     // for some reason we need to define this method this way or it won't see the state
                     isSelected={(key => this.isSelected(key))}
-                    selectAll={this.state.selectAll}
-                    toggleAll={this.toggleAll}
                     toggleSelection={this.toggleSelection}
                     selectType={"checkbox"}
                     data={emails}
