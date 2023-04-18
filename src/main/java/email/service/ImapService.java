@@ -104,16 +104,7 @@ public class ImapService {
         Item item = bitwardenService.getLoginFromCache(message.getAccountBitwardenId());
         Store store = getStore(item);
 
-        String hostname = item.getHostname();
-
-        String trashFolderName;
-        if (hostname.contains("gmail")) {
-            trashFolderName = "[Gmail]/Trash";
-        } else if (hostname.contains("aol")) {
-            trashFolderName = "Trash";
-        } else {
-            throw new Exception("Unknown domain.");
-        }
+        String trashFolderName = item.getProvider().getTrashFolderName();
 
         try (IMAPFolder inbox = openInbox(store, Folder.READ_WRITE);
              IMAPFolder trash = openFolder(store, Folder.READ_WRITE, trashFolderName)) {
