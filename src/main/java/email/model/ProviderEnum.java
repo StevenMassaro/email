@@ -5,17 +5,23 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum ProviderEnum {
-    GMAIL("EEE, d MMM yyyy HH:mm:ss Z"),
-    AOL("EEE, d MMM yyyy HH:mm:ss Z (ZZZ)");
+    GMAIL(false, "EEE, d MMM yyyy HH:mm:ss Z"),
+    AOL(true, "EEE, d MMM yyyy HH:mm:ss Z (ZZZ)");
 
     private final String[] dateFormats;
+    private final boolean doImapOperationsSynchronously;
 
-    ProviderEnum(String... dateFormats) {
+    ProviderEnum(boolean doImapOperationsSynchronously, String... dateFormats) {
+        this.doImapOperationsSynchronously = doImapOperationsSynchronously;
         this.dateFormats = dateFormats;
     }
 
     public String[] getDateFormats() {
         return dateFormats;
+    }
+
+    public boolean isDoImapOperationsSynchronously() {
+        return doImapOperationsSynchronously;
     }
 
     public static String[] getAllDateFormats() {

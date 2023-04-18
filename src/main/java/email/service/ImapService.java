@@ -117,8 +117,10 @@ public class ImapService {
 
         try (IMAPFolder inbox = openInbox(store, Folder.READ_WRITE);
              IMAPFolder trash = openFolder(store, Folder.READ_WRITE, trashFolderName)) {
+            log.trace("Deleting email {}", id);
             javax.mail.Message readMessage = inbox.getMessageByUID(message.getUid());
             inbox.moveMessages(new javax.mail.Message[]{readMessage}, trash);
+            log.debug("Deleted email {}", id);
         }
     }
 

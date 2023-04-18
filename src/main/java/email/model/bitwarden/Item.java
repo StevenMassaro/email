@@ -1,6 +1,7 @@
 package email.model.bitwarden;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import email.model.ProviderEnum;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
@@ -33,5 +34,16 @@ public class Item {
         } else {
             throw new Exception("Unsupported email host: " + login.getUsername());
         }
+    }
+
+    @JsonIgnore
+    public ProviderEnum getProvider() throws Exception {
+        String hostname = getHostname();
+        for (ProviderEnum providerEnum : ProviderEnum.values()) {
+            if (StringUtils.containsIgnoreCase(hostname, providerEnum.toString())) {
+                return providerEnum;
+            }
+        }
+        return null;
     }
 }
