@@ -73,7 +73,11 @@ public class Message {
                 setCidMap(mimeMessageParser);
             } catch (Exception e) {
                 log.warn("Failed to parse message using commons email parser, resorting to fallback method (which is less mature)", e);
-                setBodyParts(message);
+                try {
+                    setBodyParts(message);
+                } catch (Exception f) {
+                    log.warn("Failed to parse message body parts using fallback method, message might be missing some body parts.", f);
+                }
             }
 
             this.id = MessageService.messageIdSequence.incrementAndGet();
