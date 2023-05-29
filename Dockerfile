@@ -1,5 +1,5 @@
 FROM alpine:3.18 as base
-RUN apk add --update npm && \
+RUN apk add --no-cache --update npm && \
     npm install -g @bitwarden/cli
 
 # Default to UTF-8 file.encoding
@@ -18,7 +18,7 @@ ENV testItemId ${testItemId}
 ARG testMasterPassword
 ENV testMasterPassword ${testMasterPassword}
 WORKDIR /app
-RUN apk add openjdk17-jdk
+RUN apk add --no-cache openjdk17-jdk
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 COPY src ./src
@@ -27,6 +27,6 @@ RUN chmod +x mvnw && \
 
 FROM base as production
 EXPOSE 8080
-RUN apk add openjdk17-jre
+RUN apk add --no-cache openjdk17-jre
 ADD /target/Email.jar Email.jar
 ENTRYPOINT ["java","-jar","Email.jar"]
