@@ -27,6 +27,6 @@ RUN chmod +x mvnw && \
 
 FROM base as production
 EXPOSE 8080
-RUN apk add --no-cache openjdk17-jre
+RUN apk add --no-cache openjdk17-jre-headless
 ADD /target/Email.jar Email.jar
 ENTRYPOINT ["java","-jar","Email.jar"]
