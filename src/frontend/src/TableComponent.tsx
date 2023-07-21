@@ -226,6 +226,23 @@ class TableComponent extends Component<props, state> {
             )
     };
 
+    archiveMessage = (currentEmail: Email) => {
+        this.closeReadModal(currentEmail);
+        this.removeMessageFromState(currentEmail.id);
+        return fetch("./message/archive?id=" + currentEmail.id, {method: "POST"})
+            .then((response) => {
+                    if (!response.ok) {
+                        toast.error("Failed to archive '" + currentEmail.subject + "' with error '" + response.statusText + "', readding to list.");
+                        this.addMessageToState(currentEmail);
+                        console.warn(response);
+                    } else {
+                        toast.success("Message '" + currentEmail.subject + "' successfully archived.");
+                    }
+                    return response;
+                }
+            )
+    };
+
     hidePasswordModalIfPasswordNotNeeded = () => {
         fetch("./actions/requiresPassword")
             .then((response) => {
@@ -463,6 +480,7 @@ class TableComponent extends Component<props, state> {
                             email={currentEmail}
                             closeReadModal={this.closeReadModal}
                             deleteMessage={this.deleteMessage}
+                            archiveMessage={this.archiveMessage}
                             toggleAutoBlur={() => {
                                 this.setState((state) => ({
                                     autoBlur: !state.autoBlur
