@@ -76,7 +76,7 @@ class TableComponent extends Component<props, state> {
     }
 
     listMessages = () => {
-        fetch("./message/listMessages")
+        fetch("./message")
             .then(res => res.json())
             .then(
                 (result) => {

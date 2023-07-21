@@ -25,7 +25,7 @@ public class MessageEndpoint {
         this.bitwardenService = bitwardenService;
     }
 
-    @GetMapping("/listMessages")
+    @GetMapping()
     public Set<Message> listMessages() {
         return messageService.list();
     }
