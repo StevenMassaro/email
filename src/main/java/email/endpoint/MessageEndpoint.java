@@ -1,5 +1,6 @@
 package email.endpoint;
 
+import email.model.DestinationEnum;
 import email.model.Message;
 import email.model.ProviderEnum;
 import email.model.bitwarden.Item;
@@ -31,20 +32,29 @@ public class MessageEndpoint {
 
     @DeleteMapping()
     public void deleteMessage(@RequestParam("id") long id) throws Exception {
+        moveMessage(id, DestinationEnum.trash);
+    }
+
+    private void doMoveMessage(long id, DestinationEnum destination) throws Exception {
+        imapService.moveMessage(id, destination);
+        messageService.delete(id);
+    }
+
+    private void moveMessage(long id, DestinationEnum destination) throws Exception {
         Message message = messageService.get(id);
         Item login = bitwardenService.getLoginFromCache(message.getAccountBitwardenId());
         ProviderEnum provider = login.getProvider();
         if (provider != null && provider.isDoImapOperationsSynchronously()) {
             synchronized (this) {
-                doDeleteMessage(id);
+                doMoveMessage(id, destination);
             }
         } else {
-            doDeleteMessage(id);
+            doMoveMessage(id, destination);
         }
     }
 
-    private void doDeleteMessage(long id) throws Exception {
-        imapService.deleteMessage(id);
-        messageService.delete(id);
+    @PostMapping("/archive")
+    public void archiveMessage(@RequestParam("id") long id) throws Exception {
+        moveMessage(id, DestinationEnum.archive);
     }
 }

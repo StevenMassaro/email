@@ -8,16 +8,18 @@ import java.util.List;
 
 @Getter
 public enum ProviderEnum {
-    GMAIL(false, "[Gmail]/Trash", "EEE, d MMM yyyy HH:mm:ss Z"),
-    AOL(true, "Trash", "EEE, d MMM yyyy HH:mm:ss Z (ZZZ)");
+    GMAIL(false, "[Gmail]/Trash", "[Gmail]/All Mail", "EEE, d MMM yyyy HH:mm:ss Z"),
+    AOL(true, "Trash", null, "EEE, d MMM yyyy HH:mm:ss Z (ZZZ)");
 
     private final String[] dateFormats;
     private final boolean doImapOperationsSynchronously;
     private final String trashFolderName;
+    private final String archiveFolderName;
 
-    ProviderEnum(boolean doImapOperationsSynchronously, String trashFolderName, String... dateFormats) {
+    ProviderEnum(boolean doImapOperationsSynchronously, String trashFolderName, String archiveFolderName, String... dateFormats) {
         this.doImapOperationsSynchronously = doImapOperationsSynchronously;
         this.trashFolderName = trashFolderName;
+        this.archiveFolderName = archiveFolderName;
         this.dateFormats = dateFormats;
     }
 

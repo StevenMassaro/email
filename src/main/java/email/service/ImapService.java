@@ -3,6 +3,7 @@ package email.service;
 import com.google.common.cache.*;
 import com.sun.mail.imap.IMAPFolder;
 import email.exception.SomeMessagesFailedToDownloadException;
+import email.model.DestinationEnum;
 import email.model.Message;
 import email.model.bitwarden.Item;
 import lombok.extern.log4j.Log4j2;
@@ -99,19 +100,23 @@ public class ImapService {
         }
     }
 
-    public void deleteMessage(long id) throws Exception {
+    public void moveMessage(long id, DestinationEnum destination) throws Exception {
         Message message = messageService.get(id);
         Item item = bitwardenService.getLoginFromCache(message.getAccountBitwardenId());
         Store store = getStore(item);
 
-        String trashFolderName = item.getProvider().getTrashFolderName();
+        String folderName = destination.getFolderName(item.getProvider());
+
+        if (StringUtils.isEmpty(folderName)) {
+            throw new Exception("Cannot determine the destination folder name for " + destination + " for this email provider " + item.getProvider());
+        }
 
         try (IMAPFolder inbox = openInbox(store, Folder.READ_WRITE);
-             IMAPFolder trash = openFolder(store, Folder.READ_WRITE, trashFolderName)) {
-            log.trace("Deleting email {}", id);
+             IMAPFolder archive = openFolder(store, Folder.READ_WRITE, folderName)) {
+            log.trace(destination.getDisplayName() + " email {}", id);
             javax.mail.Message readMessage = inbox.getMessageByUID(message.getUid());
-            inbox.moveMessages(new javax.mail.Message[]{readMessage}, trash);
-            log.debug("Deleted email {}", id);
+            inbox.moveMessages(new javax.mail.Message[]{readMessage}, archive);
+            log.debug(destination.getDisplayName() + " email {} successful", id);
         }
     }
 
