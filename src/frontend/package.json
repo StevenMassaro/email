@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@types/react-modal": "^3.16.0",
+    "@types/react-modal": "^3.16.2",
     "downloadjs": "1.4.7",
     "lodash": "4.17.21",
     "react": "^16.14.0",
