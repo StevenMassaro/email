@@ -42,7 +42,7 @@ jobs:
       - name: Test Docker image
         uses: docker/build-push-action@v4
         with:
-          platforms: linux/arm64,linux/amd64 #,linux/arm/v8
+          platforms: linux/amd64
           context: .
           target: test
           build-args: |
@@ -60,7 +60,7 @@ jobs:
       - name: Build image and push to Docker Hub
         uses: docker/build-push-action@v4
         with:
-          platforms: linux/arm64,linux/amd64 #,linux/arm/v8
+          platforms: linux/amd64
           context: .
           tags: |
             stevenmassaro/email:latest
