@@ -20,6 +20,7 @@ import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -40,10 +41,7 @@ public class Message {
     private List<Address> recipient;
     private String fromAddress;
     private String fromPersonal;
-    /**
-     * The first recipient, in the recipient list, as defined by the IMAP server.
-     */
-    private String toAddress;
+    private List<String> recipients;
     /**
      * The username of the account that this message was sent to, obtained from Bitwarden.
      */
@@ -91,7 +89,7 @@ public class Message {
             }
             javax.mail.Address[] recipients = message.getRecipients(javax.mail.Message.RecipientType.TO);
             if (ArrayUtils.isNotEmpty(recipients)) {
-                this.toAddress = recipients[0].toString();
+                this.recipients = Arrays.stream(recipients).map(javax.mail.Address::toString).collect(Collectors.toList());
             }
             this.username = username;
         }

@@ -387,7 +387,7 @@ class TableComponent extends Component<props, state> {
                 maxWidth: 200,
                 Cell: row => {
                     return (
-                        <span title={row.original.toAddress}>
+                        <span title={row.original.recipients ? row.original.recipients.join(", ") : ""}>
                             {row.original.username}
                         </span>
                     )
