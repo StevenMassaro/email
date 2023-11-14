@@ -8,6 +8,7 @@ import email.model.Message;
 import email.model.bitwarden.Item;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +25,7 @@ public class ImapService {
 
     private final MessageService messageService;
     private final BitwardenService bitwardenService;
+    private final int messageProcessingTimeoutSeconds;
     Cache<String, Store> storeCache = CacheBuilder.newBuilder()
             .expireAfterWrite(2, TimeUnit.MINUTES)
             .removalListener(new RemovalListener<String, Store>() {
@@ -41,9 +43,12 @@ public class ImapService {
             })
             .build();
 
-    public ImapService(MessageService messageService, BitwardenService bitwardenService) {
+    public ImapService(MessageService messageService,
+                       BitwardenService bitwardenService,
+                       @Value("${messageProcessingTimeoutSeconds:60}") int messageProcessingTimeoutSeconds) {
         this.messageService = messageService;
         this.bitwardenService = bitwardenService;
+        this.messageProcessingTimeoutSeconds = messageProcessingTimeoutSeconds;
     }
 
     public List<Message> getInboxMessages(String hostname, int port, String username, String decryptedPassword, List<Message> existingMessages, UUID accountBitwardenId) throws Exception {
@@ -74,7 +79,7 @@ public class ImapService {
                 });
 
                 try {
-                    messageProcessingFuture.get(60, TimeUnit.SECONDS);
+                    messageProcessingFuture.get(messageProcessingTimeoutSeconds, TimeUnit.SECONDS);
                 } catch (TimeoutException e) {
                     log.warn("{} - Ran out of time while processing message {} of {}", username, finalI + 1, messages.length, e);
                     messageProcessingFuture.cancel(true);
