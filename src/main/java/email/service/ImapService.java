@@ -119,10 +119,10 @@ public class ImapService {
 
         try (IMAPFolder inbox = openInbox(store, Folder.READ_WRITE);
              IMAPFolder archive = openFolder(store, Folder.READ_WRITE, folderName)) {
-            log.trace(destination.getDisplayName() + " email {}", id);
+            log.trace("{} - " + destination.getDisplayName() + " email", id);
             javax.mail.Message readMessage = inbox.getMessageByUID(message.getUid());
             inbox.moveMessages(new javax.mail.Message[]{readMessage}, archive);
-            log.debug(destination.getDisplayName() + " email {} successful", id);
+            log.debug("{} - " + destination.getDisplayName() + " email successful", id);
         }
     }
 

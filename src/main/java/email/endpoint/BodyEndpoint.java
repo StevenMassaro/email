@@ -39,7 +39,7 @@ public class BodyEndpoint {
 
     @GetMapping()
     public ResponseEntity<String> getBody(@RequestParam("id") long id) throws Exception {
-        log.debug("Loading email body for message {}", id);
+        log.debug("{} - Loading email body", id);
         HttpHeaders responseHeaders = new HttpHeaders();
 
         Message message = messageService.get(id);
