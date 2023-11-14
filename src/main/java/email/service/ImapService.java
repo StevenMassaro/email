@@ -64,6 +64,7 @@ public class ImapService {
                     for (Message existingMessage : existingMessages) {
                         if (existingMessage.getUid() == uid) {
                             messageAlreadyDownloaded = true;
+                            break;
                         }
                     }
 
