@@ -39,7 +39,7 @@ public class SyncService {
 
         try {
             Item item = bitwardenService.getLogin(account, bitwardenMasterPassword);
-            log.debug("Sync started for {}", item.getLogin().getUsername());
+            log.debug("{} - Sync started", item.getLogin().getUsername());
             username = item.getLogin().getUsername();
             List<Message> dbMessages = messageService.list(account);
             List<Message> imapMessages;
@@ -59,8 +59,8 @@ public class SyncService {
                     deletedCount++;
                 }
             }
-            log.debug("Deleted {} messages from local database while processing account {}.",
-                    deletedCount, item.getLogin().getUsername());
+            log.debug("{} - Deleted {} messages from local database.",
+                    item.getLogin().getUsername(), deletedCount);
 
             // then add all messages that do exist on the imap server
             long insertedCount = 0;
@@ -74,26 +74,26 @@ public class SyncService {
                         insertedCount++;
                     } catch (Exception e) {
                         messageFailure = true;
-                        log.error("Failed to insert new message with UID {} while processing account {}.", imapMessage.getUid(), item.getLogin().getUsername(), e);
+                        log.error("{} - Failed to insert new message with UID {}.", item.getLogin().getUsername(), imapMessage.getUid(), e);
                     }
                 } else {
                     // if the message has a different read indicator in the database than IMAP
                     if (imapMessage.isReadInd() != match.isReadInd()) {
                         messageService.setReadIndicator(match.getId(), imapMessage.isReadInd());
-                        log.debug("Changed read indicator for email ID {} to {}.",
+                        log.debug("{} - Changed read indicator to {}.",
                                 match.getId(), imapMessage.isReadInd() ? "read" : "unread");
                         changedReadIndCount++;
                     }
                 }
             }
-            log.debug("Inserted {} messages into local database while processing account {}.", insertedCount, item.getLogin().getUsername());
-            log.debug("Changed read indicator for {} messages while processing account {}.", changedReadIndCount, item.getLogin().getUsername());
+            log.debug("{} - Inserted {} messages into local database.", item.getLogin().getUsername(), insertedCount);
+            log.debug("{} - Changed read indicator for {} messages.", item.getLogin().getUsername(), changedReadIndCount);
             totalChangedReadIndCount += changedReadIndCount;
             totalDeletedCount += deletedCount;
             totalInsertedCount += insertedCount;
         } catch (Exception e) {
             accountFailure = true;
-            log.error("Exception while processing account {} {}.", account, username, e);
+            log.error("{} - Exception while processing account {}.", username, account, e);
         }
 
         ExecStatusEnum result;
@@ -104,7 +104,7 @@ public class SyncService {
         } else {
             result = ExecStatusEnum.RULE_END_ACCOUNT_FAILURE;
         }
-        log.debug("Sync finished for {} {}", account, username);
+        log.debug("{} - Sync finished for {}", username, account);
         return new AsyncResult<>(new SyncStatusResult(totalInsertedCount, totalDeletedCount, totalChangedReadIndCount, result, username));
     }
 }

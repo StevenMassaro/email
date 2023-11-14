@@ -38,7 +38,7 @@ public class SyncJob {
 
             List<Future<SyncStatusResult>> syncFutures = new ArrayList<>();
             for (UUID accountBitwardenId : accounts) {
-                log.debug("Submitting task for account {}", accountBitwardenId);
+                log.debug("{} - Submitting sync task", accountBitwardenId);
                 syncFutures.add(syncService.sync(accountBitwardenId, bitwardenMasterPassword));
             }
 

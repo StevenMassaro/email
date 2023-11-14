@@ -31,11 +31,11 @@ public class ImapService {
                 public void onRemoval(RemovalNotification<String, Store> notification) {
                     try {
                         if (notification.getValue() != null) {
-                            log.debug("Closing store for {}", notification.getKey());
+                            log.debug("{} - Closing store", notification.getKey());
                             notification.getValue().close();
                         }
                     } catch (MessagingException e) {
-                        log.warn("Failed to close expired store for {}", notification.getKey(), e);
+                        log.warn("{} - Failed to close expired store", notification.getKey(), e);
                     }
                 }
             })
@@ -67,7 +67,7 @@ public class ImapService {
                         }
                     }
 
-                    log.debug("Processing email {} of {} for {}", finalI + 1, messages.length, username);
+                    log.debug("{} - Processing email {} of {}", username, finalI + 1, messages.length);
                     returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username, accountBitwardenId));
                     return null; // this is useless, but is here to make this a callable, so that we can throw exceptions
                 });
@@ -75,7 +75,7 @@ public class ImapService {
                 try {
                     messageProcessingFuture.get(60, TimeUnit.SECONDS);
                 } catch (TimeoutException e) {
-                    log.warn("Ran out of time while processing message {} of {} for {}", finalI + 1, messages.length, username, e);
+                    log.warn("{} - Ran out of time while processing message {} of {}", username, finalI + 1, messages.length, e);
                     messageProcessingFuture.cancel(true);
                     allSuccess = false;
                 }
@@ -90,7 +90,7 @@ public class ImapService {
 
     @Async
     public void setReadIndicator(long id, boolean readInd) throws Exception {
-        log.debug("Marking email {} as read ind {}", id, readInd);
+        log.debug("{} - Marking email as read ind {}", id, readInd);
         Message message = messageService.get(id);
         Store store = getStore(message);
 
@@ -130,7 +130,7 @@ public class ImapService {
     }
 
     private Store getStore(String hostname, int port, String username, String decryptedPassword, boolean isRetry) throws Exception {
-        log.debug("Getting store for {} {}", hostname, username);
+        log.debug("{} - Getting store for {}", username, hostname);
         Store cached = storeCache.get(username, () -> {
             Properties props = System.getProperties();
             props.setProperty("mail.store.protocol", "imaps");
@@ -151,7 +151,7 @@ public class ImapService {
             Session session = Session.getDefaultInstance(props, null);
             Store store = session.getStore("imaps");
             store.connect(hostname, port, username, decryptedPassword);
-            log.debug("Connected to store for {} {}", hostname, username);
+            log.debug("{} - Connected to store for {}", username, hostname);
             return store;
         });
         if (cached.isConnected()) {
