@@ -26,29 +26,33 @@ public class ImapService {
     private final MessageService messageService;
     private final BitwardenService bitwardenService;
     private final int messageProcessingTimeoutSeconds;
-    Cache<String, Store> storeCache = CacheBuilder.newBuilder()
-            .expireAfterWrite(2, TimeUnit.MINUTES)
-            .removalListener(new RemovalListener<String, Store>() {
-                @Override
-                public void onRemoval(RemovalNotification<String, Store> notification) {
-                    try {
-                        if (notification.getValue() != null) {
-                            log.debug("{} - Closing store", notification.getKey());
-                            notification.getValue().close();
-                        }
-                    } catch (MessagingException e) {
-                        log.warn("{} - Failed to close expired store", notification.getKey(), e);
-                    }
-                }
-            })
-            .build();
+    private final Cache<String, Store> storeCache;
 
     public ImapService(MessageService messageService,
                        BitwardenService bitwardenService,
-                       @Value("${messageProcessingTimeoutSeconds:60}") int messageProcessingTimeoutSeconds) {
+                       @Value("${messageProcessingTimeoutSeconds:60}") int messageProcessingTimeoutSeconds,
+                       @Value("${closeStoreWhenCacheExpires:true}") boolean shouldCloseStoreWhenCacheExpires) {
         this.messageService = messageService;
         this.bitwardenService = bitwardenService;
         this.messageProcessingTimeoutSeconds = messageProcessingTimeoutSeconds;
+        storeCache = CacheBuilder.newBuilder()
+                .expireAfterWrite(2, TimeUnit.MINUTES)
+                .removalListener((RemovalListener<String, Store>) notification -> {
+                    if (shouldCloseStoreWhenCacheExpires) {
+                        try {
+                            if (notification.getValue() != null) {
+                                log.debug("{} - Closing expired store", notification.getKey());
+                                notification.getValue().close();
+                            }
+                        } catch (MessagingException e) {
+                            log.warn("{} - Failed to close expired store", notification.getKey(), e);
+                        }
+                    } else {
+                        log.trace("{} - Not closing expired store because closeStoreWhenCacheExpires is false", notification.getKey());
+                    }
+
+                })
+                .build();
     }
 
     public List<Message> getInboxMessages(String hostname, int port, String username, String decryptedPassword, List<Message> existingMessages, UUID accountBitwardenId) throws Exception {

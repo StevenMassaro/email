@@ -20,7 +20,8 @@ Note that if the account you have specified in Bitwarden does not end in "gmail.
 
 ### Optional configuration settings:
 
-- `messageProcessingTimeoutSeconds`: number of seconds that should be spent processing each individual message before cancelling attempt to obtain message
+- `messageProcessingTimeoutSeconds` (default `60`): number of seconds that should be spent processing each individual message before cancelling attempt to obtain message
+- `closeStoreWhenCacheExpires` (default `true`): whether the `close` method should be called on an IMAP store when it expires from the cache. This was added because it seems that particularly slow IMAP providers (like gmail, sometimes), get `FolderClosedExceptions` when a `close` call occurs concurrently with opening a new store.
 
 ## Steps to get Bitwarden IDs
 
