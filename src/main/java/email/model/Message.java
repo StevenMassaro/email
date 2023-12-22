@@ -93,7 +93,7 @@ public class Message {
                 this.fromAddress = sender.getAddress();
                 this.fromPersonal = sender.getPersonal();
             }
-            if (obfuscateAmazonOrderSubject && this.fromAddress.equalsIgnoreCase("shipment-tracking@amazon.com")) {
+            if (obfuscateAmazonOrderSubject && (this.fromAddress.equalsIgnoreCase("shipment-tracking@amazon.com") || this.subject.toLowerCase().contains("your amazon.com order of \""))) {
                 this.subject = subject.replaceAll("\"(.*?)\"", "*****");
             }
             javax.mail.Address[] recipients = message.getRecipients(javax.mail.Message.RecipientType.TO);
