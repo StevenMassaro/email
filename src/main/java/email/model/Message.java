@@ -10,6 +10,7 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.mail.util.MimeMessageParser;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.activation.DataSource;
 import javax.mail.Flags;
@@ -26,6 +27,10 @@ import java.util.stream.Collectors;
 @Setter
 @Log4j2
 public class Message {
+
+    @JsonIgnore
+    @Value("${obfuscateAmazonOrderSubject:false}")
+    private boolean obfuscateAmazonOrderSubject;
 
     private long id;
     private long uid;
@@ -86,6 +91,9 @@ public class Message {
             if (sender != null) {
                 this.fromAddress = sender.getAddress();
                 this.fromPersonal = sender.getPersonal();
+            }
+            if (obfuscateAmazonOrderSubject && this.fromAddress.equalsIgnoreCase("shipment-tracking@amazon.com")) {
+                this.subject = subject.replaceAll("\"(.*?)\"", "*****");
             }
             javax.mail.Address[] recipients = message.getRecipients(javax.mail.Message.RecipientType.TO);
             if (ArrayUtils.isNotEmpty(recipients)) {
