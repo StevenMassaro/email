@@ -27,14 +27,17 @@ public class ImapService {
     private final BitwardenService bitwardenService;
     private final int messageProcessingTimeoutSeconds;
     private final Cache<String, Store> storeCache;
+    private final boolean obfuscateAmazonOrderSubject;
 
     public ImapService(MessageService messageService,
                        BitwardenService bitwardenService,
                        @Value("${messageProcessingTimeoutSeconds:60}") int messageProcessingTimeoutSeconds,
-                       @Value("${closeStoreWhenCacheExpires:true}") boolean shouldCloseStoreWhenCacheExpires) {
+                       @Value("${closeStoreWhenCacheExpires:true}") boolean shouldCloseStoreWhenCacheExpires,
+                       @Value("${obfuscateAmazonOrderSubject:false}") boolean obfuscateAmazonOrderSubject) {
         this.messageService = messageService;
         this.bitwardenService = bitwardenService;
         this.messageProcessingTimeoutSeconds = messageProcessingTimeoutSeconds;
+        this.obfuscateAmazonOrderSubject = obfuscateAmazonOrderSubject;
         storeCache = CacheBuilder.newBuilder()
                 .expireAfterWrite(2, TimeUnit.MINUTES)
                 .removalListener((RemovalListener<String, Store>) notification -> {
@@ -78,7 +81,7 @@ public class ImapService {
                     }
 
                     log.debug("{} - Processing email {} of {}", username, finalI + 1, messages.length);
-                    returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username, accountBitwardenId));
+                    returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username, accountBitwardenId, obfuscateAmazonOrderSubject));
                     return null; // this is useless, but is here to make this a callable, so that we can throw exceptions
                 });
 

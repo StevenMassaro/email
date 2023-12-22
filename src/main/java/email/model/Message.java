@@ -28,10 +28,6 @@ import java.util.stream.Collectors;
 @Log4j2
 public class Message {
 
-    @JsonIgnore
-    @Value("${obfuscateAmazonOrderSubject:false}")
-    private boolean obfuscateAmazonOrderSubject;
-
     private long id;
     private long uid;
     /**
@@ -64,7 +60,12 @@ public class Message {
 
     }
 
-    public Message(javax.mail.Message message, long uid, boolean alreadyExists, String username, UUID accountBitwardenId) throws Exception {
+    public Message(javax.mail.Message message,
+                   long uid,
+                   boolean alreadyExists,
+                   String username,
+                   UUID accountBitwardenId,
+                   boolean obfuscateAmazonOrderSubject) throws Exception {
         // only care to parse out the parts of the email for emails that are not in the database already
         // parsing is an expensive IMAP operation
         if (!alreadyExists) {
