@@ -10,7 +10,6 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.mail.util.MimeMessageParser;
-import org.springframework.beans.factory.annotation.Value;
 
 import javax.activation.DataSource;
 import javax.mail.Flags;
@@ -51,10 +50,6 @@ public class Message {
     private List<BodyPart> bodyParts = new ArrayList<>();
     private boolean readInd;
     private List<Attachment> attachments = new ArrayList<>();
-    /**
-     * Map of Content-ID's to their respective attachments.
-     */
-    private Map<String, Attachment> cidMap = new HashMap<>();
 
     public Message() {
 
@@ -74,7 +69,7 @@ public class Message {
                 mimeMessageParser.parse();
                 setAttachments(mimeMessageParser);
                 setBodyParts(mimeMessageParser);
-                setCidMap(mimeMessageParser);
+                setCidsOnAttachments(mimeMessageParser);
             } catch (Exception e) {
                 log.warn("Failed to parse message using commons email parser, resorting to fallback method (which is less mature)", e);
                 try {
@@ -108,14 +103,13 @@ public class Message {
         this.readInd = determineReadInd(message);
     }
 
-    private void setCidMap(MimeMessageParser mimeMessageParser) throws IOException {
+    private void setCidsOnAttachments(MimeMessageParser mimeMessageParser) {
         Collection<String> contentIds = mimeMessageParser.getContentIds();
         for (String contentId : contentIds) {
             DataSource attachmentDs = mimeMessageParser.findAttachmentByCid(contentId);
-            Attachment attachment = Attachment.fromDataSource(attachmentDs);
-            if (attachment != null) {
-                this.cidMap.put(contentId, attachment);
-            }
+            this.attachments.stream()
+                    .filter(a -> a.getName().equals(attachmentDs.getName()) && a.getContentType().equals(attachmentDs.getContentType()))
+                    .findFirst().ifPresent(attachment -> attachment.setContentId(contentId));
         }
     }
 

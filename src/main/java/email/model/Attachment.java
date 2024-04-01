@@ -26,6 +26,7 @@ public class Attachment {
     private String contentType;
     @JsonIgnore
     private byte[] file;
+    private String contentId;
 
     public Attachment(String name, String contentType, byte[] file) {
         this.id = MessageService.attachmentIdSequence.incrementAndGet();
@@ -52,7 +53,7 @@ public class Attachment {
         String contentType = dataSource.getContentType();
         byte[] file = IOUtils.toByteArray(dataSource.getInputStream());
         if (StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(contentType) && file != null) {
-            return new Attachment(dataSource.getName(), dataSource.getContentType(), file);
+            return new Attachment(name, contentType, file);
         }
         return null;
     }

@@ -35,11 +35,6 @@ public class AttachmentEndpoint {
         if (resourceResponseEntity != null) {
             return resourceResponseEntity;
         }
-
-        resourceResponseEntity = checkCid(id);
-        if (resourceResponseEntity != null) {
-            return resourceResponseEntity;
-        }
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "no message found with the corresponding attachment ID");
     }
 
@@ -50,18 +45,6 @@ public class AttachmentEndpoint {
             Attachment attachment = messageWithAttachment.get().getAttachments().stream().filter(a -> a.getId() == id).findFirst().orElse(null);
             if (attachment != null) {
                 return attachment.toResponseEntity();
-            }
-        }
-        return null;
-    }
-
-    private ResponseEntity<Resource> checkCid(long id) {
-        Optional<Message> messageWithAttachment = messageService.list().stream()
-                .filter(m -> m.getCidMap() != null && !m.getCidMap().isEmpty() && m.getCidMap().entrySet().stream().anyMatch(a -> a.getValue().getId() == id)).findFirst();
-        if (messageWithAttachment.isPresent()) {
-            Map.Entry<String, Attachment> attachment = messageWithAttachment.get().getCidMap().entrySet().stream().filter(a -> a.getValue().getId() == id).findFirst().orElse(null);
-            if (attachment != null) {
-                return attachment.getValue().toResponseEntity();
             }
         }
         return null;

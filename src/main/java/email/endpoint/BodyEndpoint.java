@@ -63,11 +63,11 @@ public class BodyEndpoint {
         }
 
         // replace all cid (Content-Id) identifiers with a link to the attachment endpoint
-        for (Map.Entry<String, Attachment> cidMapEntry : message.getCidMap().entrySet()) {
-            Attachment attachment = cidMapEntry.getValue();
-            String contentId = cidMapEntry.getKey();
-
-            body = body.replace("cid:" + contentId, "./attachment?id=" + attachment.getId());
+        for (Attachment attachment : message.getAttachments()) {
+            String contentId = attachment.getContentId();
+            if (StringUtils.isNotEmpty(contentId)) {
+                body = body.replace("cid:" + contentId, "./attachment?id=" + attachment.getId());
+            }
         }
 
         // add open in new tab to all links
