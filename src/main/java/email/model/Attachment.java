@@ -52,7 +52,7 @@ public class Attachment {
         String contentType = dataSource.getContentType();
         byte[] file = IOUtils.toByteArray(dataSource.getInputStream());
         if (StringUtils.isNotEmpty(name) && StringUtils.isNotEmpty(contentType) && file != null) {
-            return new Attachment(dataSource.getName(), dataSource.getContentType(), IOUtils.toByteArray(dataSource.getInputStream()));
+            return new Attachment(dataSource.getName(), dataSource.getContentType(), file);
         }
         return null;
     }
