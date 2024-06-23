@@ -499,7 +499,7 @@ class TableComponent extends Component<props, state> {
                     </div>
                 </ReactModal>
                 }
-                <ReactModal
+                {this.state.showPasswordModal && <ReactModal
                     isOpen={this.state.showPasswordModal}
                     contentLabel={"EnterPassword"}
                     ariaHideApp={false}
@@ -515,7 +515,7 @@ class TableComponent extends Component<props, state> {
                             </Form>
                         </Grid.Column>
                     </Grid>
-                </ReactModal>
+                </ReactModal>}
                 {!this.state.showPasswordModal &&
                 <SelectTable
                     keyField="id"
