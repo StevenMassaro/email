@@ -1,4 +1,4 @@
-FROM ibm-semeru-runtimes:open-21-jre AS base
+FROM ibm-semeru-runtimes:open-21-jdk AS base
 RUN apt-get update && \
     apt-get install -y npm && \
     npm install -g @bitwarden/cli && \
