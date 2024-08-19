@@ -1,6 +1,9 @@
-FROM alpine:3.18 AS base
-RUN apk add --no-cache --update npm && \
-    npm install -g @bitwarden/cli
+FROM ibm-semeru-runtimes:open-21-jre AS base
+RUN apt-get update && \
+    apt-get install -y npm && \
+    npm install -g @bitwarden/cli && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
 # Default to UTF-8 file.encoding
 # From https://github.com/adoptium/containers/blob/d3c9617e83eb706aff74c095fd531fe31e359674/17/jre/ubuntu/jammy/Dockerfile.releases.full
@@ -18,7 +21,6 @@ ENV testItemId ${testItemId}
 ARG testMasterPassword
 ENV testMasterPassword ${testMasterPassword}
 WORKDIR /app
-RUN apk add --no-cache openjdk17-jdk
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 COPY src ./src
@@ -27,6 +29,5 @@ RUN chmod +x mvnw && \
 
 FROM base AS production
 EXPOSE 8080
-RUN apk add --no-cache openjdk17-jre-headless
 ADD /target/Email.jar Email.jar
 ENTRYPOINT ["java","-jar","Email.jar"]
