@@ -11,15 +11,15 @@ ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
 FROM base AS test
 ARG bitwardenEmailFolderId
-ENV bitwardenEmailFolderId ${bitwardenEmailFolderId}
+ENV bitwardenEmailFolderId=${bitwardenEmailFolderId}
 ARG BW_CLIENTID
-ENV BW_CLIENTID ${BW_CLIENTID}
+ENV BW_CLIENTID=${BW_CLIENTID}
 ARG BW_CLIENTSECRET
-ENV BW_CLIENTSECRET ${BW_CLIENTSECRET}
+ENV BW_CLIENTSECRET=${BW_CLIENTSECRET}
 ARG testItemId
-ENV testItemId ${testItemId}
+ENV testItemId=${testItemId}
 ARG testMasterPassword
-ENV testMasterPassword ${testMasterPassword}
+ENV testMasterPassword=${testMasterPassword}
 WORKDIR /app
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
