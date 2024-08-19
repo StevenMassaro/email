@@ -21,7 +21,7 @@ ENV testItemId ${testItemId}
 ARG testMasterPassword
 ENV testMasterPassword ${testMasterPassword}
 WORKDIR /app
-RUN apk add --no-cache openjdk17-jdk
+RUN apt-get update && apt-get install -y openjdk-17-jdk
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 COPY src ./src
