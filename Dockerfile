@@ -7,6 +7,7 @@ RUN apk add --no-cache --update npm && \
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
 FROM base as test
+#
 ARG bitwardenEmailFolderId
 ENV bitwardenEmailFolderId ${bitwardenEmailFolderId}
 ARG BW_CLIENTID
