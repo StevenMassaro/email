@@ -1,4 +1,4 @@
-FROM alpine:3.18 as base
+FROM alpine:3.18 AS base
 RUN apk add --no-cache --update npm && \
     npm install -g @bitwarden/cli
 
@@ -6,7 +6,7 @@ RUN apk add --no-cache --update npm && \
 # From https://github.com/adoptium/containers/blob/d3c9617e83eb706aff74c095fd531fe31e359674/17/jre/ubuntu/jammy/Dockerfile.releases.full
 ENV LANG='en_US.UTF-8' LANGUAGE='en_US:en' LC_ALL='en_US.UTF-8'
 
-FROM base as test
+FROM base AS test
 ARG bitwardenEmailFolderId
 ENV bitwardenEmailFolderId ${bitwardenEmailFolderId}
 ARG BW_CLIENTID
@@ -25,7 +25,7 @@ COPY src ./src
 RUN chmod +x mvnw && \
     ./mvnw --batch-mode test
 
-FROM base as production
+FROM base AS production
 EXPOSE 8080
 RUN apk add --no-cache openjdk17-jre-headless
 ADD /target/Email.jar Email.jar
