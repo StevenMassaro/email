@@ -135,6 +135,7 @@ public class BitwardenService {
             exec.execute(commandline);
         } catch (ExecuteException e) {
             output = outputStream.toString();
+            System.out.println(output);
             if (output.contains("You are already logged in as ")){
                 log.debug("Already logged in to Bitwarden CLI");
             } else {

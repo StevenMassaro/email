@@ -1,4 +1,4 @@
-FROM ubuntu:22.04 AS base
+FROM ubuntu:24.04 AS base
 RUN apt-get update && \
     apt-get install -y npm && \
     npm install -g @bitwarden/cli && \
@@ -28,7 +28,7 @@ ENV JAVA_HOME=/opt/java/openjdk
 COPY --from=ibm-semeru-runtimes:open-21-jdk $JAVA_HOME $JAVA_HOME
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 RUN chmod +x mvnw && \
-    ./mvnw --batch-mode test || cat target/surefire-reports/email.service.BitwardenServiceTest-output.txt
+    ./mvnw --batch-mode test || (echo HERE && cat target/surefire-reports/email.service.BitwardenServiceTest-output.txt && npm --version && exit 1)
 
 FROM base AS production
 EXPOSE 8080
