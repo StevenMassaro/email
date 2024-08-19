@@ -1,4 +1,4 @@
-FROM ibm-semeru-runtimes:open-21-jdk AS base
+FROM ubuntu:22.04 AS base
 RUN apt-get update && \
     apt-get install -y npm && \
     npm install -g @bitwarden/cli && \
@@ -24,10 +24,16 @@ WORKDIR /app
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 COPY src ./src
+ENV JAVA_HOME=/opt/java/openjdk
+COPY --from=ibm-semeru-runtimes:open-21-jdk $JAVA_HOME $JAVA_HOME
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
 RUN chmod +x mvnw && \
     ./mvnw --batch-mode test
 
 FROM base AS production
 EXPOSE 8080
+ENV JAVA_HOME=/opt/java/openjdk
+COPY --from=ibm-semeru-runtimes:open-21-jre $JAVA_HOME $JAVA_HOME
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
 ADD /target/Email.jar Email.jar
 ENTRYPOINT ["java","-jar","Email.jar"]
