@@ -401,7 +401,7 @@ class TableComponent extends Component<props, state> {
                 id: "from",
                 Cell: row => {
                     return (
-                        <span>{row.original.fromPersonal} <span
+                        <span title={row.original.fromPersonal + " " + row.original.fromAddress}>{row.original.fromPersonal} <span
                             style={row.original.fromPersonal ? {"fontStyle": "italic"} : {}}>{row.original.fromAddress}</span></span>
                     );
                 },
