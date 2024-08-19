@@ -28,7 +28,7 @@ ENV JAVA_HOME=/opt/java/openjdk
 COPY --from=ibm-semeru-runtimes:open-21-jdk $JAVA_HOME $JAVA_HOME
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 RUN chmod +x mvnw && \
-    ./mvnw --batch-mode test || ls target/surefire-reports/
+    ./mvnw --batch-mode test || cat target/surefire-reports/email.service.BitwardenServiceTest-output.txt
 
 FROM base AS production
 EXPOSE 8080
