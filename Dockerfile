@@ -21,10 +21,12 @@ ENV testItemId ${testItemId}
 ARG testMasterPassword
 ENV testMasterPassword ${testMasterPassword}
 WORKDIR /app
-RUN apk add --no-cache openjdk17-jdk
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 COPY src ./src
+ENV JAVA_HOME=/opt/java/openjdk
+COPY --from=ibm-semeru-runtimes:open-21-jdk $JAVA_HOME $JAVA_HOME
+ENV PATH="${JAVA_HOME}/bin:${PATH}"
 RUN chmod +x mvnw && \
     ./mvnw --batch-mode test
 
