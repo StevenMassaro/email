@@ -20,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
-public class BitwardenServiceTest {
+public class BitwardenServiceIT {
 
     @Autowired
     private BitwardenService bitwardenService;

@@ -28,7 +28,7 @@ ENV JAVA_HOME=/opt/java/openjdk
 COPY --from=ibm-semeru-runtimes:open-21-jdk $JAVA_HOME $JAVA_HOME
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 RUN chmod +x mvnw && \
-    ./mvnw --batch-mode test
+    ./mvnw --batch-mode verify
 
 FROM base AS production
 EXPOSE 8080
