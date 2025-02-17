@@ -212,7 +212,7 @@ class TableComponent extends Component<props, state> {
     deleteMessage = (currentEmail: Email) => {
         this.closeReadModal(currentEmail);
         this.removeMessageFromState(currentEmail.id);
-        return fetch("./message?id=" + currentEmail.id, {method: "DELETE"})
+        fetch("./message?id=" + currentEmail.id, {method: "DELETE"})
             .then((response) => {
                     if (!response.ok) {
                         toast.error("Failed to delete '" + currentEmail.subject + "' with error '" + response.statusText + "', readding to list.");
@@ -337,7 +337,7 @@ class TableComponent extends Component<props, state> {
                 e.stopPropagation();
                 for (const selectedEmail of this.state.selectedEmails) {
                     console.log("deleting " + selectedEmail.id)
-                    await this.deleteMessage(selectedEmail);
+                    this.deleteMessage(selectedEmail);
                     console.log("deleted " + selectedEmail.id)
                 }
                 this.setState({
