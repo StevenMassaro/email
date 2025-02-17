@@ -219,7 +219,7 @@ class TableComponent extends Component<props, state> {
                         this.addMessageToState(currentEmail);
                         console.warn(response);
                     } else {
-                        toast.success("Message '" + currentEmail.subject + "' successfully deleted.");
+                        console.log("Message '" + currentEmail.subject + "' successfully deleted.");
                     }
                     return response;
                 }
