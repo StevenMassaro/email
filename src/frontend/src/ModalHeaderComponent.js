@@ -17,6 +17,7 @@ class ModalHeaderComponent extends Component {
 
     print = (email) => {
         let w = window.open();
+        w.document.title = email.subject || "Email"; // Set title to influence filename
         w.document.write(
             '<span style="all:unset">' +
             '<b>From: </b><span>' + (email.fromPersonal ? (email.fromPersonal + " ") : "") + '&#8249;' + email.fromAddress + '&#8250;</span><br>' +
