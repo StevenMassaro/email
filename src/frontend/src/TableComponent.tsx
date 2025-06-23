@@ -28,6 +28,8 @@ type state = {
     emails: Email[],
     selectedEmails: Email[],
     autoBlur: boolean,
+    selectAll: boolean,
+    tableRef: any,
 }
 
 class TableComponent extends Component<props, state> {
@@ -40,7 +42,9 @@ class TableComponent extends Component<props, state> {
             currentEmail: undefined,
             emails: [],
             selectedEmails: [],
-            autoBlur: true
+            autoBlur: true,
+            selectAll: false,
+            tableRef: null,
         };
     }
 
@@ -378,6 +382,22 @@ class TableComponent extends Component<props, state> {
         }
     };
 
+    toggleAll = () => {
+        let state = this.state;
+        const selectAll = !state.selectAll;
+
+        let selectedEmails: Email[] = [];
+
+        if (selectAll && state.tableRef) {
+            const currentRecords = state.tableRef!.getWrappedInstance().getResolvedState().sortedData;
+            selectedEmails = currentRecords.map(row => row._original);
+        }
+
+        this.setState({
+            selectAll,
+            selectedEmails
+        });
+    };
 
     render() {
         const {emails, currentEmail} = this.state;
@@ -518,10 +538,18 @@ class TableComponent extends Component<props, state> {
                 </ReactModal>}
                 {!this.state.showPasswordModal &&
                 <SelectTable
+                    ref={(tableRef) => {
+                        !this.state.tableRef &&
+                        this.setState({
+                            tableRef: tableRef
+                        });
+                    }}
                     keyField="id"
                     // for some reason we need to define this method this way or it won't see the state
                     isSelected={(key => this.isSelected(key))}
                     toggleSelection={this.toggleSelection}
+                    toggleAll={this.toggleAll}
+                    selectAll={this.state.selectAll}
                     selectType={"checkbox"}
                     data={emails}
                     columns={columns}
