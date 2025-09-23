@@ -32,3 +32,7 @@ You must have the [Bitwarden CLI](https://github.com/bitwarden/clients) installe
 - unlock `bw unlock`
 - find the folder ID using `bw list folders`
 - find the IDs of the accounts you wish to sync by doing `bw list items --folderid <folderId>`
+
+## Developer notes
+### Running frontend against real backend
+Change the `proxy` in the `package.json` to point at where the backend is actually hosted.
