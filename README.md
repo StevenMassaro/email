@@ -1,3 +1,7 @@
+# Update
+
+I suggest using [Cypht](https://github.com/cypht-org/cypht) instead of this project. I've transitioned to using Cypht and this project has been archived as a result.
+
 # Email
 
 An email inbox aggregator, supporting listing emails via IMAP from Gmail and AOL in one aggregated view. Passwords are loaded from Bitwarden vault.
