@@ -323,9 +323,10 @@ class TableComponent extends Component<props, state> {
             this.performSync();
         }
         const deleteKeyCode = 46;
+        const backspaceKeyCode = 8;
         const escapeKeyCode = 27;
         if (this.state.currentEmail && this.state.showReadModal) {
-            if (e.keyCode === deleteKeyCode) {
+            if (e.keyCode === deleteKeyCode || e.keyCode === backspaceKeyCode) {
                 e.preventDefault();
                 e.stopPropagation();
                 this.deleteMessage(this.state.currentEmail);
@@ -336,7 +337,7 @@ class TableComponent extends Component<props, state> {
             }
         }
         if (!lodash.isEmpty(this.state.selectedEmails)) {
-            if (e.keyCode === deleteKeyCode) {
+            if (e.keyCode === deleteKeyCode || e.keyCode === backspaceKeyCode) {
                 e.preventDefault();
                 e.stopPropagation();
                 for (const selectedEmail of this.state.selectedEmails) {
