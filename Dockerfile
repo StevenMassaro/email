@@ -1,9 +1,12 @@
 FROM ubuntu:24.04 AS base
 RUN apt-get update && \
-    apt-get install -y npm && \
+    apt-get install -y curl && \
+    curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
+    apt-get install -y nodejs && \
     npm install -g @bitwarden/cli && \
     apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    rm -rf /var/lib/apt/lists/* && \
+    node -v && npm -v && bw --version
 
 # Default to UTF-8 file.encoding
 # From https://github.com/adoptium/containers/blob/d3c9617e83eb706aff74c095fd531fe31e359674/17/jre/ubuntu/jammy/Dockerfile.releases.full
