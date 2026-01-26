@@ -5,7 +5,7 @@
   "dependencies": {
     "@types/react-modal": "^3.16.0",
     "downloadjs": "1.4.7",
-    "lodash": "4.17.21",
+    "lodash": "4.17.23",
     "react": "^16.14.0",
     "react-device-detect": "^2.2.3",
     "react-dom": "^16.14.0",
