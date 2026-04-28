@@ -6,7 +6,6 @@ import email.service.SyncService;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -42,18 +41,11 @@ public class SyncJob {
                 syncFutures.add(syncService.sync(accountBitwardenId, bitwardenMasterPassword));
             }
 
-            while(!syncFutures.isEmpty()) {
-                Iterator<Future<SyncStatusResult>> iterator = syncFutures.iterator();
-                while(iterator.hasNext()) {
-                    Future<SyncStatusResult> future = iterator.next();
-                    try {
-                        if (future.isDone()) {
-                            results.add(future.get());
-                            iterator.remove();
-                        }
-                    } catch (InterruptedException | ExecutionException e) {
-                        log.error("Sync thread failed for one future", e);
-                    }
+            for (Future<SyncStatusResult> future : syncFutures) {
+                try {
+                    results.add(future.get());
+                } catch (InterruptedException | ExecutionException e) {
+                    log.error("Sync thread failed for one future", e);
                 }
             }
             inProgress.set(false);

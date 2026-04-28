@@ -10,7 +10,9 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Future;
 
@@ -50,11 +52,20 @@ public class SyncService {
                 messageFailure = true;
             }
 
+            // build lookup maps keyed by (uid, accountBitwardenId) for O(1) matching
+            Map<String, Message> imapByUid = new HashMap<>();
+            for (Message imapMessage : imapMessages) {
+                imapByUid.put(imapMessage.getUid() + ":" + imapMessage.getAccountBitwardenId(), imapMessage);
+            }
+            Map<String, Message> dbByUid = new HashMap<>();
+            for (Message dbMessage : dbMessages) {
+                dbByUid.put(dbMessage.getUid() + ":" + dbMessage.getAccountBitwardenId(), dbMessage);
+            }
+
             // first delete all messages from the local db that no longer exist on the imap server
             long deletedCount = 0;
             for (Message dbMessage : dbMessages) {
-                Message match = MessageService.findMatch(imapMessages, dbMessage);
-                if (match == null) {
+                if (!imapByUid.containsKey(dbMessage.getUid() + ":" + dbMessage.getAccountBitwardenId())) {
                     messageService.delete(dbMessage.getId());
                     deletedCount++;
                 }
@@ -65,8 +76,12 @@ public class SyncService {
             // then add all messages that do exist on the imap server
             long insertedCount = 0;
             long changedReadIndCount = 0;
+            long maxUid = 0;
             for (Message imapMessage : imapMessages) {
-                Message match = MessageService.findMatch(dbMessages, imapMessage);
+                if (imapMessage.getUid() > maxUid) {
+                    maxUid = imapMessage.getUid();
+                }
+                Message match = dbByUid.get(imapMessage.getUid() + ":" + imapMessage.getAccountBitwardenId());
 
                 if (match == null) {
                     try {
@@ -88,6 +103,10 @@ public class SyncService {
             }
             log.debug("{} - Inserted {} messages into local database.", item.getLogin().getUsername(), insertedCount);
             log.debug("{} - Changed read indicator for {} messages.", item.getLogin().getUsername(), changedReadIndCount);
+            if (maxUid > 0) {
+                messageService.setHighWaterMark(account, maxUid);
+                log.debug("{} - Updated high water mark to {}", item.getLogin().getUsername(), maxUid);
+            }
             totalChangedReadIndCount += changedReadIndCount;
             totalDeletedCount += deletedCount;
             totalInsertedCount += insertedCount;

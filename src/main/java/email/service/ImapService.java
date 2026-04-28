@@ -14,8 +14,10 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.*;
 
@@ -60,38 +62,42 @@ public class ImapService {
 
     public List<Message> getInboxMessages(String hostname, int port, String username, String decryptedPassword, List<Message> existingMessages, UUID accountBitwardenId) throws Exception {
         Store store = getStore(hostname, port, username, decryptedPassword, false);
+        long highWaterMark = messageService.getHighWaterMark(accountBitwardenId);
 
         try (IMAPFolder inbox = openInbox(store, Folder.READ_ONLY)) {
             javax.mail.Message[] messages = inbox.getMessages();
             List<Message> returnMessages = new ArrayList<>();
+            Set<Long> existingUids = new HashSet<>();
+            for (Message existingMessage : existingMessages) {
+                existingUids.add(existingMessage.getUid());
+            }
             boolean allSuccess = true;
-            for (int i = 0; i < messages.length; i++) {
-                ExecutorService executor = Executors.newSingleThreadExecutor();
-                int finalI = i;
-                Future<Void> messageProcessingFuture = executor.submit(() -> {
-                    javax.mail.Message message = messages[finalI];
-                    long uid = inbox.getUID(message);
+            ExecutorService executor = Executors.newSingleThreadExecutor();
+            try {
+                for (int i = 0; i < messages.length; i++) {
+                    int finalI = i;
+                    Future<Void> messageProcessingFuture = executor.submit(() -> {
+                        javax.mail.Message message = messages[finalI];
+                        long uid = inbox.getUID(message);
+                        // skip expensive MIME parsing for messages at or below the high water mark
+                        // that we've already downloaded — just record the UID for deletion detection
+                        boolean messageAlreadyDownloaded = existingUids.contains(uid) || uid <= highWaterMark;
 
-                    boolean messageAlreadyDownloaded = false;
-                    for (Message existingMessage : existingMessages) {
-                        if (existingMessage.getUid() == uid) {
-                            messageAlreadyDownloaded = true;
-                            break;
-                        }
+                        log.debug("{} - Processing email {} of {}", username, finalI + 1, messages.length);
+                        returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username, accountBitwardenId, obfuscateAmazonOrderSubject));
+                        return null; // this is useless, but is here to make this a callable, so that we can throw exceptions
+                    });
+
+                    try {
+                        messageProcessingFuture.get(messageProcessingTimeoutSeconds, TimeUnit.SECONDS);
+                    } catch (TimeoutException e) {
+                        log.warn("{} - Ran out of time while processing message {} of {}", username, finalI + 1, messages.length, e);
+                        messageProcessingFuture.cancel(true);
+                        allSuccess = false;
                     }
-
-                    log.debug("{} - Processing email {} of {}", username, finalI + 1, messages.length);
-                    returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username, accountBitwardenId, obfuscateAmazonOrderSubject));
-                    return null; // this is useless, but is here to make this a callable, so that we can throw exceptions
-                });
-
-                try {
-                    messageProcessingFuture.get(messageProcessingTimeoutSeconds, TimeUnit.SECONDS);
-                } catch (TimeoutException e) {
-                    log.warn("{} - Ran out of time while processing message {} of {}", username, finalI + 1, messages.length, e);
-                    messageProcessingFuture.cancel(true);
-                    allSuccess = false;
                 }
+            } finally {
+                executor.shutdown();
             }
             if (!allSuccess) {
                 throw new SomeMessagesFailedToDownloadException(returnMessages);

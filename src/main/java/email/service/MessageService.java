@@ -4,6 +4,7 @@ import email.model.Message;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
@@ -20,6 +21,7 @@ public class MessageService {
     public static final AtomicLong attachmentIdSequence = new AtomicLong(0);
 
     private static final Set<Message> messageList = new HashSet<>();
+    private static final ConcurrentHashMap<UUID, Long> highWaterMarks = new ConcurrentHashMap<>();
 
     public Message get(long id) {
         return messageList.stream().filter(m -> m.getId() == id).findFirst().orElse(null);
@@ -45,12 +47,11 @@ public class MessageService {
         messageList.stream().filter(m -> m.getId() == id).forEach(m -> m.setReadInd(readInd));
     }
 
-    public static Message findMatch(List<Message> messages, Message key) {
-        for (Message message : messages) {
-            if (message.equals(key)) {
-                return message;
-            }
-        }
-        return null;
+    public long getHighWaterMark(UUID accountBitwardenId) {
+        return highWaterMarks.getOrDefault(accountBitwardenId, 0L);
+    }
+
+    public void setHighWaterMark(UUID accountBitwardenId, long uid) {
+        highWaterMarks.merge(accountBitwardenId, uid, Long::max);
     }
 }
