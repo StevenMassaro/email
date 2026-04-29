@@ -5,14 +5,18 @@ import {Dropdown, Menu} from "semantic-ui-react";
 import * as lodash from "lodash";
 
 class ModalHeaderComponent extends Component {
+    state = {downloadingAttachmentId: null};
 
     fetchAttachment = (attachment) => {
+        this.setState({downloadingAttachmentId: attachment.id});
         fetch("./attachment?id=" + attachment.id)
             .then(function (resp) {
                 return resp.blob();
-            }).then(function (blob) {
-            download(blob, attachment.name, attachment.contentType);
-        });
+            }).then((blob) => {
+                download(blob, attachment.name, attachment.contentType);
+            }).finally(() => {
+                this.setState({downloadingAttachmentId: null});
+            });
     };
 
     print = (email) => {
@@ -35,6 +39,7 @@ class ModalHeaderComponent extends Component {
     render() {
         const currentEmail = this.props.email;
         const attachments = currentEmail.attachments;
+        const {downloadingAttachmentId} = this.state;
 
         return <div>
             <Menu>
@@ -43,7 +48,12 @@ class ModalHeaderComponent extends Component {
                 {!lodash.isEmpty(attachments) && <Dropdown item text='Attachments'>
                     <Dropdown.Menu>
                         {attachments.map((attachment) => {
-                            return <Dropdown.Item onClick={() => this.fetchAttachment(attachment)}>{attachment.name}</Dropdown.Item>
+                            const isDownloading = downloadingAttachmentId === attachment.id;
+                            return <Dropdown.Item
+                                onClick={() => this.fetchAttachment(attachment)}
+                                disabled={isDownloading}>
+                                {isDownloading ? 'Downloading...' : attachment.name}
+                            </Dropdown.Item>
                         })}
                     </Dropdown.Menu>
                 </Dropdown>}
