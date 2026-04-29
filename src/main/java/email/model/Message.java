@@ -63,6 +63,9 @@ public class Message {
                    boolean obfuscateAmazonOrderSubject) throws Exception {
         // only care to parse out the parts of the email for emails that are not in the database already
         // parsing is an expensive IMAP operation
+        this.uid = uid;
+        this.accountBitwardenId = accountBitwardenId;
+
         if (!alreadyExists) {
             try {
                 MimeMessageParser mimeMessageParser = new MimeMessageParser((MimeMessage) message);
@@ -98,8 +101,6 @@ public class Message {
             this.username = username;
         }
 
-        this.accountBitwardenId = accountBitwardenId;
-        this.uid = uid;
         this.readInd = determineReadInd(message);
     }
 
