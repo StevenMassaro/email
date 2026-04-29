@@ -34,5 +34,13 @@ You must have the [Bitwarden CLI](https://github.com/bitwarden/clients) installe
 - find the IDs of the accounts you wish to sync by doing `bw list items --folderid <folderId>`
 
 ## Developer notes
-### Running frontend against real backend
-Change the `proxy` in the `package.json` to point at where the backend is actually hosted.
+### Running frontend against a remote backend
+From the `src/frontend` directory, set `REACT_APP_BACKEND_URL` and run `npm start`:
+
+```
+REACT_APP_BACKEND_URL=https://your-backend.example.com npm start
+```
+
+This env var is read by the dev server proxy and the email body iframe to route requests to the backend.
+
+Without it, `npm start` defaults to proxying to `http://localhost:8080`.
