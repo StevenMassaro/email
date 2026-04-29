@@ -5,17 +5,17 @@ import {Dropdown, Menu} from "semantic-ui-react";
 import * as lodash from "lodash";
 
 class ModalHeaderComponent extends Component {
-    state = {downloadingAttachmentId: null};
+    state = {downloadingAttachmentId: null, dropdownOpen: false};
 
     fetchAttachment = (attachment) => {
-        this.setState({downloadingAttachmentId: attachment.id});
+        this.setState({downloadingAttachmentId: attachment.id, dropdownOpen: true});
         fetch("./attachment?id=" + attachment.id)
             .then(function (resp) {
                 return resp.blob();
             }).then((blob) => {
                 download(blob, attachment.name, attachment.contentType);
             }).finally(() => {
-                this.setState({downloadingAttachmentId: null});
+                this.setState({downloadingAttachmentId: null, dropdownOpen: false});
             });
     };
 
@@ -39,13 +39,13 @@ class ModalHeaderComponent extends Component {
     render() {
         const currentEmail = this.props.email;
         const attachments = currentEmail.attachments;
-        const {downloadingAttachmentId} = this.state;
+        const {downloadingAttachmentId, dropdownOpen} = this.state;
 
         return <div>
             <Menu>
                 <Menu.Item onClick={() => this.props.closeReadModal(currentEmail)}>Close</Menu.Item>
                 <Menu.Item onClick={() => this.print(currentEmail)}>Print</Menu.Item>
-                {!lodash.isEmpty(attachments) && <Dropdown item text='Attachments'>
+                {!lodash.isEmpty(attachments) && <Dropdown item text='Attachments' open={dropdownOpen} onOpen={() => this.setState({dropdownOpen: true})} onClose={() => { if (!downloadingAttachmentId) this.setState({dropdownOpen: false}) }}>
                     <Dropdown.Menu>
                         {attachments.map((attachment) => {
                             const isDownloading = downloadingAttachmentId === attachment.id;
