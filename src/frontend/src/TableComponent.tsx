@@ -92,7 +92,7 @@ class TableComponent extends Component<props, state> {
     };
 
     performSync = () => {
-        if (process.env.NODE_ENV === "development") {
+        if (process.env.NODE_ENV === "development" || window.location.host.includes("localhost:3000")) {
             this._confirmationCallback(() => this._performSync())
         } else {
             this._performSync()
@@ -191,7 +191,7 @@ class TableComponent extends Component<props, state> {
         let host = window.location.host;
         let url = "";
         if (host.includes("localhost:3000")) {
-            url = 'http://localhost:8080'
+            url = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8080'
         } else {
             url += '.';
         }
