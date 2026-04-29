@@ -86,7 +86,7 @@ public class ImapService {
                 existingUids.add(existingMessage.getUid());
             }
             boolean allSuccess = true;
-            ExecutorService executor = Executors.newFixedThreadPool(Math.min(4, Runtime.getRuntime().availableProcessors()));
+            ExecutorService executor = Executors.newFixedThreadPool(5);
             try {
                 List<Future<Void>> futures = new ArrayList<>();
                 for (int i = 0; i < messages.length; i++) {
