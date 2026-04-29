@@ -109,7 +109,17 @@ public class Message {
             DataSource attachmentDs = mimeMessageParser.findAttachmentByCid(contentId);
             this.attachments.stream()
                     .filter(a -> a.getName().equals(attachmentDs.getName()) && a.getContentType().equals(attachmentDs.getContentType()))
-                    .findFirst().ifPresent(attachment -> attachment.setContentId(contentId));
+                    .findFirst().ifPresent(attachment -> {
+                        attachment.setContentId(contentId);
+                        // inline (CID) attachments must be eagerly loaded for body rendering
+                        if (!attachment.isLoaded()) {
+                            try {
+                                attachment.loadFromDataSource(attachmentDs);
+                            } catch (IOException e) {
+                                log.warn("Failed to load inline attachment '{}' for CID {}", attachment.getName(), contentId, e);
+                            }
+                        }
+                    });
         }
     }
 
@@ -191,7 +201,7 @@ public class Message {
     public void setAttachments(MimeMessageParser mimeMessageParser) throws IOException {
         List<DataSource> attachments = mimeMessageParser.getAttachmentList();
         for (DataSource attachmentDs : attachments) {
-            Attachment attachment = Attachment.fromDataSource(attachmentDs);
+            Attachment attachment = Attachment.fromDataSource(attachmentDs, uid, accountBitwardenId);
             if (attachment != null) {
                 this.attachments.add(attachment);
             }

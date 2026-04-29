@@ -7,6 +7,7 @@ import email.model.DestinationEnum;
 import email.model.Message;
 import email.model.bitwarden.Item;
 import lombok.extern.log4j.Log4j2;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -65,34 +67,50 @@ public class ImapService {
         long highWaterMark = messageService.getHighWaterMark(accountBitwardenId);
 
         try (IMAPFolder inbox = openInbox(store, Folder.READ_ONLY)) {
+            // check UID validity — if it changed, the high water mark is stale
+            long uidValidity = inbox.getUIDValidity();
+            if (uidValidity != messageService.getUidValidity(accountBitwardenId)) {
+                log.info("{} - UID validity changed (was {}, now {}), resetting high water mark",
+                        username, messageService.getUidValidity(accountBitwardenId), uidValidity);
+                messageService.setHighWaterMark(accountBitwardenId, 0);
+                messageService.setUidValidity(accountBitwardenId, uidValidity);
+                highWaterMark = 0;
+            }
+
             javax.mail.Message[] messages = inbox.getMessages();
-            List<Message> returnMessages = new ArrayList<>();
+            List<Message> returnMessages = Collections.synchronizedList(new ArrayList<>());
             Set<Long> existingUids = new HashSet<>();
             for (Message existingMessage : existingMessages) {
                 existingUids.add(existingMessage.getUid());
             }
             boolean allSuccess = true;
-            ExecutorService executor = Executors.newSingleThreadExecutor();
+            ExecutorService executor = Executors.newFixedThreadPool(Math.min(4, Runtime.getRuntime().availableProcessors()));
             try {
+                List<Future<Void>> futures = new ArrayList<>();
                 for (int i = 0; i < messages.length; i++) {
                     int finalI = i;
-                    Future<Void> messageProcessingFuture = executor.submit(() -> {
+                    long finalHighWaterMark = highWaterMark;
+                    futures.add(executor.submit(() -> {
                         javax.mail.Message message = messages[finalI];
                         long uid = inbox.getUID(message);
                         // skip expensive MIME parsing for messages at or below the high water mark
                         // that we've already downloaded — just record the UID for deletion detection
-                        boolean messageAlreadyDownloaded = existingUids.contains(uid) || uid <= highWaterMark;
+                        boolean messageAlreadyDownloaded = existingUids.contains(uid) || uid <= finalHighWaterMark;
 
                         log.debug("{} - Processing email {} of {}", username, finalI + 1, messages.length);
                         returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username, accountBitwardenId, obfuscateAmazonOrderSubject));
-                        return null; // this is useless, but is here to make this a callable, so that we can throw exceptions
-                    });
-
+                        return null;
+                    }));
+                }
+                for (Future<Void> future : futures) {
                     try {
-                        messageProcessingFuture.get(messageProcessingTimeoutSeconds, TimeUnit.SECONDS);
+                        future.get(messageProcessingTimeoutSeconds, TimeUnit.SECONDS);
                     } catch (TimeoutException e) {
-                        log.warn("{} - Ran out of time while processing message {} of {}", username, finalI + 1, messages.length, e);
-                        messageProcessingFuture.cancel(true);
+                        log.warn("{} - Ran out of time while processing a message", username, e);
+                        future.cancel(true);
+                        allSuccess = false;
+                    } catch (ExecutionException e) {
+                        log.warn("{} - Failed to process a message", username, e.getCause());
                         allSuccess = false;
                     }
                 }
@@ -104,6 +122,28 @@ public class ImapService {
             } else {
                 return returnMessages;
             }
+        }
+    }
+
+    public byte[] downloadAttachment(long messageUid, UUID accountBitwardenId, String attachmentName) throws Exception {
+        Item item = bitwardenService.getLoginFromCache(accountBitwardenId);
+        Store store = getStore(item);
+
+        try (IMAPFolder inbox = openInbox(store, Folder.READ_ONLY)) {
+            javax.mail.Message message = inbox.getMessageByUID(messageUid);
+            if (message == null) {
+                throw new Exception("Message with UID " + messageUid + " not found on IMAP server");
+            }
+            if (message.getContent() instanceof Multipart) {
+                Multipart multipart = (Multipart) message.getContent();
+                for (int i = 0; i < multipart.getCount(); i++) {
+                    javax.mail.BodyPart bodyPart = multipart.getBodyPart(i);
+                    if (StringUtils.equalsIgnoreCase(bodyPart.getFileName(), attachmentName)) {
+                        return IOUtils.toByteArray(bodyPart.getInputStream());
+                    }
+                }
+            }
+            throw new Exception("Attachment '" + attachmentName + "' not found in message UID " + messageUid);
         }
     }
 
@@ -162,7 +202,7 @@ public class ImapService {
             This stackoverflow page suggested I disable this: https://stackoverflow.com/questions/1755414/javamail-baseencode64-error
 
             It seems to have had no effect.
-             */
+            */
             if (StringUtils.containsIgnoreCase(hostname, "aol")) {
                 props.setProperty("mail.imap.partialfetch", "false");
             }

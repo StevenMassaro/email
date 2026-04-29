@@ -22,6 +22,7 @@ public class MessageService {
 
     private static final Set<Message> messageList = new HashSet<>();
     private static final ConcurrentHashMap<UUID, Long> highWaterMarks = new ConcurrentHashMap<>();
+    private static final ConcurrentHashMap<UUID, Long> uidValidities = new ConcurrentHashMap<>();
 
     public Message get(long id) {
         return messageList.stream().filter(m -> m.getId() == id).findFirst().orElse(null);
@@ -53,5 +54,13 @@ public class MessageService {
 
     public void setHighWaterMark(UUID accountBitwardenId, long uid) {
         highWaterMarks.merge(accountBitwardenId, uid, Long::max);
+    }
+
+    public long getUidValidity(UUID accountBitwardenId) {
+        return uidValidities.getOrDefault(accountBitwardenId, -1L);
+    }
+
+    public void setUidValidity(UUID accountBitwardenId, long uidValidity) {
+        uidValidities.put(accountBitwardenId, uidValidity);
     }
 }

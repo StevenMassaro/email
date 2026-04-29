@@ -2,8 +2,8 @@ package email.endpoint;
 
 import email.model.Attachment;
 import email.model.Message;
+import email.service.ImapService;
 import email.service.MessageService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -16,17 +16,16 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Map;
-import java.util.Optional;
-
 @RestController
 @RequestMapping("/attachment")
 public class AttachmentEndpoint {
 
     private final MessageService messageService;
+    private final ImapService imapService;
 
-    public AttachmentEndpoint(MessageService messageService) {
+    public AttachmentEndpoint(MessageService messageService, ImapService imapService) {
         this.messageService = messageService;
+        this.imapService = imapService;
     }
 
     @GetMapping
@@ -39,12 +38,26 @@ public class AttachmentEndpoint {
     }
 
     private ResponseEntity<Resource> checkAttachments(long id) {
-        Optional<Message> messageWithAttachment = messageService.list().stream()
-                .filter(m -> m.getAttachments() != null && !m.getAttachments().isEmpty() && m.getAttachments().stream().anyMatch(a -> a.getId() == id)).findFirst();
-        if (messageWithAttachment.isPresent()) {
-            Attachment attachment = messageWithAttachment.get().getAttachments().stream().filter(a -> a.getId() == id).findFirst().orElse(null);
-            if (attachment != null) {
-                return attachment.toResponseEntity();
+        for (Message message : messageService.list()) {
+            if (message.getAttachments() != null) {
+                for (Attachment attachment : message.getAttachments()) {
+                    if (attachment.getId() == id) {
+                        if (!attachment.isLoaded()) {
+                            try {
+                                byte[] file = imapService.downloadAttachment(
+                                        attachment.getMessageUid(),
+                                        attachment.getAccountBitwardenId(),
+                                        attachment.getName());
+                                attachment.setFile(file);
+                                attachment.setLoaded(true);
+                            } catch (Exception e) {
+                                throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
+                                        "Failed to download attachment: " + e.getMessage(), e);
+                            }
+                        }
+                        return attachment.toResponseEntity();
+                    }
+                }
             }
         }
         return null;
