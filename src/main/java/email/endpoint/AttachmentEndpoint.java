@@ -4,6 +4,8 @@ import email.model.Attachment;
 import email.model.Message;
 import email.service.ImapService;
 import email.service.MessageService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +21,8 @@ import org.springframework.web.server.ResponseStatusException;
 @RestController
 @RequestMapping("/attachment")
 public class AttachmentEndpoint {
+
+    private static final Logger log = LoggerFactory.getLogger(AttachmentEndpoint.class);
 
     private final MessageService messageService;
     private final ImapService imapService;
@@ -51,6 +55,8 @@ public class AttachmentEndpoint {
                                 attachment.setFile(file);
                                 attachment.setLoaded(true);
                             } catch (Exception e) {
+                                log.error("Failed to download attachment '{}' (id={}) for message UID {}: {}",
+                                        attachment.getName(), id, attachment.getMessageUid(), e.getMessage(), e);
                                 throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,
                                         "Failed to download attachment: " + e.getMessage(), e);
                             }
