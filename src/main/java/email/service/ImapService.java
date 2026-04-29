@@ -9,10 +9,12 @@ import email.model.bitwarden.Item;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.mail.util.MimeMessageParser;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
+import javax.activation.DataSource;
 import javax.mail.*;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -134,13 +136,10 @@ public class ImapService {
             if (message == null) {
                 throw new Exception("Message with UID " + messageUid + " not found on IMAP server");
             }
-            if (message.getContent() instanceof Multipart) {
-                Multipart multipart = (Multipart) message.getContent();
-                for (int i = 0; i < multipart.getCount(); i++) {
-                    javax.mail.BodyPart bodyPart = multipart.getBodyPart(i);
-                    if (StringUtils.equalsIgnoreCase(bodyPart.getFileName(), attachmentName)) {
-                        return IOUtils.toByteArray(bodyPart.getInputStream());
-                    }
+            MimeMessageParser parser = new MimeMessageParser((javax.mail.internet.MimeMessage) message).parse();
+            for (DataSource ds : parser.getAttachmentList()) {
+                if (StringUtils.equalsIgnoreCase(ds.getName(), attachmentName)) {
+                    return IOUtils.toByteArray(ds.getInputStream());
                 }
             }
             throw new Exception("Attachment '" + attachmentName + "' not found in message UID " + messageUid);
