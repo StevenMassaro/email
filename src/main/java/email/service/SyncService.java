@@ -3,6 +3,7 @@ package email.service;
 import email.exception.SomeMessagesFailedToDownloadException;
 import email.model.ExecStatusEnum;
 import email.model.Message;
+import email.model.SyncProgress;
 import email.model.SyncStatusResult;
 import email.model.bitwarden.Item;
 import lombok.extern.log4j.Log4j2;
@@ -31,7 +32,7 @@ public class SyncService {
     }
 
     @Async
-    public Future<SyncStatusResult> sync(UUID account, String bitwardenMasterPassword) {
+    public Future<SyncStatusResult> sync(UUID account, String bitwardenMasterPassword, SyncProgress syncProgress) {
         String username = null;
         boolean messageFailure = false;
         boolean accountFailure = false;
@@ -46,7 +47,7 @@ public class SyncService {
             List<Message> dbMessages = messageService.list(account);
             List<Message> imapMessages;
             try {
-                imapMessages = imapService.getInboxMessages(item.getHostname(), item.getLogin().getPort(), item.getLogin().getUsername(), item.getLogin().getPassword(), dbMessages, account);
+                imapMessages = imapService.getInboxMessages(item.getHostname(), item.getLogin().getPort(), item.getLogin().getUsername(), item.getLogin().getPassword(), dbMessages, account, syncProgress);
             } catch (SomeMessagesFailedToDownloadException e) {
                 imapMessages = e.getReturnMessages();
                 messageFailure = true;

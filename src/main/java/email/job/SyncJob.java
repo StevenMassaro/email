@@ -1,5 +1,6 @@
 package email.job;
 
+import email.model.SyncProgress;
 import email.model.SyncStatusResult;
 import email.service.AccountService;
 import email.service.SyncService;
@@ -19,6 +20,7 @@ public class SyncJob {
     private final SyncService syncService;
     private final List<SyncStatusResult> results = new ArrayList<>();
     private final AtomicBoolean inProgress = new AtomicBoolean(false);
+    private SyncProgress syncProgress;
     private int numberOfAccounts;
 
     public SyncJob(AccountService accountService, SyncService syncService) {
@@ -31,6 +33,7 @@ public class SyncJob {
             throw new Exception("Sync is already in progress and cannot be started again.");
         }
         results.clear();
+        syncProgress = new SyncProgress();
         new Thread(() -> {
             List<UUID> accounts = accountService.list();
             numberOfAccounts = accounts.size();
@@ -38,7 +41,7 @@ public class SyncJob {
             List<Future<SyncStatusResult>> syncFutures = new ArrayList<>();
             for (UUID accountBitwardenId : accounts) {
                 log.debug("{} - Submitting sync task", accountBitwardenId);
-                syncFutures.add(syncService.sync(accountBitwardenId, bitwardenMasterPassword));
+                syncFutures.add(syncService.sync(accountBitwardenId, bitwardenMasterPassword, syncProgress));
             }
 
             for (Future<SyncStatusResult> future : syncFutures) {
@@ -62,5 +65,9 @@ public class SyncJob {
 
     public int getNumberOfAccounts() {
         return numberOfAccounts;
+    }
+
+    public SyncProgress getSyncProgress() {
+        return syncProgress;
     }
 }

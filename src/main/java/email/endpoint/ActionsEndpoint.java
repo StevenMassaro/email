@@ -2,6 +2,7 @@ package email.endpoint;
 
 import email.job.SyncJob;
 import email.model.ResultsWrapper;
+import email.model.SyncProgress;
 import email.service.AccountService;
 import email.service.BitwardenService;
 import email.service.SyncService;
@@ -31,7 +32,10 @@ public class ActionsEndpoint {
 
     @GetMapping("/sync/results")
     public synchronized ResultsWrapper getSyncResults() {
-        return new ResultsWrapper(syncJob.getResults(), syncJob.isComplete(), syncJob.getNumberOfAccounts());
+        SyncProgress progress = syncJob.getSyncProgress();
+        int emailsSynced = progress != null ? progress.getEmailsSynced() : 0;
+        int totalEmails = progress != null ? progress.getTotalEmails() : 0;
+        return new ResultsWrapper(syncJob.getResults(), syncJob.isComplete(), syncJob.getNumberOfAccounts(), emailsSynced, totalEmails);
     }
 
     @GetMapping("/requiresPassword")

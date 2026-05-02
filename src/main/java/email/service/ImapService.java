@@ -5,6 +5,7 @@ import com.sun.mail.imap.IMAPFolder;
 import email.exception.SomeMessagesFailedToDownloadException;
 import email.model.DestinationEnum;
 import email.model.Message;
+import email.model.SyncProgress;
 import email.model.bitwarden.Item;
 import lombok.extern.log4j.Log4j2;
 import org.apache.commons.io.IOUtils;
@@ -64,7 +65,7 @@ public class ImapService {
                 .build();
     }
 
-    public List<Message> getInboxMessages(String hostname, int port, String username, String decryptedPassword, List<Message> existingMessages, UUID accountBitwardenId) throws Exception {
+    public List<Message> getInboxMessages(String hostname, int port, String username, String decryptedPassword, List<Message> existingMessages, UUID accountBitwardenId, SyncProgress syncProgress) throws Exception {
         Store store = getStore(hostname, port, username, decryptedPassword, false);
         long highWaterMark = messageService.getHighWaterMark(accountBitwardenId);
 
@@ -80,6 +81,7 @@ public class ImapService {
             }
 
             javax.mail.Message[] messages = inbox.getMessages();
+            syncProgress.addTotalEmails(messages.length);
             List<Message> returnMessages = Collections.synchronizedList(new ArrayList<>());
             Set<Long> existingUids = new HashSet<>();
             for (Message existingMessage : existingMessages) {
@@ -101,6 +103,7 @@ public class ImapService {
 
                         log.debug("{} - Processing email {} of {}", username, finalI + 1, messages.length);
                         returnMessages.add(new Message(message, uid, messageAlreadyDownloaded, username, accountBitwardenId, obfuscateAmazonOrderSubject));
+                        syncProgress.incrementEmailsSynced();
                         return null;
                     }));
                 }

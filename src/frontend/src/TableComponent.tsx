@@ -117,9 +117,9 @@ class TableComponent extends Component<props, state> {
         }
     }
 
-    buildSyncStatusToastMessage(completedAccountCount, totalAccountCount) {
-        const innerMessage = totalAccountCount ? `/${totalAccountCount}` : ""
-        return `Syncing... ${completedAccountCount}${innerMessage} accounts complete`
+    buildSyncStatusToastMessage(emailsSynced, totalEmails) {
+        const innerMessage = totalEmails ? `/${totalEmails}` : ""
+        return `Syncing... ${emailsSynced}${innerMessage} emails complete`
     }
 
     syncPollStatus = (syncToastId) => {
@@ -128,10 +128,10 @@ class TableComponent extends Component<props, state> {
             .then(
                 (resultWrapper) => {
                     if (!resultWrapper.complete) {
-                        const completedAccountCount = resultWrapper.results.length
-                        const totalAccountsCount = resultWrapper.numberOfAccounts
+                        const emailsSynced = resultWrapper.emailsSynced
+                        const totalEmails = resultWrapper.totalEmails
                         toast.update(syncToastId, {
-                            render: this.buildSyncStatusToastMessage(completedAccountCount, totalAccountsCount)
+                            render: this.buildSyncStatusToastMessage(emailsSynced, totalEmails)
                         })
                         setTimeout(() => {
                             this.syncPollStatus(syncToastId);
