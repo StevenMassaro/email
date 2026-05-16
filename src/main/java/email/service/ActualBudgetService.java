@@ -117,17 +117,32 @@ public class ActualBudgetService {
         if (StringUtils.isNotEmpty(payeeName)) {
             transaction.put("payee_name", payeeName);
         }
-        if (StringUtils.isNotEmpty(categoryId)) {
-            transaction.put("category", categoryId);
-        }
         if (StringUtils.isNotEmpty(notes)) {
             transaction.put("notes", notes);
         }
 
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("transaction", transaction);
+        body.put("transactions", List.of(transaction));
 
-        return post("/v1/budgets/" + syncId + "/accounts/" + accountId + "/transactions", body);
+        JsonNode importResult = post("/v1/budgets/" + syncId + "/accounts/" + accountId + "/transactions/import", body);
+
+        if (StringUtils.isNotEmpty(categoryId)) {
+            JsonNode added = importResult.path("data").path("added");
+            if (added.isArray() && !added.isEmpty()) {
+                String transactionId = added.get(0).asText();
+                Map<String, Object> patchTransaction = new LinkedHashMap<>();
+                patchTransaction.put("account", accountId);
+                patchTransaction.put("date", date);
+                patchTransaction.put("category", categoryId);
+
+                Map<String, Object> patchBody = new LinkedHashMap<>();
+                patchBody.put("transaction", patchTransaction);
+
+                patch("/v1/budgets/" + syncId + "/transactions/" + transactionId, patchBody);
+            }
+        }
+
+        return importResult;
     }
 
     public List<Map<String, Object>> extractAmounts(long emailId) {
@@ -199,6 +214,21 @@ public class ActualBudgetService {
                 .uri(URI.create(serverUrl + path))
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(json));
+        addAuthHeaders(builder);
+        HttpRequest request = builder.build();
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() >= 400) {
+            throw new RuntimeException("Actual Budget API error: " + response.statusCode() + " " + response.body());
+        }
+        return objectMapper.readTree(response.body());
+    }
+
+    private JsonNode patch(String path, Map<String, Object> body) throws Exception {
+        String json = objectMapper.writeValueAsString(body);
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(serverUrl + path))
+                .header("Content-Type", "application/json")
+                .method("PATCH", HttpRequest.BodyPublishers.ofString(json));
         addAuthHeaders(builder);
         HttpRequest request = builder.build();
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
