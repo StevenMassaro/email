@@ -125,9 +125,9 @@ public class ActualBudgetService {
         }
 
         Map<String, Object> body = new LinkedHashMap<>();
-        body.put("transactions", List.of(transaction));
+        body.put("transaction", transaction);
 
-        return post("/v1/budgets/" + syncId + "/accounts/" + accountId + "/transactions/import", body);
+        return post("/v1/budgets/" + syncId + "/accounts/" + accountId + "/transactions", body);
     }
 
     public List<Map<String, Object>> extractAmounts(long emailId) {
