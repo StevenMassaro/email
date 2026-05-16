@@ -554,7 +554,6 @@ class TableComponent extends Component<props, state> {
 						email={currentEmail}
 						amounts={this.state.budgetAmounts}
 						onClose={this.closeBudgetModal}
-						deleteMessage={this.deleteMessage}
 					/>
 				}
 				{this.state.showPasswordModal && <ReactModal
