@@ -51,7 +51,6 @@ class ModalHeaderComponent extends Component {
 			<Menu>
 				<Menu.Item onClick={() => this.props.closeReadModal(currentEmail)}>Close</Menu.Item>
 				<Menu.Item onClick={() => this.print(currentEmail)}>Print</Menu.Item>
-				<Menu.Item onClick={() => this.props.openBudgetModal()}>Add to Budget</Menu.Item>
 				{!lodash.isEmpty(attachments) && <Dropdown item text='Attachments' open={dropdownOpen} closeOnChange={false} onOpen={() => this.setState({dropdownOpen: true})} onClose={() => this.setState({dropdownOpen: false})}>
 					<Dropdown.Menu>
 						{attachments.map((attachment) => {
@@ -67,6 +66,7 @@ class ModalHeaderComponent extends Component {
 				<Menu.Item><p><b>{currentEmail.subject}</b></p></Menu.Item>
 				<Menu.Item><b>{formatDate(new Date(currentEmail.dateReceived))}</b></Menu.Item>
 				<Menu.Menu position={"right"}>
+					<Menu.Item onClick={() => this.props.openBudgetModal()} title="Add to Budget" style={{fontSize: '1.3em', fontWeight: 'bold'}}>$</Menu.Item>
 					<Menu.Item onClick={() => this.props.toggleAutoBlur()}>{this.props.autoBlur ? "Disable" : "Enable"} auto-blur</Menu.Item>
 					{currentEmail.username.includes("gmail") && <Menu.Item color={"red"} onClick={() => this.props.archiveMessage(currentEmail)}>Archive</Menu.Item>}
 					<Menu.Item color={"red"} onClick={() => this.props.deleteMessage(currentEmail)}>Delete</Menu.Item>
