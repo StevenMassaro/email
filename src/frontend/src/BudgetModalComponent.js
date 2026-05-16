@@ -204,12 +204,12 @@ class BudgetModalComponent extends Component {
 				ariaHideApp={false}
 				style={{
                     content: {
-                        top: '50%',
-                        left: '50%',
-                        right: 'auto',
+                        position: 'static',
+                        float: 'right',
+                        top: '10px%',
+                        left: 'auto',
+                        right: '10px',
                         bottom: 'auto',
-                        marginRight: '-50%',
-                        transform: 'translate(-50%, -50%)',
                         width: '500px',
                         maxHeight: '80vh',
                         overflow: 'auto',
