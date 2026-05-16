@@ -1,0 +1,282 @@
+import React, {Component} from 'react';
+import ReactModal from 'react-modal';
+import {Button, Form, Label} from 'semantic-ui-react';
+import {toast} from 'react-toastify';
+
+class BudgetModalComponent extends Component {
+    state = {
+        accounts: [],
+        categoryGroups: [],
+        payees: [],
+        amounts: this.props.amounts || [],
+        selectedAccountId: localStorage.getItem('budget_last_account') || '',
+        date: '',
+        amount: '',
+        payeeName: '',
+        selectedCategoryId: localStorage.getItem('budget_last_category') || '',
+        notes: '',
+        loading: false,
+    };
+
+    componentDidMount() {
+        this.prefillFromEmail();
+        this.fetchBudgetData();
+    }
+
+    prefillFromEmail() {
+        const {email} = this.props;
+        if (email) {
+            // date
+            const d = new Date(email.dateReceived);
+            const dateStr = d.toISOString().split('T')[0];
+            this.setState({date: dateStr});
+
+            // payee
+            const payeeName = email.fromPersonal || email.fromAddress || '';
+            this.setState({payeeName});
+
+            // notes
+            this.setState({notes: email.subject || ''});
+
+            // amount
+            const {amounts} = this.props;
+            if (amounts && amounts.length > 0) {
+                // display in dollars (amounts from API are in cents)
+                const firstAmount = (amounts[0].amount / 100).toFixed(2);
+                this.setState({amount: firstAmount});
+            }
+        }
+    }
+
+    fetchBudgetData = () => {
+        Promise.all([
+            fetch('./budget/accounts').then(r => r.json()),
+            fetch('./budget/category-groups').then(r => r.json()),
+            fetch('./budget/payees').then(r => r.json()),
+        ]).then(([accounts, categoryGroups, payees]) => {
+            this.setState({accounts, categoryGroups, payees});
+        }).catch(err => {
+            toast.error('Failed to load budget data: ' + err.message);
+        });
+    };
+
+    handleAccountChange = (e, {value}) => this.setState({selectedAccountId: value});
+    handleDateChange = (e, {value}) => this.setState({date: value});
+    handleAmountChange = (e, {value}) => this.setState({amount: value});
+    handlePayeeChange = (e, {value}) => this.setState({payeeName: value});
+    handleCategoryChange = (e, {value}) => this.setState({selectedCategoryId: value});
+    handleNotesChange = (e, {value}) => this.setState({notes: value});
+
+    handleAddPayee = (e, {value}) => {
+        this.setState({payeeName: value});
+    };
+
+    handleAmountChipClick = (amountCents) => {
+        this.setState({amount: (amountCents / 100).toFixed(2)});
+    };
+
+    handleSubmit = () => {
+        const {selectedAccountId, date, amount, payeeName, selectedCategoryId, notes} = this.state;
+
+        if (!selectedAccountId || !date || !amount) {
+            toast.error('Account, date, and amount are required');
+            return;
+        }
+
+        this.setState({loading: true});
+
+        // convert dollar amount to cents, negate for expense
+        const amountCents = -Math.round(parseFloat(amount) * 100);
+
+        fetch('./budget/transactions', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                accountId: selectedAccountId,
+                date: date,
+                amount: amountCents,
+                payeeName: payeeName,
+                categoryId: selectedCategoryId || null,
+                notes: notes,
+            }),
+        }).then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(text);
+                });
+            }
+            return response.json();
+        }).then(() => {
+            localStorage.setItem('budget_last_account', selectedAccountId);
+            localStorage.setItem('budget_last_category', selectedCategoryId);
+            toast.success('Transaction added to budget');
+            this.props.onClose();
+        }).catch(err => {
+            toast.error('Failed to add transaction: ' + err.message);
+        }).finally(() => {
+            this.setState({loading: false});
+        });
+    };
+
+    buildCategoryOptions() {
+        const {categoryGroups} = this.state;
+        const options = [];
+        for (const group of categoryGroups) {
+            if (group.is_income || group.hidden) continue;
+            const categoryOptions = (group.categories || [])
+                .filter(c => !c.hidden && !c.is_income)
+                .map(c => ({
+                    key: c.id,
+                    value: c.id,
+                    text: c.name,
+                }));
+            if (categoryOptions.length > 0) {
+                options.push({
+                    key: group.id,
+                    label: group.name,
+                    options: categoryOptions,
+                });
+            }
+        }
+        // add income group
+        for (const group of categoryGroups) {
+            if (group.is_income && !group.hidden) {
+                const incomeOptions = (group.categories || [])
+                    .filter(c => !c.hidden)
+                    .map(c => ({
+                        key: c.id,
+                        value: c.id,
+                        text: c.name,
+                    }));
+                if (incomeOptions.length > 0) {
+                    options.push({
+                        key: group.id,
+                        label: group.name,
+                        options: incomeOptions,
+                    });
+                }
+            }
+        }
+        return options;
+    }
+
+    render() {
+        const {accounts, payees, amounts, selectedAccountId, date, amount, payeeName, selectedCategoryId, notes, loading} = this.state;
+
+        const accountOptions = accounts
+            .filter(a => !a.closed)
+            .map(a => ({
+                key: a.id,
+                value: a.id,
+                text: a.name + (a.offbudget ? ' (off-budget)' : ''),
+            }));
+
+        const payeeOptions = payees.map(p => ({
+            key: p.id,
+            value: p.name,
+            text: p.name,
+        }));
+
+        const categoryOptions = this.buildCategoryOptions();
+
+        return (
+            <ReactModal
+                isOpen={true}
+                contentLabel="Add to Budget"
+                ariaHideApp={false}
+                style={{
+                    content: {
+                        top: '50%',
+                        left: '50%',
+                        right: 'auto',
+                        bottom: 'auto',
+                        marginRight: '-50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: '500px',
+                        maxHeight: '80vh',
+                        overflow: 'auto',
+                        padding: '20px',
+                        borderRadius: '8px',
+                    },
+                    overlay: {
+                        zIndex: 1000,
+                        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    },
+                }}
+            >
+                <h3 style={{marginTop: 0}}>Add to Budget</h3>
+                <Form>
+                    <Form.Select
+                        label="Account"
+                        options={accountOptions}
+                        value={selectedAccountId}
+                        onChange={this.handleAccountChange}
+                        placeholder="Select account"
+                        search
+                    />
+                    <Form.Input
+                        label="Date"
+                        type="date"
+                        value={date}
+                        onChange={this.handleDateChange}
+                    />
+                    <Form.Input
+                        label="Amount"
+                        type="number"
+                        step="0.01"
+                        value={amount}
+                        onChange={this.handleAmountChange}
+                        placeholder="0.00"
+                    />
+                    {amounts.length > 1 && (
+                        <div style={{marginTop: '-10px', marginBottom: '10px'}}>
+                            <Label.Group size="mini">
+                                {amounts.map((a, i) => (
+                                    <Label
+                                        key={i}
+                                        as="a"
+                                        onClick={() => this.handleAmountChipClick(a.amount)}
+                                        color={amount === (a.amount / 100).toFixed(2) ? 'blue' : undefined}
+                                    >
+                                        {a.formatted}
+                                    </Label>
+                                ))}
+                            </Label.Group>
+                        </div>
+                    )}
+                    <Form.Select
+                        label="Payee"
+                        options={payeeOptions}
+                        value={payeeName}
+                        onChange={this.handlePayeeChange}
+                        onAddItem={this.handleAddPayee}
+                        allowAdditions
+                        search
+                        selection
+                        additionLabel="Create: "
+                    />
+                    <Form.Select
+                        label="Category"
+                        options={categoryOptions}
+                        value={selectedCategoryId}
+                        onChange={this.handleCategoryChange}
+                        placeholder="Select category"
+                        search
+                    />
+                    <Form.TextArea
+                        label="Notes"
+                        value={notes}
+                        onChange={this.handleNotesChange}
+                        rows={2}
+                    />
+                    <div style={{display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px'}}>
+                        <Button onClick={this.props.onClose}>Cancel</Button>
+                        <Button primary onClick={this.handleSubmit} loading={loading} disabled={loading}>Add Transaction</Button>
+                    </div>
+                </Form>
+            </ReactModal>
+        );
+    }
+}
+
+export default BudgetModalComponent;
