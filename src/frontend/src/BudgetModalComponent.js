@@ -3,6 +3,10 @@ import ReactModal from 'react-modal';
 import {Button, Form, Label, Message} from 'semantic-ui-react';
 import {toast} from 'react-toastify';
 
+const caseInsensitiveSearch = (options, query) => {
+	return options.filter(opt => opt.text.toLowerCase().includes(query.toLowerCase()));
+};
+
 class BudgetModalComponent extends Component {
 	state = {
 		accounts: [],
@@ -83,6 +87,10 @@ class BudgetModalComponent extends Component {
 		this.setState({amount: (amountCents / 100).toFixed(2)});
 	};
 
+	clearNotes = () => {
+		this.setState({notes: ''});
+	};
+
 	submitTransaction = () => {
 		const {selectedAccountId, date, amount, payeeName, selectedCategoryId, notes} = this.state;
 
@@ -141,38 +149,14 @@ class BudgetModalComponent extends Component {
 		const {categoryGroups} = this.state;
 		const options = [];
 		for (const group of categoryGroups) {
-			if (group.is_income || group.hidden) continue;
-			const categoryOptions = (group.categories || [])
-				.filter(c => !c.hidden && !c.is_income)
-				.map(c => ({
+			if (group.hidden) continue;
+			for (const c of (group.categories || [])) {
+				if (c.hidden) continue;
+				options.push({
 					key: c.id,
 					value: c.id,
-					text: c.name,
-				}));
-			if (categoryOptions.length > 0) {
-				options.push({
-					key: group.id,
-					label: group.name,
-					options: categoryOptions,
+					text: (group.is_income ? 'Income: ' : group.name + ': ') + c.name,
 				});
-			}
-		}
-		for (const group of categoryGroups) {
-			if (group.is_income && !group.hidden) {
-				const incomeOptions = (group.categories || [])
-					.filter(c => !c.hidden)
-					.map(c => ({
-						key: c.id,
-						value: c.id,
-						text: c.name,
-					}));
-				if (incomeOptions.length > 0) {
-					options.push({
-						key: group.id,
-						label: group.name,
-						options: incomeOptions,
-					});
-				}
 			}
 		}
 		return options;
@@ -270,7 +254,7 @@ class BudgetModalComponent extends Component {
 						onChange={this.handlePayeeChange}
 						onAddItem={this.handleAddPayee}
 						allowAdditions
-						search
+						search={caseInsensitiveSearch}
 						selection
 						additionLabel="Create: "
 					/>
@@ -280,7 +264,7 @@ class BudgetModalComponent extends Component {
 						value={selectedCategoryId}
 						onChange={this.handleCategoryChange}
 						placeholder="Select category"
-						search
+						search={caseInsensitiveSearch}
 					/>
 					<Form.TextArea
 						label="Notes"
@@ -288,6 +272,9 @@ class BudgetModalComponent extends Component {
 						onChange={this.handleNotesChange}
 						rows={2}
 					/>
+					<div style={{textAlign: 'right', marginTop: '-8px', marginBottom: '8px'}}>
+						<span style={{color: '#4183c4', cursor: 'pointer', fontSize: '0.85em'}} onClick={this.clearNotes}>Clear</span>
+					</div>
 					<div style={{display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '10px'}}>
 						<Button onClick={this.props.onClose}>Cancel</Button>
 						<Button primary onClick={this.handleSubmit} loading={loading} disabled={loading}>Add Transaction</Button>
