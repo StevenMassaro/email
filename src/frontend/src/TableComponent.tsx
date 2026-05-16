@@ -355,7 +355,7 @@ class TableComponent extends Component<props, state> {
 		const deleteKeyCode = 46;
 		const backspaceKeyCode = 8;
 		const escapeKeyCode = 27;
-		if (this.state.currentEmail && this.state.showReadModal) {
+		if (this.state.currentEmail && this.state.showReadModal && !this.state.showBudgetModal) {
 			if (e.keyCode === deleteKeyCode || e.keyCode === backspaceKeyCode) {
 				e.preventDefault();
 				e.stopPropagation();
