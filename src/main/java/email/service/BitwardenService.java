@@ -83,10 +83,14 @@ public class BitwardenService {
         File f = File.createTempFile("bwpw",".txt");
         log.debug("Created temporary password file {}", f.getAbsolutePath());
         f.deleteOnExit();
+        String output = null;
         try {
             FileUtils.write(f, bitwardenMasterPassword, StandardCharsets.UTF_8);
-            String output = runCommand(new String[]{bitwardenCliLocation, "unlock", "--passwordfile", f.getAbsolutePath()});
+            output = runCommand(new String[]{bitwardenCliLocation, "unlock", "--passwordfile", f.getAbsolutePath()});
             return parseSessionKeyFromUnlockOutput(output);
+        } catch (Exception e) {
+            log.error(output, e);
+            throw e;
         } finally {
             boolean deletedPasswordFileSuccessfully = f.delete();
             if (!deletedPasswordFileSuccessfully) {
