@@ -3,7 +3,7 @@ RUN apt-get update && \
     apt-get install -y curl && \
     curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
     apt-get install -y nodejs && \
-    npm install -g @bitwarden/cli && \
+    npm install -g @bitwarden/cli@2026.2.0 && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     node -v && npm -v && bw --version
