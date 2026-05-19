@@ -19,4 +19,8 @@ module.exports = function (app) {
     '/actions',
     createProxyMiddleware({target: backendTarget, changeOrigin: true})
   );
+  app.use(
+    '/budget',
+    createProxyMiddleware({target: backendTarget, changeOrigin: true})
+  );
 };
