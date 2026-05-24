@@ -11,7 +11,7 @@ import 'react-toastify/dist/ReactToastify.min.css';
 import './TableComponent.css';
 import ModalHeaderComponent from "./ModalHeaderComponent";
 import BudgetModalComponent from "./BudgetModalComponent";
-import {formatDate} from "./Utils";
+import {formatDate, fetchWithRetry} from "./Utils";
 import {Email} from "./model/Email";
 import * as lodash from "lodash";
 
@@ -221,8 +221,7 @@ class TableComponent extends Component<props, state> {
 
 	openBudgetModal = () => {
 		if (!this.state.currentEmail) return;
-		fetch("./budget/amounts?emailId=" + this.state.currentEmail.id)
-			.then(res => res.json())
+		fetchWithRetry("./budget/amounts?emailId=" + this.state.currentEmail.id)
 			.then((amounts) => {
 				this.setState({
 					showBudgetModal: true,

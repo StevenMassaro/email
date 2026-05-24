@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import ReactModal from 'react-modal';
 import {Button, Form, Label, Message} from 'semantic-ui-react';
 import {toast} from 'react-toastify';
+import {fetchWithRetry} from './Utils';
 
 const caseInsensitiveSearch = (options, query) => {
     return options.filter(opt => opt.text.toLowerCase().includes(query.toLowerCase()));
@@ -49,25 +50,26 @@ class BudgetModalComponent extends Component {
     }
 
     fetchBudgetData = () => {
-        const fetchSafe = (url) => fetch(url).then(r => {
-            if (!r.ok) throw new Error(r.status + ' ' + r.statusText);
-            return r.json();
-        }).catch(err => {
-            console.error('Failed to fetch ' + url, err);
-            return null;
-        });
-
         Promise.all([
-            fetchSafe('./budget/accounts'),
-            fetchSafe('./budget/category-groups'),
-            fetchSafe('./budget/payees'),
+            fetchWithRetry('./budget/accounts'),
+            fetchWithRetry('./budget/category-groups'),
+            fetchWithRetry('./budget/payees'),
         ]).then(([accounts, categoryGroups, payees]) => {
-            const hasError = accounts === null || categoryGroups === null || payees === null;
             this.setState({
                 accounts: accounts || [],
                 categoryGroups: categoryGroups || [],
                 payees: payees || [],
-                loadError: hasError ? 'Some budget data failed to load. Check that Actual Budget API is running.' : null,
+                loadError: (accounts === null || categoryGroups === null || payees === null) ?
+                    'Some budget data failed to load after 3 attempts. Check that Actual Budget API is running.' :
+                    null,
+            });
+        }).catch(error => {
+            console.error('Failed to fetch budget data:', error);
+            this.setState({
+                accounts: [],
+                categoryGroups: [],
+                payees: [],
+                loadError: 'Failed to load budget data after 3 attempts. Please check your connection and that Actual Budget API is running.'
             });
         });
     };
