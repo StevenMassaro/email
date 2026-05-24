@@ -55,6 +55,7 @@ class ModalHeaderComponent extends Component {
 				<Menu.Item onClick={() => this.print(currentEmail)}>
 					<Icon name="print" />
 				</Menu.Item>
+				<Menu.Item><b>{formatDate(new Date(currentEmail.dateReceived))}</b></Menu.Item>
 				{!lodash.isEmpty(attachments) && <Dropdown item text='Attachments' open={dropdownOpen} closeOnChange={false} onOpen={() => this.setState({dropdownOpen: true})} onClose={() => this.setState({dropdownOpen: false})}>
 					<Dropdown.Menu>
 						{attachments.map((attachment) => {
@@ -68,7 +69,6 @@ class ModalHeaderComponent extends Component {
 					</Dropdown.Menu>
 				</Dropdown>}
 				<Menu.Item><p><b>{currentEmail.subject}</b></p></Menu.Item>
-				<Menu.Item><b>{formatDate(new Date(currentEmail.dateReceived))}</b></Menu.Item>
 				<Menu.Menu position={"right"}>
 					<Menu.Item onClick={() => this.props.openBudgetModal()} title="Add to Budget" style={{fontSize: '1.3em', fontWeight: 'bold'}}>$</Menu.Item>
 					<Menu.Item onClick={() => this.props.toggleAutoBlur()}>
