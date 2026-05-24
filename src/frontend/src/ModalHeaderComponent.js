@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import download from 'downloadjs';
 import {formatDate} from "./Utils";
-import {Dropdown, Menu} from "semantic-ui-react";
+import {Dropdown, Menu, Icon} from "semantic-ui-react";
 import * as lodash from "lodash";
 
 class ModalHeaderComponent extends Component {
@@ -49,8 +49,12 @@ class ModalHeaderComponent extends Component {
 
 		return <div>
 			<Menu>
-				<Menu.Item onClick={() => this.props.closeReadModal(currentEmail)}>Close</Menu.Item>
-				<Menu.Item onClick={() => this.print(currentEmail)}>Print</Menu.Item>
+				<Menu.Item onClick={() => this.props.closeReadModal(currentEmail)}>
+					<Icon name="close" />
+				</Menu.Item>
+				<Menu.Item onClick={() => this.print(currentEmail)}>
+					<Icon name="print" />
+				</Menu.Item>
 				{!lodash.isEmpty(attachments) && <Dropdown item text='Attachments' open={dropdownOpen} closeOnChange={false} onOpen={() => this.setState({dropdownOpen: true})} onClose={() => this.setState({dropdownOpen: false})}>
 					<Dropdown.Menu>
 						{attachments.map((attachment) => {
@@ -67,9 +71,15 @@ class ModalHeaderComponent extends Component {
 				<Menu.Item><b>{formatDate(new Date(currentEmail.dateReceived))}</b></Menu.Item>
 				<Menu.Menu position={"right"}>
 					<Menu.Item onClick={() => this.props.openBudgetModal()} title="Add to Budget" style={{fontSize: '1.3em', fontWeight: 'bold'}}>$</Menu.Item>
-					<Menu.Item onClick={() => this.props.toggleAutoBlur()}>{this.props.autoBlur ? "Disable" : "Enable"} auto-blur</Menu.Item>
-					{currentEmail.username.includes("gmail") && <Menu.Item color={"red"} onClick={() => this.props.archiveMessage(currentEmail)}>Archive</Menu.Item>}
-					<Menu.Item color={"red"} onClick={() => this.props.deleteMessage(currentEmail)}>Delete</Menu.Item>
+					<Menu.Item onClick={() => this.props.toggleAutoBlur()}>
+						<Icon name={this.props.autoBlur ? "eye slash" : "eye"} />
+					</Menu.Item>
+					{currentEmail.username.includes("gmail") && <Menu.Item color={"red"} onClick={() => this.props.archiveMessage(currentEmail)}>
+						<Icon name="archive" />
+					</Menu.Item>}
+					<Menu.Item color={"red"} onClick={() => this.props.deleteMessage(currentEmail)}>
+						<Icon name="trash" />
+					</Menu.Item>
 				</Menu.Menu>
 			</Menu>
 		</div>
