@@ -71,13 +71,15 @@ class ModalHeaderComponent extends Component {
 				<Menu.Item><p><b>{currentEmail.subject}</b></p></Menu.Item>
 				<Menu.Menu position={"right"}>
 					<Menu.Item onClick={() => this.props.openBudgetModal()} title="Add to Budget" style={{fontSize: '1.3em', fontWeight: 'bold'}}>$</Menu.Item>
-					<Menu.Item onClick={() => this.props.toggleAutoBlur()}>
+					<Menu.Item onClick={() => this.props.toggleAutoBlur()} title={this.props.autoBlur ? "Disable Auto-Blur" : "Enable Auto-Blur"}>
 						<Icon name={this.props.autoBlur ? "eye slash" : "eye"} />
 					</Menu.Item>
-					{currentEmail.username.includes("gmail") && <Menu.Item color={"red"} onClick={() => this.props.archiveMessage(currentEmail)}>
-						<Icon name="archive" />
-					</Menu.Item>}
-					<Menu.Item color={"red"} onClick={() => this.props.deleteMessage(currentEmail)}>
+					{currentEmail.username.includes("gmail") && (
+						<Menu.Item color={"red"} onClick={() => this.props.archiveMessage(currentEmail)} title="Archive Message">
+							<Icon name="archive" />
+						</Menu.Item>
+					)}
+					<Menu.Item color={"red"} onClick={() => this.props.deleteMessage(currentEmail)} title="Delete Message">
 						<Icon name="trash" />
 					</Menu.Item>
 				</Menu.Menu>
