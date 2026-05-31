@@ -3,6 +3,7 @@ import ReactModal from 'react-modal';
 import {Button, Form, Label, Message} from 'semantic-ui-react';
 import {toast} from 'react-toastify';
 import {fetchWithRetry} from './Utils';
+import {isMobile} from "react-device-detect";
 
 const caseInsensitiveSearch = (options, query) => {
     return options.filter(opt => opt.text.toLowerCase().includes(query.toLowerCase()));
@@ -189,17 +190,18 @@ class BudgetModalComponent extends Component {
                 ariaHideApp={false}
                 style={{
                     content: {
-                        position: 'static',
-                        float: 'right',
-                        top: '10px%',
-                        left: 'auto',
-                        right: '10px',
-                        bottom: 'auto',
+                        top: '5px',
+                        left: '5px',
+                        right: '5px',
+                        bottom: '5px',
                         maxWidth: '500px',
-                        maxHeight: '80vh',
+                        margin: '0 auto',
                         overflow: 'auto',
                         padding: '20px',
                         borderRadius: '8px',
+                        boxSizing: 'border-box',
+                        position: isMobile ? 'fixed' : 'static',
+                        float: 'right'
                     },
                     overlay: {
                         zIndex: 1000,
