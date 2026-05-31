@@ -493,6 +493,7 @@ class TableComponent extends Component<props, state> {
 							type="button"
 							className="link-button"
 							onClick={(e) => this.onSubjectClick(e, row.original)}
+							title={displaySubject}
 						>
 							<span style={{
 								"fontWeight": row.original.readInd ? "normal" : "bold",
