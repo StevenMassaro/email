@@ -433,6 +433,17 @@ class TableComponent extends Component<props, state> {
 		const {emails, currentEmail} = this.state;
 
 		let columns = [
+            {
+                Header: "Date received",
+                accessor: "dateReceived",
+                id: "dateReceived",
+                Cell: row => {
+                    const date = new Date(row.value);
+                    return (<div title={row.original.originalDateReceived}>{formatDate(date)}</div>);
+                },
+                maxWidth: 148,
+                show: !isMobile
+            },
 			{
 				Header: "Account",
 				id: "account",
@@ -468,7 +479,8 @@ class TableComponent extends Component<props, state> {
 							 src={'./paper-clip.svg'}
 							 alt={"attachment"}/> : ""}</span>;
 				},
-				maxWidth: 25
+				maxWidth: 25,
+				show: !isMobile
 			},
 			{
 				Header: "Subject",
@@ -493,19 +505,6 @@ class TableComponent extends Component<props, state> {
 				}
 			}
 		];
-
-		if (!isMobile) {
-			columns.unshift({
-				Header: "Date received",
-				accessor: "dateReceived",
-				id: "dateReceived",
-				Cell: row => {
-					const date = new Date(row.value);
-					return (<div title={row.original.originalDateReceived}>{formatDate(date)}</div>);
-				},
-				maxWidth: 148
-			});
-		}
 
 		return (
 			<div>
