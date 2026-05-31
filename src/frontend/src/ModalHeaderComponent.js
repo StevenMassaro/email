@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import download from 'downloadjs';
 import {formatDate} from "./Utils";
 import {Dropdown, Menu, Icon} from "semantic-ui-react";
+import {isMobile} from "react-device-detect";
 import * as lodash from "lodash";
 
 class ModalHeaderComponent extends Component {
@@ -19,10 +20,10 @@ class ModalHeaderComponent extends Component {
 			.then(function (resp) {
 				return resp.blob();
 			}).then((blob) => {
-			download(blob, attachment.name, attachment.contentType);
-		}).finally(() => {
-			this.setState({downloadingAttachmentId: null, dropdownOpen: false});
-		});
+				download(blob, attachment.name, attachment.contentType);
+			}).finally(() => {
+				this.setState({downloadingAttachmentId: null, dropdownOpen: false});
+			});
 	};
 
 	print = (email) => {
@@ -46,6 +47,7 @@ class ModalHeaderComponent extends Component {
 		const currentEmail = this.props.email;
 		const attachments = currentEmail.attachments;
 		const {downloadingAttachmentId, dropdownOpen} = this.state;
+		const isMobileView = isMobile;
 
 		return <div>
 			<Menu>
@@ -55,7 +57,7 @@ class ModalHeaderComponent extends Component {
 				<Menu.Item onClick={() => this.print(currentEmail)}>
 					<Icon name="print" />
 				</Menu.Item>
-				<Menu.Item><b>{formatDate(new Date(currentEmail.dateReceived))}</b></Menu.Item>
+				{!isMobileView && <Menu.Item><b>{formatDate(new Date(currentEmail.dateReceived))}</b></Menu.Item>}
 				{!lodash.isEmpty(attachments) && <Dropdown item text='Attachments' open={dropdownOpen} closeOnChange={false} onOpen={() => this.setState({dropdownOpen: true})} onClose={() => this.setState({dropdownOpen: false})}>
 					<Dropdown.Menu>
 						{attachments.map((attachment) => {
@@ -68,7 +70,7 @@ class ModalHeaderComponent extends Component {
 						})}
 					</Dropdown.Menu>
 				</Dropdown>}
-				<Menu.Item><p><b>{currentEmail.subject}</b></p></Menu.Item>
+				{!isMobileView && <Menu.Item className="subject-item"><p><b>{currentEmail.subject}</b></p></Menu.Item>}
 				<Menu.Menu position={"right"}>
 					<Menu.Item onClick={() => this.props.openBudgetModal()} title="Add to Budget" style={{fontSize: '1.3em', fontWeight: 'bold'}}>$</Menu.Item>
 					<Menu.Item onClick={() => this.props.toggleAutoBlur()} title={this.props.autoBlur ? "Disable Auto-Blur" : "Enable Auto-Blur"}>
