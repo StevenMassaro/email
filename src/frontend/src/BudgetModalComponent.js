@@ -195,7 +195,7 @@ class BudgetModalComponent extends Component {
                         left: 'auto',
                         right: '10px',
                         bottom: 'auto',
-                        width: '500px',
+                        maxWidth: '500px',
                         maxHeight: '80vh',
                         overflow: 'auto',
                         padding: '20px',
