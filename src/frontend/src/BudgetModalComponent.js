@@ -83,7 +83,16 @@ class BudgetModalComponent extends Component {
     handleNotesChange = (e, {value}) => this.setState({notes: value});
 
     handleAddPayee = (e, {value}) => {
-        this.setState({payeeName: value});
+        // Optimistically add the new payee to the payees list so it shows up in the modal
+        const newPayee = {
+            name: value,
+            // Use a temporary ID to avoid conflicts with real IDs
+            id: `temp-${Date.now()}`
+        };
+        this.setState(prevState => ({
+            payeeName: value,
+            payees: [...prevState.payees, newPayee]
+        }));
     };
 
     handleAmountChipClick = (amountCents) => {
