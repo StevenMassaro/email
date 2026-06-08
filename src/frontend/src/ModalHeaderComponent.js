@@ -58,7 +58,7 @@ class ModalHeaderComponent extends Component {
 					<Icon name="print" />
 				</Menu.Item>
 				{!isMobileView && <Menu.Item><b>{formatDate(new Date(currentEmail.dateReceived))}</b></Menu.Item>}
-				{!lodash.isEmpty(attachments) && <Dropdown item text='Attachments' open={dropdownOpen} closeOnChange={false} onOpen={() => this.setState({dropdownOpen: true})} onClose={() => this.setState({dropdownOpen: false})}>
+				{!lodash.isEmpty(attachments) && <Dropdown item trigger={<Icon name="paperclip" />} open={dropdownOpen} closeOnChange={false} onOpen={() => this.setState({dropdownOpen: true})} onClose={() => this.setState({dropdownOpen: false})}>
 					<Dropdown.Menu>
 						{attachments.map((attachment) => {
 							const isDownloading = downloadingAttachmentId === attachment.id;
