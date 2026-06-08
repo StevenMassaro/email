@@ -57,19 +57,19 @@ class ModalHeaderComponent extends Component {
 				<Menu.Item onClick={() => this.print(currentEmail)}>
 					<Icon name="print" />
 				</Menu.Item>
-				{!isMobileView && <Menu.Item><b>{formatDate(new Date(currentEmail.dateReceived))}</b></Menu.Item>}
 				{!lodash.isEmpty(attachments) && <Dropdown item trigger={<Icon name="paperclip" />} open={dropdownOpen} closeOnChange={false} onOpen={() => this.setState({dropdownOpen: true})} onClose={() => this.setState({dropdownOpen: false})}>
-					<Dropdown.Menu>
-						{attachments.map((attachment) => {
-							const isDownloading = downloadingAttachmentId === attachment.id;
-							return <Dropdown.Item
-								onClick={() => this.fetchAttachment(attachment)}
-								disabled={isDownloading}>
-								{isDownloading ? 'Downloading...' : attachment.name}
-							</Dropdown.Item>
-						})}
-					</Dropdown.Menu>
-				</Dropdown>}
+                					<Dropdown.Menu>
+                						{attachments.map((attachment) => {
+                							const isDownloading = downloadingAttachmentId === attachment.id;
+                							return <Dropdown.Item
+                								onClick={() => this.fetchAttachment(attachment)}
+                								disabled={isDownloading}>
+                								{isDownloading ? 'Downloading...' : attachment.name}
+                							</Dropdown.Item>
+                						})}
+                					</Dropdown.Menu>
+                				</Dropdown>}
+				{!isMobileView && <Menu.Item><b>{formatDate(new Date(currentEmail.dateReceived))}</b></Menu.Item>}
 				{!isMobileView && <Menu.Item className="subject-item"><p><b>{currentEmail.subject}</b></p></Menu.Item>}
 				<Menu.Menu position={"right"}>
 					<Menu.Item onClick={() => this.props.openBudgetModal()} title="Add to Budget" style={{fontSize: '1.3em', fontWeight: 'bold'}}>$</Menu.Item>
