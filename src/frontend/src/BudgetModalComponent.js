@@ -40,8 +40,6 @@ class BudgetModalComponent extends Component {
             const payeeName = email.fromPersonal || email.fromAddress || '';
             this.setState({payeeName});
 
-            this.setState({notes: email.subject || ''});
-
             const {amounts} = this.props;
             if (amounts && amounts.length > 0) {
                 const firstAmount = (amounts[0].amount / 100).toFixed(2);
@@ -97,6 +95,13 @@ class BudgetModalComponent extends Component {
 
     handleAmountChipClick = (amountCents) => {
         this.setState({amount: (amountCents / 100).toFixed(2)});
+    };
+
+    handleDescriptionChipClick = () => {
+        const {email} = this.props;
+        if (email && email.subject) {
+            this.setState({notes: email.subject});
+        }
     };
 
     clearNotes = () => {
@@ -279,7 +284,27 @@ class BudgetModalComponent extends Component {
                         search={caseInsensitiveSearch}
                     />
                     <Form.TextArea
-                        label={<label>Notes <span style={{color: '#4183c4', cursor: 'pointer', fontSize: '0.85em', marginLeft: '10px'}} onClick={this.clearNotes}>Clear</span></label>}
+                        label={
+                            <label>
+                                Notes
+                                <span
+                                    style={{color: '#4183c4', cursor: 'pointer', fontSize: '0.85em', marginLeft: '10px'}}
+                                    onClick={this.clearNotes}>
+                                    Clear
+                                </span>
+                                {this.props.email?.subject && (
+                                      <div style={{marginBottom: '10px'}}>
+                                          <Label.Group size="mini">
+                                              <Label
+                                                  as="a"
+                                                  onClick={this.handleDescriptionChipClick}
+                                                  color={notes === this.props.email.subject ? 'blue' : undefined}
+                                              >
+                                                  {this.props.email.subject}
+                                              </Label>
+                                          </Label.Group>
+                                      </div>
+                                  )}</label>}
                         value={notes}
                         onChange={this.handleNotesChange}
                         rows={2}
