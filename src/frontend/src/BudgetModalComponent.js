@@ -223,7 +223,7 @@ class BudgetModalComponent extends Component {
                     },
                 }}
             >
-                <h3 style={{marginTop: 0}}>Add to Budget</h3>
+                <h3 style={{marginTop: 15}}>Add to Budget</h3>
                 {loadError && <Message warning>{loadError}</Message>}
                 <Form>
                     <Form.Select
