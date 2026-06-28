@@ -28,11 +28,6 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn --batch-mode --update-snapshots clean install --activate-profiles ui -DskipTests # tests are run in the docker build
-      - run: mkdir staging && cp target/*.jar staging
-      - uses: actions/upload-artifact@v7
-        with:
-          name: Package
-          path: staging
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
         with:
