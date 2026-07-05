@@ -42,8 +42,10 @@ class BudgetModalComponent extends Component {
 
             const {amounts} = this.props;
             if (amounts && amounts.length > 0) {
-                const firstAmount = (amounts[0].amount / 100).toFixed(2);
-                this.setState({amount: firstAmount});
+                // Find the amount with the highest value (in cents)
+                const maxAmountObj = amounts.reduce((max, current) => current.amount > max.amount ? current : max);
+                const maxAmount = (maxAmountObj.amount / 100).toFixed(2);
+                this.setState({amount: maxAmount});
             }
         }
     }
