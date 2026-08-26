@@ -59,15 +59,18 @@ public class BitwardenService {
                     log.trace("Already logged in");
                 }
             }
-            String sessionKey = unlock(bitwardenMasterPassword);
-            String passwordListJson = listPasswordsFromCli(sessionKey);
-            logout();
-            List<Item> items = deserializeBitwardenJson(passwordListJson);
-            // put all of the passwords into the cache
-            for (Item item : items) {
-                loginCache.put(item.getId(), item);
+            try {
+                String sessionKey = unlock(bitwardenMasterPassword);
+                String passwordListJson = listPasswordsFromCli(sessionKey);
+                List<Item> items = deserializeBitwardenJson(passwordListJson);
+                // put all the passwords into the cache
+                for (Item item : items) {
+                    loginCache.put(item.getId(), item);
+                }
+                return loginCache.getIfPresent(id);
+            } finally {
+                logout();
             }
-            return loginCache.getIfPresent(id);
         });
     }
 
@@ -129,6 +132,7 @@ public class BitwardenService {
     }
 
     private String runCommand(String[] commands) throws IOException {
+        log.trace("Running Bitwarden command " + StringUtils.join(commands, " "));
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         CommandLine commandline = CommandLine.parse(StringUtils.join(commands, " "));
         DefaultExecutor exec = new DefaultExecutor();
