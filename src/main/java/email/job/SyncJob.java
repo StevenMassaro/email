@@ -4,6 +4,7 @@ import email.model.SyncProgress;
 import email.model.SyncStatusResult;
 import email.service.AccountService;
 import email.service.SyncService;
+import email.service.SyncWebSocketService;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
@@ -18,14 +19,16 @@ public class SyncJob {
 
     private final AccountService accountService;
     private final SyncService syncService;
+    private final SyncWebSocketService syncWebSocketService;
     private final List<SyncStatusResult> results = new ArrayList<>();
     private final AtomicBoolean inProgress = new AtomicBoolean(false);
     private SyncProgress syncProgress;
     private int numberOfAccounts;
 
-    public SyncJob(AccountService accountService, SyncService syncService) {
+    public SyncJob(AccountService accountService, SyncService syncService, SyncWebSocketService syncWebSocketService) {
         this.accountService = accountService;
         this.syncService = syncService;
+        this.syncWebSocketService = syncWebSocketService;
     }
 
     public synchronized void startSync(String bitwardenMasterPassword) throws Exception {
@@ -35,23 +38,29 @@ public class SyncJob {
         results.clear();
         syncProgress = new SyncProgress();
         new Thread(() -> {
-            List<UUID> accounts = accountService.list();
-            numberOfAccounts = accounts.size();
+            try {
+                List<UUID> accounts = accountService.list();
+                numberOfAccounts = accounts.size();
 
-            List<Future<SyncStatusResult>> syncFutures = new ArrayList<>();
-            for (UUID accountBitwardenId : accounts) {
-                log.debug("{} - Submitting sync task", accountBitwardenId);
-                syncFutures.add(syncService.sync(accountBitwardenId, bitwardenMasterPassword, syncProgress));
-            }
-
-            for (Future<SyncStatusResult> future : syncFutures) {
-                try {
-                    results.add(future.get());
-                } catch (InterruptedException | ExecutionException e) {
-                    log.error("Sync thread failed for one future", e);
+                List<Future<SyncStatusResult>> syncFutures = new ArrayList<>();
+                for (UUID accountBitwardenId : accounts) {
+                    log.debug("{} - Submitting sync task", accountBitwardenId);
+                    syncFutures.add(syncService.sync(accountBitwardenId, bitwardenMasterPassword, syncProgress));
                 }
+
+                for (Future<SyncStatusResult> future : syncFutures) {
+                    try {
+                        results.add(future.get());
+                    } catch (InterruptedException | ExecutionException e) {
+                        log.error("Sync thread failed for one future", e);
+                    }
+                }
+
+                // Send sync completion notification
+                syncWebSocketService.sendSyncComplete();
+            } finally {
+                inProgress.set(false);
             }
-            inProgress.set(false);
         }).start();
     }
 

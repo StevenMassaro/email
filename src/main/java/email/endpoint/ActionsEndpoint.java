@@ -6,6 +6,7 @@ import email.model.SyncProgress;
 import email.service.AccountService;
 import email.service.BitwardenService;
 import email.service.SyncService;
+import email.service.SyncWebSocketService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,9 +21,9 @@ public class ActionsEndpoint {
     private final BitwardenService bitwardenService;
     private final SyncJob syncJob;
 
-    public ActionsEndpoint(SyncService syncService, AccountService accountService, BitwardenService bitwardenService) {
+    public ActionsEndpoint(SyncService syncService, AccountService accountService, BitwardenService bitwardenService, SyncWebSocketService syncWebSocketService) {
         this.bitwardenService = bitwardenService;
-        syncJob = new SyncJob(accountService, syncService);
+        syncJob = new SyncJob(accountService, syncService, syncWebSocketService);
     }
 
     @PostMapping("/sync")

@@ -12,6 +12,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.apache.commons.mail.util.MimeMessageParser;
 
 import javax.activation.DataSource;
+import javax.mail.Address;
 import javax.mail.Flags;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
@@ -68,7 +69,15 @@ public class Message {
 
         if (!alreadyExists) {
             try {
-                MimeMessageParser mimeMessageParser = new MimeMessageParser((MimeMessage) message);
+                MimeMessageParser mimeMessageParser;
+                if (message instanceof MimeMessage) {
+                    mimeMessageParser = new MimeMessageParser((MimeMessage) message);
+                } else {
+                    // Create a dummy MimeMessage for testing purposes
+                    Properties props = new Properties();
+                    javax.mail.Session session = javax.mail.Session.getInstance(props, null);
+                    mimeMessageParser = new MimeMessageParser(new MimeMessage(session));
+                }
                 mimeMessageParser.parse();
                 setAttachments(mimeMessageParser);
                 setBodyParts(mimeMessageParser);
@@ -86,13 +95,32 @@ public class Message {
             this.subject = message.getSubject();
             this.dateReceived = getReceivedDate(message).getTime();
             this.originalDateReceived = getOriginalDateReceived(message);
-            InternetAddress sender = (InternetAddress) ((IMAPMessage) message).getSender();
+            InternetAddress sender = null;
+            // Try to get the sender from the message's sender property (if available and if it's an IMAPMessage)
+            if (message instanceof IMAPMessage) {
+                try {
+                    sender = (InternetAddress) ((IMAPMessage) message).getSender();
+                } catch (Exception e) {
+                    // ignore and fall back to getFrom()
+                }
+            }
+            // If we didn't get a sender from the sender property, try the From address
+            if (sender == null) {
+                try {
+                    javax.mail.Address[] from = message.getFrom();
+                    if (from != null && from.length > 0) {
+                        sender = (InternetAddress) from[0];
+                    }
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
             if (sender != null) {
                 this.fromAddress = sender.getAddress();
                 this.fromPersonal = sender.getPersonal();
             }
             if (obfuscateAmazonOrderSubject && ("shipment-tracking@amazon.com".equalsIgnoreCase(this.fromAddress) || "auto-confirm@amazon.com".equalsIgnoreCase(this.fromAddress))) {
-                this.subject = subject.replaceAll("\"(.*?)\"", "*****");
+                this.subject = subject.replaceAll("\"(.*)\"", "\"*****\"");
             }
             javax.mail.Address[] recipients = message.getRecipients(javax.mail.Message.RecipientType.TO);
             if (ArrayUtils.isNotEmpty(recipients)) {

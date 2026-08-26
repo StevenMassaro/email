@@ -24,11 +24,13 @@ public class SyncService {
     private final ImapService imapService;
     private final MessageService messageService;
     private final BitwardenService bitwardenService;
+    private final SyncWebSocketService syncWebSocketService;
 
-    public SyncService(ImapService imapService, MessageService messageService, BitwardenService bitwardenService) {
+    public SyncService(ImapService imapService, MessageService messageService, BitwardenService bitwardenService, SyncWebSocketService syncWebSocketService) {
         this.imapService = imapService;
         this.messageService = messageService;
         this.bitwardenService = bitwardenService;
+        this.syncWebSocketService = syncWebSocketService;
     }
 
     @Async
@@ -125,6 +127,12 @@ public class SyncService {
             result = ExecStatusEnum.RULE_END_ACCOUNT_FAILURE;
         }
         log.debug("{} - Sync finished for {}", username, account);
+
+        // Send WebSocket update for account completion
+        if (syncWebSocketService != null) {
+            syncWebSocketService.sendSyncProgressUpdate(syncProgress);
+        }
+
         return new AsyncResult<>(new SyncStatusResult(totalInsertedCount, totalDeletedCount, totalChangedReadIndCount, result, username));
     }
 }

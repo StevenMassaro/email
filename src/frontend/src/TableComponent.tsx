@@ -15,6 +15,9 @@ import {formatDate, fetchWithRetry} from "./Utils";
 import {Email} from "./model/Email";
 import * as lodash from "lodash";
 
+import * as SockJS from 'sockjs-client';
+import * as Stomp from 'stompjs';
+
 const SelectTable = selectTableHOC(ReactTable);
 
 type props = {
@@ -66,6 +69,7 @@ class TableComponent extends Component<props, state> {
 		this.listMessages();
 		document.addEventListener('keydown', this.keydownHandler);
 		this.runAutoBlur()
+		this.initWebSocket();
 	}
 
 	/**
@@ -80,8 +84,43 @@ class TableComponent extends Component<props, state> {
 		}, 2000);
 	}
 
+	initWebSocket = () => {
+		const socket = new SockJS(process.env.NODE_ENV === "development" || window.location.host.includes("localhost:3000")
+			? (process.env.REACT_APP_BACKEND_URL || 'http://localhost:8080') + '/sync-progress'
+			: './sync-progress');
+		const stompClient = Stomp.over(socket);
+		stompClient.connect({}, frame => {
+			console.log('Connected to WebSocket: ' + frame);
+			stompClient.subscribe('/topic/sync/progress', (message) => {
+				const progress = JSON.parse(message.body);
+				if (this.state.syncToastId) {
+					toast.update(this.state.syncToastId, {
+						render: this.buildSyncStatusToastMessage(progress.emailsSynced, progress.totalEmails)
+					});
+				}
+			});
+
+			stompClient.subscribe('/topic/sync/complete', (message) => {
+				console.log('Sync completed:', message.body);
+				if (this.state.syncToastId) {
+					toast.dismiss(this.state.syncToastId);
+					this.setState({ isSyncing: false });
+
+					// Parse results from the complete message to show final toast
+					const resultWrapper = JSON.parse(message.body);
+					this.handleSyncComplete(resultWrapper);
+				}
+			});
+
+			this.setState({ stompClient });
+		});
+	}
+
 	componentWillUnmount(){
 		document.removeEventListener('keydown', this.keydownHandler);
+		if (this.state.stompClient) {
+			this.state.stompClient.disconnect();
+		}
 	}
 
 	listMessages = () => {
@@ -105,15 +144,70 @@ class TableComponent extends Component<props, state> {
 	};
 
 	_performSync = () => {
+		if (this.state.isSyncing) {
+			toast.warning('Sync is already in progress');
+			return;
+		}
+
+		this.setState({ isSyncing: true });
 		const syncToastId = toast.info(this.buildSyncStatusToastMessage(0, null), {
 			autoClose: false
 		})
+		this.setState({ syncToastId });
+
 		fetch("./actions/sync", {
 			body: this.state.password,
 			method: 'POST'
 		}).then(() => {
-			this.syncPollStatus(syncToastId)
+			// WebSocket will handle progress updates and completion
+		}).catch(error => {
+			toast.dismiss(syncToastId);
+			toast.error("Sync failed to start.");
+			console.warn(error);
+			this.setState({ isSyncing: false, syncToastId: null });
 		});
+	}
+
+	handleSyncComplete = (resultWrapper) => {
+		let insertedCount = 0;
+		let deletedCount = 0;
+		let changedReadIndCount = 0;
+		let failedAccounts = [];
+		let partiallyFailedAccounts = [];
+
+		let results = resultWrapper.results;
+
+		results.forEach(function (result) {
+			insertedCount += result.insertedCount;
+			deletedCount += result.deletedCount;
+			changedReadIndCount += result.changedReadIndCount;
+			if (result.execStatusEnum === "RULE_END_ACCOUNT_FAILURE") {
+				failedAccounts.push(result);
+			} else if (result.execStatusEnum === "RULE_END_MESSAGE_FAILURE") {
+				partiallyFailedAccounts.push(result);
+			}
+		});
+
+		toast.info("Sync results: "
+			+ insertedCount + " inserted; "
+			+ deletedCount + " deleted; "
+			+ changedReadIndCount + " changed read indicator.");
+
+		failedAccounts.forEach((account) => {
+			toast.error("Failed to sync: " + account.username, {
+				autoClose: false
+			});
+		});
+
+		partiallyFailedAccounts.forEach((account) => {
+			toast.warn("Partially failed to sync (some messages may be missing): " + account.username, {
+				autoClose: false
+			})
+		})
+
+		if (insertedCount + deletedCount + changedReadIndCount > 0) {
+			this.listMessages();
+		}
 	}
 
 	_confirmationCallback = (callback: () => void, action: string = "sync") => {
@@ -125,71 +219,6 @@ class TableComponent extends Component<props, state> {
 	buildSyncStatusToastMessage(emailsSynced, totalEmails) {
 		const innerMessage = totalEmails ? `/${totalEmails}` : ""
 		return `Syncing... ${emailsSynced}${innerMessage} emails complete`
-	}
-
-	syncPollStatus = (syncToastId) => {
-		fetch("./actions/sync/results")
-			.then(res => res.json())
-			.then(
-				(resultWrapper) => {
-					if (!resultWrapper.complete) {
-						const emailsSynced = resultWrapper.emailsSynced
-						const totalEmails = resultWrapper.totalEmails
-						toast.update(syncToastId, {
-							render: this.buildSyncStatusToastMessage(emailsSynced, totalEmails)
-						})
-						setTimeout(() => {
-							this.syncPollStatus(syncToastId);
-						}, 2000);
-					} else {
-						let insertedCount = 0;
-						let deletedCount = 0;
-						let changedReadIndCount = 0;
-						let failedAccounts = [];
-						let partiallyFailedAccounts = [];
-
-						let results = resultWrapper.results;
-
-						results.forEach(function (result) {
-							insertedCount += result.insertedCount;
-							deletedCount += result.deletedCount;
-							changedReadIndCount += result.changedReadIndCount;
-							if (result.execStatusEnum === "RULE_END_ACCOUNT_FAILURE") {
-								failedAccounts.push(result);
-							} else if (result.execStatusEnum === "RULE_END_MESSAGE_FAILURE") {
-								partiallyFailedAccounts.push(result);
-							}
-						});
-						toast.dismiss(syncToastId)
-
-						toast.info("Sync results: "
-							+ insertedCount + " inserted; "
-							+ deletedCount + " deleted; "
-							+ changedReadIndCount + " changed read indicator.");
-
-						failedAccounts.forEach((account) => {
-							toast.error("Failed to sync: " + account.username, {
-								autoClose: false
-							});
-						});
-
-						partiallyFailedAccounts.forEach((account) => {
-							toast.warn("Partially failed to sync (some messages may be missing): " + account.username, {
-								autoClose: false
-							})
-						})
-
-						if (insertedCount + deletedCount + changedReadIndCount > 0) {
-							this.listMessages();
-						}
-					}
-				},
-				(result) => {
-					toast.dismiss(syncToastId);
-					toast.error("Sync failed.");
-					console.warn(result);
-				}
-			)
 	}
 
 	getBodyUrl = (id: number) => {
