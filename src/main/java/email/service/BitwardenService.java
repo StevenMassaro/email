@@ -42,7 +42,7 @@ public class BitwardenService {
     @Value("${BW_CLIENTSECRET}")
     private String bitwardenApiKey;
 
-    @Value("${BW_HOST}")
+    @Value("${BW_HOST:}")
     private String bwHost;
 
     private static final Cache<UUID, Item> loginCache = CacheBuilder
