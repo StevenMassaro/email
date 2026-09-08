@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Service
 @Log4j2
@@ -40,6 +41,9 @@ public class BitwardenService {
 
     @Value("${BW_CLIENTSECRET}")
     private String bitwardenApiKey;
+
+    @Value("${BW_HOST}")
+    private String bwHost;
 
     private static final Cache<UUID, Item> loginCache = CacheBuilder
             .newBuilder()
@@ -128,7 +132,14 @@ public class BitwardenService {
     }
 
     private void loginWithApiKey() throws IOException {
+        configServerIfNeeded();
         runCommand(new String[]{bitwardenCliLocation, "login", "--apikey", bitwardenApiKey});
+    }
+
+    private void configServerIfNeeded() throws IOException {
+        if (StringUtils.isNotBlank(bwHost)) {
+            runCommand(new String[]{bitwardenCliLocation, "config", "server", bwHost});
+        }
     }
 
     private String runCommand(String[] commands) throws IOException {
