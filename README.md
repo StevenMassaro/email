@@ -36,6 +36,15 @@ actual.syncId=<from Actual Budget Settings > Advanced > Sync ID>
 actual.encryptionPassword=<only needed if your budget is encrypted>
 ```
 
+## Steps to get Bitwarden IDs
+
+You must have the [Bitwarden CLI](https://github.com/bitwarden/clients) installed.
+
+- login `bw login <email>`
+- unlock `bw unlock`
+- find the folder ID using `bw list folders`
+- find the IDs of the accounts you wish to sync by doing `bw list items --folderid <folderId>`
+
 ## Developer notes
 ### Running frontend against a remote backend
 From the `src/frontend` directory, set `REACT_APP_BACKEND_URL` and run `npm start`:
