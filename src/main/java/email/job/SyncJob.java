@@ -1,14 +1,15 @@
 package email.job;
 
+import email.model.ExecStatusEnum;
 import email.model.SyncProgress;
 import email.model.SyncStatusResult;
-import email.service.AccountService;
+import email.model.bitwarden.Item;
+import email.service.BitwardenService;
 import email.service.SyncService;
 import lombok.extern.log4j.Log4j2;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -16,15 +17,15 @@ import java.util.concurrent.atomic.AtomicBoolean;
 @Log4j2
 public class SyncJob {
 
-    private final AccountService accountService;
+    private final BitwardenService bitwardenService;
     private final SyncService syncService;
     private final List<SyncStatusResult> results = new ArrayList<>();
     private final AtomicBoolean inProgress = new AtomicBoolean(false);
     private SyncProgress syncProgress;
     private int numberOfAccounts;
 
-    public SyncJob(AccountService accountService, SyncService syncService) {
-        this.accountService = accountService;
+    public SyncJob(BitwardenService bitwardenService, SyncService syncService) {
+        this.bitwardenService = bitwardenService;
         this.syncService = syncService;
     }
 
@@ -35,13 +36,21 @@ public class SyncJob {
         results.clear();
         syncProgress = new SyncProgress();
         new Thread(() -> {
-            List<UUID> accounts = accountService.list();
-            numberOfAccounts = accounts.size();
+            List<Item> items;
+            try {
+                items = bitwardenService.getItems(bitwardenMasterPassword);
+            } catch (Exception e) {
+                log.error("Failed to retrieve items from Bitwarden", e);
+                results.add(new SyncStatusResult(0, 0, 0, ExecStatusEnum.RULE_END_ACCOUNT_FAILURE, "Bitwarden"));
+                inProgress.set(false);
+                return;
+            }
+            numberOfAccounts = items.size();
 
             List<Future<SyncStatusResult>> syncFutures = new ArrayList<>();
-            for (UUID accountBitwardenId : accounts) {
-                log.debug("{} - Submitting sync task", accountBitwardenId);
-                syncFutures.add(syncService.sync(accountBitwardenId, bitwardenMasterPassword, syncProgress));
+            for (Item item : items) {
+                log.debug("{} - Submitting sync task", item.getId());
+                syncFutures.add(syncService.sync(item, syncProgress));
             }
 
             for (Future<SyncStatusResult> future : syncFutures) {

@@ -54,28 +54,26 @@ public class BitwardenService {
         this.jacksonObjectMapper = jacksonObjectMapper;
     }
 
-    public synchronized Item getLogin(UUID id, String bitwardenMasterPassword) throws InterruptedException, IOException, ExecutionException {
-        return loginCache.get(id, () -> {
-            try {
-                loginWithApiKey();
-            } catch (DetailedExecuteException e) {
-                if (e.getConsoleOutput().contains("You are already logged in as ")) {
-                    log.trace("Already logged in");
-                }
+    public synchronized List<Item> getItems(String bitwardenMasterPassword) throws InterruptedException, IOException, ExecutionException {
+        try {
+            loginWithApiKey();
+        } catch (DetailedExecuteException e) {
+            if (e.getConsoleOutput().contains("You are already logged in as ")) {
+                log.trace("Already logged in");
             }
-            try {
-                String sessionKey = unlock(bitwardenMasterPassword);
-                String passwordListJson = listPasswordsFromCli(sessionKey);
-                List<Item> items = deserializeBitwardenJson(passwordListJson);
-                // put all the passwords into the cache
-                for (Item item : items) {
-                    loginCache.put(item.getId(), item);
-                }
-                return loginCache.getIfPresent(id);
-            } finally {
-                logout();
+        }
+        try {
+            String sessionKey = unlock(bitwardenMasterPassword);
+            String passwordListJson = listPasswordsFromCli(sessionKey);
+            List<Item> items = deserializeBitwardenJson(passwordListJson);
+            // put all the passwords into the cache
+            for (Item item : items) {
+                loginCache.put(item.getId(), item);
             }
-        });
+            return items;
+        } finally {
+            logout();
+        }
     }
 
     public List<Item> deserializeBitwardenJson(String json) throws IOException {

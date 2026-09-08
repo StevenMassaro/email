@@ -51,7 +51,7 @@ public class BitwardenServiceIT {
 
     @Test
     public void testLoadingSampleLoginFromVault() throws InterruptedException, ExecutionException, IOException {
-        Item login = bitwardenService.getLogin(testItemId, testMasterPassword.trim());
+        Item login = bitwardenService.getItems(testMasterPassword.trim()).get(0);
         assertEquals(testItemId, login.getId());
         assertEquals("testuser", login.getLogin().getUsername());
         assertEquals("testpw", login.getLogin().getPassword());

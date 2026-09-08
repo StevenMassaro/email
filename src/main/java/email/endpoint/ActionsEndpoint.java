@@ -3,14 +3,10 @@ package email.endpoint;
 import email.job.SyncJob;
 import email.model.ResultsWrapper;
 import email.model.SyncProgress;
-import email.service.AccountService;
 import email.service.BitwardenService;
 import email.service.SyncService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 @RestController
 @RequestMapping("/actions")
@@ -20,9 +16,9 @@ public class ActionsEndpoint {
     private final BitwardenService bitwardenService;
     private final SyncJob syncJob;
 
-    public ActionsEndpoint(SyncService syncService, AccountService accountService, BitwardenService bitwardenService) {
+    public ActionsEndpoint(SyncService syncService, BitwardenService bitwardenService) {
         this.bitwardenService = bitwardenService;
-        syncJob = new SyncJob(accountService, syncService);
+        syncJob = new SyncJob(bitwardenService, syncService);
     }
 
     @PostMapping("/sync")

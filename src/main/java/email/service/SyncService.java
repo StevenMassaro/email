@@ -23,16 +23,15 @@ public class SyncService {
 
     private final ImapService imapService;
     private final MessageService messageService;
-    private final BitwardenService bitwardenService;
 
-    public SyncService(ImapService imapService, MessageService messageService, BitwardenService bitwardenService) {
+    public SyncService(ImapService imapService, MessageService messageService) {
         this.imapService = imapService;
         this.messageService = messageService;
-        this.bitwardenService = bitwardenService;
     }
 
     @Async
-    public Future<SyncStatusResult> sync(UUID account, String bitwardenMasterPassword, SyncProgress syncProgress) {
+    public Future<SyncStatusResult> sync(Item item, SyncProgress syncProgress) {
+        UUID account = item.getId();
         String username = null;
         boolean messageFailure = false;
         boolean accountFailure = false;
@@ -41,7 +40,6 @@ public class SyncService {
         long totalChangedReadIndCount = 0;
 
         try {
-            Item item = bitwardenService.getLogin(account, bitwardenMasterPassword);
             log.debug("{} - Sync started", item.getLogin().getUsername());
             username = item.getLogin().getUsername();
             List<Message> dbMessages = messageService.list(account);
