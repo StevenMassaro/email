@@ -21,6 +21,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
@@ -55,6 +56,9 @@ public class BitwardenService {
     }
 
     public synchronized List<Item> getItems(String bitwardenMasterPassword) throws InterruptedException, IOException, ExecutionException {
+        if (!isCacheEmpty()) {
+            return new ArrayList<>(loginCache.asMap().values());
+        }
         try {
             loginWithApiKey();
         } catch (DetailedExecuteException e) {
